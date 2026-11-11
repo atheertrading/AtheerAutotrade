@@ -15,11 +15,15 @@ xcuserdata/
 *.ipa
 *.dSYM.zip
 *.dSYM/
+*.xcresult
+
+# Xcode Playgrounds
+timeline.xctimeline
+playground.xcworkspace
 
 # Swift Package Manager
 .build/
 Packages/
-Package.resolved
 
 # Node.js / TypeScript
 node_modules/
@@ -48,4 +52,16 @@ pnpm-debug.log*
 coverage/
 .nyc_output/
 .test-results/
-*.xcresult
+
+# CocoaPods
+Pods/
+
+# Carthage
+Carthage/Checkouts
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
