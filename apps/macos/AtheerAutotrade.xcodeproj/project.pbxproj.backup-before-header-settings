@@ -1,0 +1,78 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 56;
+	objects = {
+/* Begin PBXBuildFile section */
+		A10000000000000000000001 /* AtheerAutotradeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* AtheerAutotradeApp.swift */; };
+		A10000000000000000000002 /* ApplicationShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ApplicationShellView.swift */; };
+		A10000000000000000000003 /* WorkspaceSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* WorkspaceSection.swift */; };
+		A10000000000000000000004 /* AtheerColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000004 /* AtheerColors.swift */; };
+		A10000000000000000000005 /* SidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000005 /* SidebarView.swift */; };
+		A10000000000000000000006 /* DashboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000006 /* DashboardView.swift */; };
+		A10000000000000000000007 /* DestinationPlaceholderView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000007 /* DestinationPlaceholderView.swift */; };
+/* End PBXBuildFile section */
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* AtheerAutotradeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtheerAutotradeApp.swift; sourceTree = "<group>"; };
+		A20000000000000000000002 /* ApplicationShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationShellView.swift; sourceTree = "<group>"; };
+		A20000000000000000000003 /* WorkspaceSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSection.swift; sourceTree = "<group>"; };
+		A20000000000000000000004 /* AtheerColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtheerColors.swift; sourceTree = "<group>"; };
+		A20000000000000000000005 /* SidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SidebarView.swift; sourceTree = "<group>"; };
+		A20000000000000000000006 /* DashboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DashboardView.swift; sourceTree = "<group>"; };
+		A20000000000000000000007 /* DestinationPlaceholderView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DestinationPlaceholderView.swift; sourceTree = "<group>"; };
+		A30000000000000000000001 /* AtheerAutotrade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtheerAutotrade.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+/* Begin PBXFrameworksBuildPhase section */
+		A40000000000000000000001 /* Frameworks */ = {isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXFrameworksBuildPhase section */
+/* Begin PBXGroup section */
+		A50000000000000000000001 = {
+			isa = PBXGroup;
+			children = (A50000000000000000000002 /* Products */, A50000000000000000000003 /* Sources */,);
+			sourceTree = "<group>";
+		};
+		A50000000000000000000002 /* Products */ = {isa = PBXGroup; children = (A30000000000000000000001 /* AtheerAutotrade.app */,); name = Products; sourceTree = "<group>"; };
+		A50000000000000000000003 /* Sources */ = {isa = PBXGroup; children = (A50000000000000000000004 /* App */, A50000000000000000000005 /* Core */, A50000000000000000000006 /* Features */,); path = Sources; sourceTree = "<group>"; };
+		A50000000000000000000004 /* App */ = {isa = PBXGroup; children = (A20000000000000000000001 /* AtheerAutotradeApp.swift */,); path = App; sourceTree = "<group>"; };
+		A50000000000000000000005 /* Core */ = {isa = PBXGroup; children = (A50000000000000000000007 /* Application */, A50000000000000000000008 /* DesignSystem */,); path = Core; sourceTree = "<group>"; };
+		A50000000000000000000006 /* Features */ = {isa = PBXGroup; children = (A50000000000000000000009 /* Dashboard */,); path = Features; sourceTree = "<group>"; };
+		A50000000000000000000007 /* Application */ = {isa = PBXGroup; children = (A20000000000000000000002 /* ApplicationShellView.swift */, A20000000000000000000003 /* WorkspaceSection.swift */,); path = Application; sourceTree = "<group>"; };
+		A50000000000000000000008 /* DesignSystem */ = {isa = PBXGroup; children = (A20000000000000000000004 /* AtheerColors.swift */,); path = DesignSystem; sourceTree = "<group>"; };
+		A50000000000000000000009 /* Dashboard */ = {isa = PBXGroup; children = (A20000000000000000000005 /* SidebarView.swift */, A20000000000000000000006 /* DashboardView.swift */, A20000000000000000000007 /* DestinationPlaceholderView.swift */,); path = Dashboard; sourceTree = "<group>"; };
+/* End PBXGroup section */
+/* Begin PBXProject section */
+		A5000000000000000000000A /* Project object */ = {
+			isa = PBXProject;
+			attributes = { LastUpgradeCheck = 1430; };
+			buildConfigurationList = B20000000000000000000001 /* Build configuration list for PBXProject "AtheerAutotrade" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (en, Base,);
+			mainGroup = A50000000000000000000001;
+			productRefGroup = A50000000000000000000002;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (A60000000000000000000001 /* AtheerAutotrade */,);
+		};
+/* End PBXProject section */
+/* Begin PBXNativeTarget section */
+		A60000000000000000000001 /* AtheerAutotrade */ = {isa = PBXNativeTarget; buildConfigurationList = B20000000000000000000002 /* Build configuration list for PBXNativeTarget "AtheerAutotrade" */; buildPhases = (A40000000000000000000001 /* Frameworks */, A80000000000000000000001 /* Sources */,); buildRules = (); dependencies = (); name = AtheerAutotrade; productName = AtheerAutotrade; productReference = A30000000000000000000001 /* AtheerAutotrade.app */; productType = "com.apple.product-type.application"; };
+/* End PBXNativeTarget section */
+/* Begin PBXSourcesBuildPhase section */
+		A80000000000000000000001 /* Sources */ = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (A10000000000000000000001 /* AtheerAutotradeApp.swift in Sources */, A10000000000000000000002 /* ApplicationShellView.swift in Sources */, A10000000000000000000003 /* WorkspaceSection.swift in Sources */, A10000000000000000000004 /* AtheerColors.swift in Sources */, A10000000000000000000005 /* SidebarView.swift in Sources */, A10000000000000000000006 /* DashboardView.swift in Sources */, A10000000000000000000007 /* DestinationPlaceholderView.swift in Sources */,); runOnlyForDeploymentPostprocessing = 0; };
+/* End PBXSourcesBuildPhase section */
+/* Begin XCBuildConfiguration section */
+		B10000000000000000000001 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {ARCHS = "x86_64 arm64"; CODE_SIGNING_ALLOWED = NO; MACOSX_DEPLOYMENT_TARGET = 13.0; PRODUCT_BUNDLE_IDENTIFIER = com.atheerautotrade.desktop; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = macosx; SWIFT_VERSION = 5.0; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = AtheerAutotrade; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance"; ENABLE_HARDENED_RUNTIME = YES; }; name = Debug; };
+		B10000000000000000000002 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {ARCHS = "x86_64 arm64"; CODE_SIGNING_ALLOWED = NO; MACOSX_DEPLOYMENT_TARGET = 13.0; PRODUCT_BUNDLE_IDENTIFIER = com.atheerautotrade.desktop; PRODUCT_NAME = "$(TARGET_NAME)"; SDKROOT = macosx; SWIFT_VERSION = 5.0; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = AtheerAutotrade; INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.finance"; ENABLE_HARDENED_RUNTIME = YES; }; name = Release; };
+		B10000000000000000000003 /* Debug */ = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 13.0; SDKROOT = macosx; SWIFT_VERSION = 5.0; }; name = Debug; };
+		B10000000000000000000004 /* Release */ = {isa = XCBuildConfiguration; buildSettings = {MACOSX_DEPLOYMENT_TARGET = 13.0; SDKROOT = macosx; SWIFT_VERSION = 5.0; }; name = Release; };
+/* End XCBuildConfiguration section */
+/* Begin XCConfigurationList section */
+		B20000000000000000000001 /* Build configuration list for PBXProject "AtheerAutotrade" */ = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000003 /* Debug */, B10000000000000000000004 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		B20000000000000000000002 /* Build configuration list for PBXNativeTarget "AtheerAutotrade" */ = {isa = XCConfigurationList; buildConfigurations = (B10000000000000000000001 /* Debug */, B10000000000000000000002 /* Release */,); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+/* End XCConfigurationList section */
+	};
+	rootObject = A5000000000000000000000A /* Project object */;
+}
