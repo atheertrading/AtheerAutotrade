@@ -3,12 +3,13 @@
 This register tracks milestone state and prevents completed work from being restarted.
 
 **Last reconciled:** 2026-11-12  
-**Repository baseline:** `main` at `28bca625c6a03604e77088c652bd5a2adcd15d34` when ATP-DOM-001 branch was created. PR #8 remains merged at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`.
+**Main baseline:** PR #11 merge commit `fa68db5635042b43cda16e687eeffa4f138c5cbe`.
 
 ## Status definitions
 
 - **DONE — MERGED:** Change is present in the repository.
 - **DONE — VERIFIED:** Acceptance criteria were tested and evidence is recorded.
+- **IN PROGRESS:** Implementation is underway; acceptance criteria are not yet met.
 - **PENDING VERIFICATION:** Implementation is present, but the required result has not been confirmed.
 - **PLANNED:** Not implemented.
 - **BLOCKED:** Cannot proceed until a named dependency is resolved.
@@ -26,46 +27,74 @@ This register tracks milestone state and prevents completed work from being rest
 | ATP-TEST-001 | Establish hosted XCTest target and four WorkspaceManager tests | PR #6 merged | DONE — MERGED |
 | ATP-TEST-002 | Correct XCTest group path | PR #7 merged | DONE — MERGED |
 | ATP-TEST-003 | Enable app Debug testability and correct Swift key paths | PR #8 merged as `b18b0ff` | DONE — MERGED |
-| ATP-APPLE-001 | Configure Apple Development signing and resolve XCTest bundle signing | User confirmed `Build Succeeded`; Codex reported app/test signatures valid and 4 XCTest passed, 0 failed on x86_64 | DONE — LOCAL VERIFIED; GitHub publication of local signing correction not confirmed |
+| ATP-APPLE-001 | Configure Apple Development signing and resolve XCTest bundle signing | User confirmed `Build Succeeded`; Codex reported app/test signatures valid and 4 XCTest passed, 0 failed on x86_64 | DONE — LOCAL VERIFIED; GitHub publication not confirmed |
+| ATP-DOM-001 | Provider-neutral instrument domain model | PR #11 squash-merged as `fa68db5`; user ran TypeScript build and 10 backend tests successfully | DONE — MERGED AND VERIFIED |
 
 ## Active implementation
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-DOM-001 | Provider-neutral instrument domain model | TypeScript build passed; all 10 backend tests passed on user's Mac on 2026-11-12 | DONE — VERIFIED; PR #11 pending merge |
+| ATP-CAP-001 | Capital.com read-only REST and WebSocket market connectivity | Session lifecycle, market search, historical prices, live quote/OHLC subscriptions, keepalive, bounded reconnect, mock-based tests | IN PROGRESS — source authored; build/tests and live account verification pending |
 
-Implementation branch: `feature/trading-domain-instrument-models`.
+Implementation branch: `feature/atp-cap-001-capital-market-connectivity`.
 
-Files authored:
-- `services/backend/src/modules/trading-domain/instrument.ts`
-- `services/backend/tests/instrument.test.mjs`
-- `services/backend/src/modules/trading-domain/README.md`
+Current branch files:
+- `services/backend/src/modules/broker-adapters/capital-com/capital-com-client.ts`
+- `services/backend/src/modules/broker-adapters/capital-com/capital-com-market-data-stream.ts`
+- `services/backend/src/modules/broker-adapters/capital-com/README.md`
+- `services/backend/tests/capital-com-client.test.mjs`
+- `services/backend/tests/capital-com-market-data-stream.test.mjs`
+- `docs/decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md`
 
-No new runtime or development dependencies were added. No broker, market-data, order, risk, persistence, UI, or execution path was introduced.
+No new runtime or development dependencies were added. The adapter contains no dealing, order, position, or account mutation methods.
+
+## ATP-CAP-001 acceptance criteria
+
+The milestone is not complete until all criteria below are met:
+
+1. A production-appropriate credentials provider retrieves credentials from macOS Keychain without exposing them in source, logs, environment variables, or unauthenticated HTTP.
+2. The application/backend boundary is secured before broker operations are exposed.
+3. Capital.com Demo session authentication succeeds and session tokens remain memory-only.
+4. Provider market search resolves a real epic and maps verified metadata into the provider-neutral instrument model.
+5. Historical OHLC data is retrieved and validated for a selected instrument and resolution.
+6. WebSocket delivers real quote updates and OHLC events for that instrument.
+7. WebSocket and REST session keepalive work within documented session limits.
+8. Disconnect/reconnect recovery re-subscribes without silently losing track of feed state.
+9. Quote age, timestamp order, gaps, duplicates, and candle OHLC integrity are monitored and exposed as explicit data-quality states.
+10. A sustained Demo observation period is recorded with actual timestamps, reconnect evidence, and zero fabricated market observations.
+
+A successful TypeScript build, mocked unit tests, a TCP/WebSocket handshake, or a one-time quote is not sufficient to mark this milestone verified.
 
 ## Remaining validation
 
 | ID | Item | Evidence | Status / rule |
 |---|---|---|---|
-| ATP-DOM-001-VERIFY | Run backend build and tests including instrument validation cases | User ran `npm ci --include=dev` and `npm test` in isolated worktree; TypeScript build passed, 10 tests passed, 0 failed | DONE — VERIFIED on 2026-11-12 |
-| ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Current verified local build destination was x86_64 | PLANNED; do not claim arm64 runtime validation. |
+| ATP-CAP-001-BUILD | Compile backend and run focused adapter tests | Tests authored on feature branch; no execution result yet | PENDING VERIFICATION |
+| ATP-CAP-001-KEYCHAIN | Implement Keychain credential provider and secure local app/backend boundary | No implementation yet | PLANNED |
+| ATP-CAP-001-DEMO | Authenticate and retrieve real Demo market data | No account authentication or real data received | PLANNED |
+| ATP-CAP-001-STABILITY | Verify persistent stream, stale detection, and reconnect recovery | No sustained observation evidence yet | PLANNED |
+| ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Current verified local build destination was x86_64 | PLANNED; do not claim arm64 runtime validation |
 
 ## Product capabilities not yet implemented
 
-Broker integration, credentials, account data, market data, portfolio state, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, authentication, and LIVE trading remain unimplemented.
+Account/portfolio integration, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading remain unimplemented.
 
-These are planned product capabilities, not project-configuration defects. All exposure-increasing intents must eventually pass through the centralized Risk Engine. No execution route may bypass it.
+All exposure-increasing intents must eventually pass through the centralized Risk Engine. No UI, strategy, AI, or broker-adapter route may bypass it. LIVE trading remains disabled.
 
 ## Codex assignment boundary
 
 Codex's original authorized assignment in this workflow was the bounded XCTest problem. It is not the default executor for all project work. Any future Codex assignment must specify objective, allowed files, acceptance criteria, and verification.
 
+## Local working-copy preservation
+
+The user's local repository had uncommitted tracked changes and untracked files. They were saved with `git stash push --include-untracked` as `stash@{0}`. The working tree was clean afterward, but local `main` remained behind `origin/main`. Do not pop or drop the stash or run destructive synchronization until a reviewed local reconciliation plan is prepared.
+
 ## Current next action
 
-Review the final PR diff and merge PR #11. After merge, synchronize the local project carefully, preserving unrelated local Xcode signing changes. Do not rerun the completed Xcode signing repair or reopen Git troubleshooting.
+Review and compile ATP-CAP-001 in an isolated worktree. Correct only evidenced defects. Then implement the Keychain-backed credential provider and secured local integration boundary. Do not request or repeat Xcode workspace tests for this backend milestone.
 
 ## Change log
 
-- 2026-11-12: Reconciled signing status against the user's `Build Succeeded` confirmation and the supplied Codex report.
-- 2026-11-12: Started ATP-DOM-001 on `feature/trading-domain-instrument-models`; model and tests authored.
-- 2026-11-12: User verified ATP-DOM-001 backend build and all 10 tests successfully in an isolated worktree; PR #11 remains open pending final review and merge.
+- 2026-11-12: PR #11 merged as `fa68db5`; ATP-DOM-001 is now DONE — MERGED AND VERIFIED.
+- 2026-11-12: Started ATP-CAP-001 on `feature/atp-cap-001-capital-market-connectivity`; added read-only REST session/market history client, quote/OHLC WebSocket stream, and mock-based tests. No build or live account verification is claimed.
+- 2026-11-12: Recorded local changes in `stash@{0}`; do not alter the stash until local synchronization is planned.
