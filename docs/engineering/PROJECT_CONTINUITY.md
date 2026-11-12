@@ -30,7 +30,7 @@ If documents conflict, identify the conflict, prefer newer directly verified evi
 
 ## 3. Repository baseline
 
-The last inspected GitHub baseline was main commit `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`, the merge commit for PR #8. This is repository-observed state, not proof that every local working copy is synchronized.
+The GitHub comparison performed for ATP-DOM-001 identified main at commit `28bca625c6a03604e77088c652bd5a2adcd15d34` as the branch base. PR #8 remains merged at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`. This is repository-observed state, not proof that every local working copy is synchronized.
 
 The user confirmed that the earlier Git issue was resolved and files were pushed. Do not reopen Git troubleshooting without new evidence.
 
