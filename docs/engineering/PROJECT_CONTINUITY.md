@@ -42,10 +42,10 @@ Repository records are authoritative over conversation summaries. When documents
 ## 4. Current implementation baseline
 
 - Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
-- Backend currently exposes process health and structured 404 handling.
+- On main, backend exposes process health and structured 404 handling. The active IPC branch adds a stdio protocol handler module, not yet wired into process startup.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- No concrete macOS Keychain credential provider or authenticated desktop/backend boundary is verified.
+- No concrete macOS Keychain credential provider or integrated desktop/backend process client is verified. ADR-0005 selects parent-owned anonymous stdio pipes; the backend protocol handler is not yet wired into runtime.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
 - Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
@@ -56,7 +56,7 @@ Repository records are authoritative over conversation summaries. When documents
 - Backend remains a Node.js/TypeScript modular monolith with explicit module ownership and typed boundaries.
 - Backend owns broker lifecycle, market-data ingestion, domain orchestration, persistence, Risk, OMS, execution, and reconciliation.
 - Capital.com is the primary broker target; initial broker integration remains read-only.
-- Loopback binding alone is not authentication. The desktop/backend transport and credential handoff require a focused threat-modeled design ADR before broker operations are exposed.
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; credential transfer is deferred pending a dedicated contract.
 - The Execution Gateway is the only dealing path. It accepts dispatch only from OMS with a Risk decision bound to the exact immutable intent.
 - Every exposure-increasing intent passes through centralized Risk Engine.
 - Broker-confirmed account and execution state is authoritative. Unknown submission outcomes require reconciliation; never blind retry.
