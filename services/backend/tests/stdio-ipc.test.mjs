@@ -113,3 +113,17 @@ test("rejects non-empty ping payloads", async () => {
   const responses = await runSession([encoder.encode(input)]);
   assert.equal(responses[1].error.code, "INVALID_PAYLOAD");
 });
+test("rejects unsupported protocol versions explicitly", async () => {
+  const unsupported = JSON.stringify({
+    protocol,
+    version: 99,
+    kind: "request",
+    id: "f2b66c1b-8c25-4c35-ae80-b0d59d7a9133",
+    method: "system.hello",
+    payload: { clientVersion: "0.1.0" }
+  }) + "\\n";
+
+  const responses = await runSession([encoder.encode(unsupported)]);
+  assert.equal(responses.length, 1);
+  assert.equal(responses[0].error.code, "PROTOCOL_VERSION_UNSUPPORTED");
+});
