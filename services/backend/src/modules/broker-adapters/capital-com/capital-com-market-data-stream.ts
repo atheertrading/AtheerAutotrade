@@ -152,8 +152,22 @@ export class CapitalComMarketDataStream {
 
     const epics = validEpicList(options.epics);
     const resolutions = [...new Set(options.resolutions)];
-    if (resolutions.length === 0) {
-      throw new TypeError("At least one OHLC resolution is required.");
+    const supportedResolutions = new Set<string>([
+      "MINUTE", "MINUTE_5", "MINUTE_15", "MINUTE_30",
+      "HOUR", "HOUR_4", "DAY", "WEEK"
+    ]);
+    if (
+      resolutions.length === 0 ||
+      resolutions.some((resolution) => !supportedResolutions.has(resolution))
+    ) {
+      throw new TypeError("At least one supported Capital.com OHLC resolution is required.");
+    }
+    if (
+      options.candleType !== undefined &&
+      options.candleType !== "classic" &&
+      options.candleType !== "heikin-ashi"
+    ) {
+      throw new TypeError("Unsupported Capital.com candle type.");
     }
 
     this.options = Object.freeze({
