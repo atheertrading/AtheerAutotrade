@@ -337,6 +337,7 @@
 		B10000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ENABLE_TESTABILITY = YES;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ARCHS = (
 					x86_64,

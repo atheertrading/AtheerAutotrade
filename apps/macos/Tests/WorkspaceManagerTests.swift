@@ -70,8 +70,8 @@ final class WorkspaceManagerTests: XCTestCase {
             .filter { $0.region == .right }
             .sorted { $0.sortOrder < $1.sortOrder }
 
-        XCTAssertEqual(orderedPanels.map(\\.id), [orderEntryID, marketWatchID])
-        XCTAssertEqual(orderedPanels.map(\\.sortOrder), [0, 1])
+        XCTAssertEqual(orderedPanels.map(\.id), [orderEntryID, marketWatchID])
+        XCTAssertEqual(orderedPanels.map(\.sortOrder), [0, 1])
     }
 
     func testWorkspaceChangesPersistAndRestore() throws {
