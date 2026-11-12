@@ -64,8 +64,8 @@ struct WorkspaceRegionView: View {
                                         workspaceManager.toggleMaximize(panel.id)
                                     }
                                 )
+                                .frame(maxWidth: .infinity)
                                 .frame(
-                                    maxWidth: .infinity,
                                     height: allocatedHeight(
                                         for: panel,
                                         availableHeight: availableHeight,
