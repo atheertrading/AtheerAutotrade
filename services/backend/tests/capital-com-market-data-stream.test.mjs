@@ -45,9 +45,10 @@ const session = {
 
 test("stream subscribes to quotes and OHLC after WebSocket opens", async () => {
   const socket = new FakeSocket();
+  const statuses = [];
   const stream = new CapitalComMarketDataStream(
     async () => session,
-    { onQuote() {}, onOhlc() {} },
+    { onQuote() {}, onOhlc() {}, onStatus: (status) => statuses.push(status) },
     (url) => {
       assert.equal(
         url,
@@ -72,6 +73,26 @@ test("stream subscribes to quotes and OHLC after WebSocket opens", async () => {
   assert.deepEqual(socket.sent[1].payload.resolutions, ["MINUTE", "MINUTE_5"]);
   assert.equal(socket.sent[1].payload.type, "classic");
   assert.equal(socket.sent[0].cst, "cst-test");
+  assert.equal(statuses.includes("transport-connected"), true);
+  assert.equal(statuses.includes("connected"), false);
+
+  socket.message({
+    status: "OK",
+    destination: "marketData.subscribe",
+    payload: { subscriptions: { OIL_CRUDE: "PROCESSED", EURUSD: "PROCESSED" } }
+  });
+  assert.equal(statuses.includes("connected"), false);
+  socket.message({
+    status: "OK",
+    destination: "OHLCMarketData.subscribe",
+    payload: {
+      subscriptions: {
+        "OIL_CRUDE:MINUTE:classic": "PROCESSED",
+        "OIL_CRUDE:MINUTE_5:classic": "PROCESSED"
+      }
+    }
+  });
+  assert.equal(statuses.at(-1), "connected");
   stream.stop();
 });
 
