@@ -91,16 +91,19 @@ struct WorkspaceLayoutView: View {
                     WorkspaceResizeHandle(
                         axis: .horizontal,
                         onDragChanged: { translation in
-                            let initialWidth = sidebarDragStartWidth
-                                ?? CGFloat(workspace.layout.sidebarWidth)
+                            let initialWidth = sidebarDragStartWidth ?? sidebarWidth
 
                             if sidebarDragStartWidth == nil {
                                 sidebarDragStartWidth = initialWidth
                             }
 
+                            let maximumSidebarWidth = min(
+                                360,
+                                max(180, availableSize.width * 0.34)
+                            )
                             sidebarWidthPreview = min(
                                 max(initialWidth + translation, 180),
-                                360
+                                maximumSidebarWidth
                             )
                         },
                         onDragEnded: {
@@ -173,16 +176,19 @@ struct WorkspaceLayoutView: View {
             WorkspaceResizeHandle(
                 axis: .vertical,
                 onDragChanged: { translation in
-                    let initialHeight = bottomDragStartHeight
-                        ?? CGFloat(workspace.layout.bottomPanelHeight)
+                    let initialHeight = bottomDragStartHeight ?? bottomPanelHeight
 
                     if bottomDragStartHeight == nil {
                         bottomDragStartHeight = initialHeight
                     }
 
+                    let maximumBottomHeight = min(
+                        520,
+                        max(140, availableSize.height * 0.36)
+                    )
                     bottomPanelHeightPreview = min(
                         max(initialHeight + translation, 120),
-                        520
+                        maximumBottomHeight
                     )
                 },
                 onDragEnded: {
