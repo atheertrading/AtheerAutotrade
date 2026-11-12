@@ -16,6 +16,14 @@ if [[ "${NODE_MAJOR}" != "24" ]]; then
   exit 1
 fi
 
+NODE_ARCHS="$(lipo -archs "${NODE_SOURCE}")"
+for REQUIRED_ARCH in x86_64 arm64; do
+  if [[ " ${NODE_ARCHS} " != *" ${REQUIRED_ARCH} "* ]]; then
+    echo "error: bundled Node.js runtime must support both x86_64 and arm64; found ${NODE_ARCHS}." >&2
+    exit 1
+  fi
+done
+
 LOCK_HASH="$(shasum -a 256 "${BACKEND_ROOT}/package-lock.json" | awk '{print $1}')"
 LOCK_MARKER="${BACKEND_ROOT}/node_modules/.atheer-package-lock-sha"
 if [[ ! -x "${BACKEND_ROOT}/node_modules/.bin/tsc" ]] || [[ ! -f "${LOCK_MARKER}" ]] || [[ "$(cat "${LOCK_MARKER}")" != "${LOCK_HASH}" ]]; then
