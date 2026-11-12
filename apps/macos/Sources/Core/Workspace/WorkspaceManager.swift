@@ -96,7 +96,10 @@ final class WorkspaceManager: ObservableObject {
     func addPanel(_ kind: WorkspacePanelKind, region: WorkspacePanelRegion? = nil) -> UUID? {
         guard let workspace = activeWorkspace else { return nil }
         let destination = region ?? defaultRegion(for: kind)
-        let order = workspace.panels.filter { $0.region == destination && $0.visibility != .closed }.count
+        let order = (workspace.panels
+            .filter { $0.region == destination }
+            .map(\\.sortOrder)
+            .max() ?? -1) + 1
         let panel = WorkspacePanel(kind: kind, region: destination, sortOrder: order)
         updateActiveWorkspace { $0.panels.append(panel) }
         return panel.id
@@ -121,20 +124,48 @@ final class WorkspaceManager: ObservableObject {
 
     func movePanel(_ panelID: UUID, to region: WorkspacePanelRegion, at index: Int? = nil) {
         updateActiveWorkspace { workspace in
-            guard let sourceIndex = workspace.panels.firstIndex(where: { $0.id == panelID }) else { return }
+            guard let sourceIndex = workspace.panels.firstIndex(where: { $0.id == panelID }) else {
+                return
+            }
+
+            let sourceRegion = workspace.panels[sourceIndex].region
             workspace.panels[sourceIndex].region = region
             workspace.panels[sourceIndex].visibility = .visible
             workspace.panels[sourceIndex].isMaximized = false
-            let targetPanels = workspace.panels.indices.filter {
-                workspace.panels[$0].region == region && workspace.panels[$0].id != panelID
-            }.sorted { workspace.panels[$0].sortOrder < workspace.panels[$1].sortOrder }
-            let insertion = min(max(index ?? targetPanels.count, 0), targetPanels.count)
-            var orderedIDs = targetPanels.map { workspace.panels[$0].id }
-            orderedIDs.insert(panelID, at: insertion)
-            for (order, id) in orderedIDs.enumerated() {
-                if let itemIndex = workspace.panels.firstIndex(where: { $0.id == id }) {
-                    workspace.panels[itemIndex].sortOrder = order
+
+            func orderedPanelIndices(in targetRegion: WorkspacePanelRegion) -> [Int] {
+                workspace.panels.indices
+                    .filter { workspace.panels[$0].region == targetRegion }
+                    .sorted {
+                        let left = workspace.panels[$0]
+                        let right = workspace.panels[$1]
+
+                        if left.sortOrder == right.sortOrder {
+                            return left.id.uuidString < right.id.uuidString
+                        }
+
+                        return left.sortOrder < right.sortOrder
+                    }
+            }
+
+            // Compact the source region so future additions cannot collide with gaps.
+            if sourceRegion != region {
+                for (order, panelIndex) in orderedPanelIndices(in: sourceRegion).enumerated() {
+                    workspace.panels[panelIndex].sortOrder = order
                 }
+            }
+
+            let targetIndices = orderedPanelIndices(in: region)
+                .filter { workspace.panels[$0].id != panelID }
+            let insertion = min(max(index ?? targetIndices.count, 0), targetIndices.count)
+            var orderedIDs = targetIndices.map { workspace.panels[$0].id }
+            orderedIDs.insert(panelID, at: insertion)
+
+            for (order, id) in orderedIDs.enumerated() {
+                guard let panelIndex = workspace.panels.firstIndex(where: { $0.id == id }) else {
+                    continue
+                }
+                workspace.panels[panelIndex].sortOrder = order
             }
         }
     }
