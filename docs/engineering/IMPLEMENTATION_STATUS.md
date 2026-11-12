@@ -1,79 +1,82 @@
 # Implementation status
 
+**Product identity:** ATHEER Trading Pro  
+**Repository / temporary technical identifier:** AtheerAutotrade  
+**Status basis:** Repository inspection and recorded user/test evidence. Do not interpret target architecture as implemented functionality.
+
 ## Implemented
 
 ### macOS application
 - Native SwiftUI macOS application target and dark-first navigation shell.
 - Presentation-only destinations for Dashboard, Markets, Strategies, Positions, Orders, Portfolio, Risk Management, Analytics, AI Intelligence, Activity, and Settings.
 - Trading Workspace with panel management, resizing, and drag/drop.
-- Apple Development signing configured in the user's local Xcode environment. User confirmed `Build Succeeded` on 2026-11-12. Codex reported valid signatures for the app and embedded XCTest bundle.
+- Apple Development signing configured in the user's local Xcode environment. User confirmed Build Succeeded on 2026-11-12. Codex reported valid signatures for the app and embedded XCTest bundle, with four XCTest cases passing on x86_64.
+- These local verification results are historical user/Codex reports, not a build executed during this architecture milestone.
 
 ### Backend foundation
 - Node.js built-in HTTP backend with `GET /health`, structured 404 handling, environment configuration, and graceful shutdown.
 - Node.js built-in route-contract tests.
-- Provider-neutral Trading Domain `Instrument` model merged in PR #11 (`fa68db5`). Contract increments and minimum quantity use exact decimal strings; absent provider specifications remain absent.
-- User-run backend verification for ATP-DOM-001: TypeScript build succeeded and 10/10 Node.js tests passed.
+- Provider-neutral Trading Domain `Instrument` model merged in PR #11; contract increments and minimum quantity use exact decimal strings and absent provider specifications remain absent.
+- User-reported ATP-DOM-001 backend verification: TypeScript build succeeded and 10/10 tests passed.
 
-### Capital.com adapter — implementation authored, verification pending
-On branch `feature/atp-cap-001-capital-market-connectivity`:
+### Capital.com adapter source
 - Read-only REST client for session creation, authenticated ping, market search, and historical prices.
 - In-memory CST and X-SECURITY-TOKEN session state.
-- Credential-provider interface; no concrete Keychain provider yet.
-- WebSocket stream for live quote and OHLC events.
-- WebSocket ping, optional REST session keepalive wiring, bounded reconnect backoff, and re-subscription.
-- Runtime validation of quote fields and OHLC bounds.
+- Injected credentials-provider interface; no concrete Keychain provider.
+- WebSocket stream for quote and OHLC events, ping, reconnect, and re-subscription behavior.
 - Mock-based client and stream tests.
-- ADR-0003 and adapter README.
+- Source exists in repository history; this status does not claim a real Demo session, broker-originated data, sustained stream, or reconnect continuity.
 
-No new dependencies were added. The adapter exposes no order, position, dealing, or account-mutation operations.
+### Architecture and governance documentation
+- Repository agent instructions and engineering continuity/task/status records.
+- Provider-neutral instrument and Capital.com connectivity ADRs.
+- Ten editable Mermaid architecture diagrams with explicit reconstruction provenance and target-architecture caveats.
+- ADR-0004 and the architecture rebase are being developed on `architecture/atp-arch-rebase-001`; not yet merged.
 
-## Not implemented / not yet connected
+## Not implemented or not operationally integrated
 
-- Concrete macOS Keychain-backed Capital.com credentials provider.
-- Secured local application-to-backend authentication and authorization boundary.
-- Application wiring and broker connection lifecycle UI.
-- Actual Capital.com Demo account authentication from this code.
-- Actual market search, historical candles, live quote updates, and OHLC events received from the broker.
-- Sustained feed monitoring, quote-age/staleness detection, gap/duplicate detection, and operational reconnect evidence.
-- Account/portfolio state, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading.
+- Backend runtime composition root and module lifecycle orchestration.
+- Authenticated local application-to-backend IPC/API boundary.
+- Concrete macOS Keychain-backed credential provider and secure credential handoff.
+- Broker session orchestration integrated into backend runtime and desktop application.
+- Actual Capital.com Demo authentication, market search, historical bars, live quotes, and OHLC events verified from this code.
+- Market Data ingestion quality lifecycle: quote age, stale/unknown states, ordering, deduplication, gap detection, candle integrity, and recovery.
+- Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
+- Central Risk Engine.
+- Order Management System and durable intent state machine.
+- Execution Gateway and broker dealing integration.
+- Portfolio/account/position reconciliation.
+- Strategy Runtime and Intelligence services.
+- LIVE trading; no real order path is implemented or authorized.
 
-## Verification results
+## Architecture baseline (ADR-0004; target, not implementation evidence)
 
-### Existing foundation
-- Backend TypeScript compilation passed with TypeScript 7.0.2 on Node.js 24.22.0.
-- Previous backend tests: 2 route-contract tests, 0 failures.
-- ATP-DOM-001 user-run verification on 2026-11-12: `npm ci --include=dev` succeeded; `npm test` completed TypeScript compilation and all 10 tests passed, 0 failed.
-- Swift sources previously passed `swiftc -typecheck` against macOS SDK 13.3 for x86_64 and arm64 targets; this was type-checking, not arm64 runtime validation.
+- ATHEER Trading Pro is the product identity. AtheerAutotrade remains a temporary technical identifier pending a controlled migration plan.
+- Native SwiftUI client is presentation/operator-control only.
+- Node.js/TypeScript backend is a modular monolith with explicit module ownership.
+- Broker adapters are provider-specific and initially read-only.
+- All exposure-increasing intents must pass through centralized Risk Engine.
+- OMS owns durable intent lifecycle; Execution Gateway is the only dealing path and accepts only Risk-approved, OMS-authorized intent.
+- Broker-confirmed account and execution state is authoritative.
+- Unknown broker submission outcomes require reconciliation, never blind retry.
+- Loopback binding alone is not authentication. Secure local IPC and Keychain credential handoff require a dedicated threat-modeled ADR before broker operations are exposed.
+- Process health, backend readiness, broker REST, WebSocket, feed quality, persistence, trading readiness, and LIVE authorization are separate states.
+- LIVE remains disabled until all safety controls and explicit user authorization are implemented and verified.
 
-### 2026-11-12 local Xcode signing recovery
-- Codex reported correcting `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` for the XCTest target.
-- Codex reported Debug build succeeded, four XCTest tests passed with zero failures, and `codesign --verify` passed for the app and embedded XCTest bundle.
-- User confirmed Xcode displayed `Build Succeeded`.
-- Verification destination: macOS x86_64. Apple Silicon arm64 runtime remains unverified.
-- Local signing correction has not been confirmed committed/pushed to GitHub. Do not overwrite the local project file with repository content.
+## Verification record
 
-### ATP-CAP-001 — no verification claimed yet
-- Source and mock-based tests were authored on the feature branch.
-- No TypeScript build or adapter test execution has yet been observed for this branch.
-- No Capital.com Demo or Live session has been created by this implementation.
-- No actual broker quote or OHLC event has been received.
-- No persistent-connection or reconnect observation has been completed.
-- The source code branch is not proof of an operational broker connection.
+- ATP-DOM-001: user reported `npm ci --include=dev` succeeded and all 10 backend tests passed after TypeScript compilation.
+- XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
+- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001.
+- No source runtime code or dependencies changed during this architecture documentation work.
+- Apple Silicon arm64 runtime remains unverified.
 
-## Known limitations and future validation
+## Next verification and implementation gates
 
-- The adapter requires Node.js 24 built-in Fetch and WebSocket APIs, consistent with the backend package engine constraint.
-- The credentials provider and secured local process boundary are prerequisites to desktop-initiated authentication.
-- Capital.com documents a maximum of 40 epics per WebSocket market-data subscription and session keepalive requirements; integration must respect provider limits.
-- Historical snapshots and streaming OHLC events must be reconciled by timestamp without fabricating missing observations.
-- Distribution, notarization, external API exposure, threat modeling, and operational controls require separate design and validation.
-- Validate native app runtime on Apple Silicon hardware or CI before claiming arm64 runtime support.
-
-
-## Architecture documentation — Mermaid suite
-
-- Added `docs/architecture/diagrams/README.md` (ATA-ARCH-DIAG-001), containing ten Mermaid architecture and lifecycle diagrams adapted for AtheerAutotrade from the recovered ATP-GAI-02 diagram catalogue.
-- The prior conversation history preserved the ten titles and scopes, but not the original Mermaid source blocks. The committed diagrams are explicitly labelled **reconstructed and adapted**, not verbatim recovery.
-- Diagrams describe target architecture and control flows; they are not evidence that the depicted modules are implemented or operational.
-- The OMS diagram is a reconstructed 14-state proposal with explicit unknown-submission and reconciliation handling. Its exact state list is not asserted to match the unrecovered original.
-- No runtime code or dependencies changed. Mermaid rendering and technical review remain pending.
+1. Complete architecture document/diagram consistency review and open a draft PR for ATP-ARCH-REBASE-001.
+2. Design and threat-model secure local IPC and Keychain credential-provider ownership; record the selected mechanism in a dedicated ADR before implementation.
+3. Implement backend runtime/composition and distinct readiness states.
+4. Integrate Capital.com read-only session lifecycle only after the secure boundary exists.
+5. Implement Market Data quality/freshness and sustained-feed verification.
+6. Establish durable domain/persistence foundations before Risk, OMS, and Execution.
+7. Keep LIVE disabled throughout all preceding milestones.
