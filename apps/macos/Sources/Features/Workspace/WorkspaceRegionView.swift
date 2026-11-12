@@ -1,15 +1,18 @@
-
 import SwiftUI
 
 /// Displays the visible panels belonging to one workspace region.
 ///
-/// This view coordinates panel presentation only.
-/// It does not access broker, market-data, risk, or execution services.
+/// Panel heights are allocated proportionally using each panel's sizeFraction.
+/// When minimum usable panel heights cannot fit, the region scrolls instead of
+/// forcing its content outside the available workspace bounds.
 struct WorkspaceRegionView: View {
 
     @ObservedObject var workspaceManager: WorkspaceManager
 
     let region: WorkspacePanelRegion
+
+    private let panelSpacing: CGFloat = 8
+    private let regionInset: CGFloat = 8
 
     private var regionPanels: [WorkspacePanel] {
         guard let workspace = workspaceManager.activeWorkspace else {
@@ -31,45 +34,71 @@ struct WorkspaceRegionView: View {
     }
 
     var body: some View {
-        Group {
-            if regionPanels.isEmpty {
-                emptyRegion
-            } else {
-                panelStack
+        GeometryReader { geometry in
+            let panels = regionPanels
+            let totalWeight = panels.reduce(0.0) {
+                $0 + max($1.sizeFraction, 0.15)
             }
+            let interPanelSpacing = panelSpacing * CGFloat(max(panels.count - 1, 0))
+            let availableHeight = max(
+                geometry.size.height - (regionInset * 2) - interPanelSpacing,
+                0
+            )
+
+            Group {
+                if panels.isEmpty {
+                    emptyRegion
+                } else {
+                    ScrollView(.vertical) {
+                        VStack(spacing: panelSpacing) {
+                            ForEach(panels) { panel in
+                                WorkspacePanelView(
+                                    panel: panel,
+                                    onHide: {
+                                        workspaceManager.hidePanel(panel.id)
+                                    },
+                                    onClose: {
+                                        workspaceManager.closePanel(panel.id)
+                                    },
+                                    onToggleMaximize: {
+                                        workspaceManager.toggleMaximize(panel.id)
+                                    }
+                                )
+                                .frame(
+                                    maxWidth: .infinity,
+                                    height: allocatedHeight(
+                                        for: panel,
+                                        availableHeight: availableHeight,
+                                        totalWeight: totalWeight
+                                    )
+                                )
+                            }
+                        }
+                        .padding(regionInset)
+                        .frame(minHeight: geometry.size.height, alignment: .top)
+                    }
+                }
+            }
+            .frame(width: geometry.size.width, height: geometry.size.height)
+            .background(AtheerColors.canvas)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AtheerColors.canvas)
     }
 
-    // MARK: - Panel Stack
+    // MARK: - Panel Allocation
 
-    private var panelStack: some View {
-        VStack(spacing: 8) {
-            ForEach(regionPanels) { panel in
-                WorkspacePanelView(
-                    panel: panel,
-                    onHide: {
-                        workspaceManager.hidePanel(panel.id)
-                    },
-                    onClose: {
-                        workspaceManager.closePanel(panel.id)
-                    },
-                    onToggleMaximize: {
-                        workspaceManager.toggleMaximize(panel.id)
-                    }
-                )
-                .frame(
-                    maxWidth: .infinity,
-                    minHeight: panel.kind == .chart ? 240 : 150
-                )
-                .layoutPriority(
-                    panel.kind == .chart ? 1 : 0
-                )
-            }
-        }
-        .padding(8)
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    private func allocatedHeight(
+        for panel: WorkspacePanel,
+        availableHeight: CGFloat,
+        totalWeight: Double
+    ) -> CGFloat {
+        let weight = max(panel.sizeFraction, 0.15)
+        let normalizedWeight = CGFloat(weight / max(totalWeight, 0.0001))
+        let proportionalHeight = availableHeight * normalizedWeight
+        let minimumHeight: CGFloat = panel.kind == .chart ? 180 : 112
+
+        return max(minimumHeight, proportionalHeight)
     }
 
     // MARK: - Empty Region
@@ -100,7 +129,6 @@ struct WorkspaceRegionView: View {
                     )
                 )
         }
-        .padding(8)
+        .padding(regionInset)
     }
 }
-
