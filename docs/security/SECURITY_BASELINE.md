@@ -41,6 +41,19 @@ These are repository/source observations. They do not establish a verified Keych
 - Design emergency controls to separately stop new exposure and manage existing positions.
 - Treat unknown execution outcomes as requiring reconciliation; never blindly resubmit.
 
+## Remaining controls before production broker integration
+
+- Verify the app bundle and nested Node runtime signatures on the supported macOS environment; the parent must not trust an arbitrary replacement executable.
+- Pin and record an exact Node.js 24 patch release and checksum for release builds.
+- Run cross-language X25519/HKDF/AES-GCM interoperability tests and negative authentication-tag tests on the target Mac and supported backend runtime.
+- Keep the secret channel ephemeral per child-process session; destroy derived key material on disconnect/termination as far as each runtime permits.
+- Keep Keychain ownership in the native macOS application. The backend has no direct Keychain access.
+- Keep CST and X-SECURITY-TOKEN in process memory only; redact all authentication material from errors and diagnostics.
+- Add authorization, audit events, and rate/abuse controls before exposing any API beyond the tightly controlled local boundary.
+- Integrate WebSocket quote/OHLC streaming and a market-data quality lifecycle before treating live market data as operational.
+- Keep account, position, order, dealing, and execution methods out of the broker IPC allowlist until their respective domain, Risk, OMS, and Execution Gateway controls are implemented.
+- Keep LIVE disabled until safety gates, explicit user authorization, monitoring, reconciliation, and recovery procedures are implemented and verified.
+
 ## Required execution controls
 
 - UI, Strategy, and Intelligence components have no direct broker dealing interface.
@@ -51,6 +64,6 @@ These are repository/source observations. They do not establish a verified Keych
 
 ## Current limitations
 
-No concrete Keychain provider, authenticated application/backend boundary, authorization service, durable audit log, persistence/recovery, operational monitoring, broker account session, or execution safety chain has been verified. The development API is not intended for network exposure.
+The encrypted IPC and read-only Demo session paths are implemented in source but have not been verified. No actual Demo session, WebSocket feed, account/position reconciliation, authorization service, durable audit log, persistence/recovery, operational monitoring, or execution safety chain has been verified. The development API is not intended for network exposure.
 
 See [ADR-0004 — Production Architecture Baseline](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md), [ADR-0005 — Secure macOS IPC](../decisions/ADR-0005-SECURE-MACOS-IPC.md), and [Local IPC Protocol](LOCAL_IPC_PROTOCOL.md).
