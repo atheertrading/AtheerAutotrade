@@ -69,6 +69,11 @@ export class IpcSecretChannel {
       throw new TypeError("Encrypted credential envelope is invalid.");
     }
     const value = envelope as Record<string, unknown>;
+    const expectedFields = ["algorithm", "nonce", "ciphertext", "tag"];
+    if (Object.keys(value).length !== expectedFields.length
+      || expectedFields.some((field) => !Object.prototype.hasOwnProperty.call(value, field))) {
+      throw new TypeError("Encrypted credential envelope fields are invalid.");
+    }
     if (value.algorithm !== "AES-256-GCM") throw new TypeError("Unsupported credential encryption algorithm.");
     const nonce = decodeBase64(value.nonce, 12, "nonce");
     const ciphertext = decodeBase64Variable(value.ciphertext, "ciphertext");
