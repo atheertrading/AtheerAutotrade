@@ -17,7 +17,7 @@ The protocol handler at `src/api/stdio-ipc.ts` is wired into `server.ts` through
 - 4,096-request session limit;
 - explicit method allowlist and safe error responses.
 
-**The handler is not yet wired into `server.ts`, and the SwiftUI process launcher/client is not yet implemented.** It is a tested-by-source-design module only until the backend build and tests are executed in a real Node.js environment.
+**The native Swift process launcher/client and bundled Node runtime are not yet implemented.** The backend build and tests have not yet been executed in a real Node.js environment.
 
 ### Development/diagnostic mode — loopback HTTP
 
