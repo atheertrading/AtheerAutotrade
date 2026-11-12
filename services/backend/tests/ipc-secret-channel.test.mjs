@@ -54,6 +54,7 @@ test("X25519/HKDF/AES-256-GCM secret channel decrypts only authenticated ciphert
 
   assert.deepEqual(JSON.parse(channel.decrypt(envelope).toString("utf8")), JSON.parse(plaintext.toString("utf8")));
   assert.throws(() => channel.decrypt({ ...envelope, tag: randomBytes(16).toString("base64") }));
+  assert.throws(() => channel.decrypt({ ...envelope, unexpected: true }));
   channel.destroy();
   key.fill(0);
   shared.fill(0);
