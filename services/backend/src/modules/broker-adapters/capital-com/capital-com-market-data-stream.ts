@@ -266,7 +266,7 @@ export class CapitalComMarketDataStream {
           this.callbacks.onError?.(
             error instanceof Error ? error : new Error("Capital.com REST keepalive failed.")
           );
-          if (this.socket === socket) socket.close(1011, "REST session keepalive failed");
+          if (this.socket === socket) socket.close(4001, "REST session keepalive failed");
         });
       }
     }, KEEPALIVE_INTERVAL_MS);
