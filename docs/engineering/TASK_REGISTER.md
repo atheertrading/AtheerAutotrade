@@ -1,9 +1,9 @@
 # Engineering Task Register
 
-This register tracks milestone state and prevents completed work from being restarted. Update it after each material implementation or verification event.
+This register tracks milestone state and prevents completed work from being restarted.
 
 **Last reconciled:** 2026-11-12  
-**Repository baseline inspected:** `main` at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`
+**Repository baseline:** `main` at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c` when inspected for this work.
 
 ## Status definitions
 
@@ -12,7 +12,7 @@ This register tracks milestone state and prevents completed work from being rest
 - **PENDING VERIFICATION:** Implementation is present, but the required result has not been confirmed.
 - **PLANNED:** Not implemented.
 - **BLOCKED:** Cannot proceed until a named dependency is resolved.
-- **SUPERSEDED:** Replaced by a later recorded decision or implementation.
+- **SUPERSEDED:** Replaced by a later decision or implementation.
 
 ## Completed repository milestones
 
@@ -20,56 +20,51 @@ This register tracks milestone state and prevents completed work from being rest
 |---|---|---|---|
 | ATP-WS-001 | Connect Trading Workspace to application shell | PR #1 merged | DONE — MERGED |
 | ATP-WS-002 | Responsive workspace panel allocation | PR #2 merged | DONE — MERGED |
-| ATP-WS-003 | Workspace panel management controls | PR #3 integrated into main through PR #2 | DONE — MERGED |
-| ATP-WS-004 | Workspace resizing and controlled panel drag/drop | PR #4 merged; user reported Build Succeeded | DONE — MERGED; build user-reported |
-| ATP-WS-005 | Deterministic panel ordering invariants | PR #5 merged; user reported Build Succeeded | DONE — MERGED; build user-reported |
+| ATP-WS-003 | Workspace panel management controls | PR #3 integrated through PR #2 | DONE — MERGED |
+| ATP-WS-004 | Workspace resizing and controlled panel drag/drop | PR #4 merged; user reported successful build | DONE — MERGED |
+| ATP-WS-005 | Deterministic panel ordering invariants | PR #5 merged; user reported successful build | DONE — MERGED |
 | ATP-TEST-001 | Establish hosted XCTest target and four WorkspaceManager tests | PR #6 merged | DONE — MERGED |
-| ATP-TEST-002 | Correct XCTest group path in Xcode project | PR #7 merged | DONE — MERGED |
+| ATP-TEST-002 | Correct XCTest group path | PR #7 merged | DONE — MERGED |
 | ATP-TEST-003 | Enable app Debug testability and correct Swift key paths | PR #8 merged as `b18b0ff` | DONE — MERGED |
+| ATP-APPLE-001 | Configure Apple Development signing and resolve XCTest bundle signing | User confirmed `Build Succeeded`; Codex reported app/test signatures valid and 4 XCTest passed, 0 failed on x86_64 | DONE — LOCAL VERIFIED; GitHub publication of local signing correction not confirmed |
 
-## Verification still requiring evidence
+## Active implementation
 
-| ID | Item | Current evidence | Status / rule |
+| ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-TEST-004 | Execute all four `WorkspaceManagerTests` on the user's Xcode environment | Four tests exist in source; PR #8 merge description requests execution. No confirmed test-run result is recorded in this register. | PENDING VERIFICATION. Do not claim tests passed. Run once only if this remains the active user-approved task. |
-| ATP-MAC-001 | Confirm current local Xcode build and runtime behavior after the latest merged repository changes | Repository documentation records prior environment limitations; user has reported successful builds at earlier workspace milestones, but no current post-PR-8 result is recorded here. | PENDING VERIFICATION; do not repeat builds unless needed for the active task. |
+| ATP-DOM-001 | Provider-neutral instrument domain model | Immutable instrument identity, asset class/status, optional currency and contract metadata, exact decimal strings, runtime validation, unit tests | PENDING VERIFICATION |
 
-## Project capabilities not yet implemented
+Implementation branch: `feature/trading-domain-instrument-models`.
 
-The current `IMPLEMENTATION_STATUS.md` remains authoritative. Its documented unimplemented areas include broker integration, credentials, account and market data, portfolio state, strategy runtime, risk evaluation, order management, execution gateway, AI services, authentication, persistence, and LIVE trading.
+Files authored:
+- `services/backend/src/modules/trading-domain/instrument.ts`
+- `services/backend/tests/instrument.test.mjs`
+- `services/backend/src/modules/trading-domain/README.md`
 
-These are product implementation areas, not bugs to be "fixed" by project-configuration audits. Their sequencing must be established as explicit milestones.
+No new runtime or development dependencies were added. No broker, market-data, order, risk, persistence, UI, or execution path was introduced.
 
-## Codex assignment record
+## Remaining validation
 
-- Recorded purpose: address the bounded XCTest problem.
-- PRs #6–#8 establish and correct the XCTest target and test source.
-- Do not silently repurpose Codex for general project setup, Apple Developer configuration, or broad architecture work.
-- Any future Codex use must have a specific task, allowed file scope, acceptance criteria, and a reason it is the appropriate tool.
+| ID | Item | Evidence | Status / rule |
+|---|---|---|---|
+| ATP-DOM-001-VERIFY | Run backend build and tests including instrument validation cases | Test source authored; no local execution result yet | PENDING VERIFICATION. Run `npm test` in `services/backend` once after pulling this branch. |
+| ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Current verified local build destination was x86_64 | PLANNED; do not claim arm64 runtime validation. |
+
+## Product capabilities not yet implemented
+
+Broker integration, credentials, account data, market data, portfolio state, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, authentication, and LIVE trading remain unimplemented.
+
+These are planned product capabilities, not project-configuration defects. All exposure-increasing intents must eventually pass through the centralized Risk Engine. No execution route may bypass it.
+
+## Codex assignment boundary
+
+Codex's original authorized assignment in this workflow was the bounded XCTest problem. It is not the default executor for all project work. Any future Codex assignment must specify objective, allowed files, acceptance criteria, and verification.
 
 ## Current next action
 
-No new application feature or broad Xcode/Apple Developer reconfiguration is authorized by this register.
-
-The only clearly identified outstanding verification item from the XCTest work is ATP-TEST-004. Confirm whether it is still pending from the user's actual Xcode run before asking for another test. Do not reopen Git troubleshooting; the user confirmed that it was resolved and the files were pushed.
+Validate ATP-DOM-001 by running the backend build and test suite on the user's development Mac. Review the PR and merge only after the test suite passes. Do not rerun the completed Xcode signing repair or reopen Git troubleshooting.
 
 ## Change log
 
-- 2026-11-12: Initial register reconciled against merged PRs #1–#8 and the current repository documentation. PR merge state is repository-observed; build/test outcomes are separately labeled and not inferred from merge status.
-
-
-## Latest update — 2026-11-12, after local Codex session
-
-| ID | Item | Evidence | Status |
-|---|---|---|---|
-| ATP-TEST-004 | Execute the four existing WorkspaceManager XCTest cases | User supplied Codex transcript reports `TEST SUCCEEDED`, 4 passed, 0 failed, using a command-line-only signing override. | DONE — TEST RUN REPORTED SUCCESS; transcript evidence, not independently inspected result bundle. Do not rerun solely for repetition. |
-| ATP-APPLE-001 | Resolve normal Debug code signing on the development Mac | Normal Debug build stopped because no Development Team/account or signing identity is configured in Xcode. | BLOCKED — requires account owner to sign in to Xcode and select the intended Team. No Team ID may be invented. |
-| ATP-APPLE-002 | Review local Xcode configuration changes made during the broader Codex run | Codex reports edits to `project.pbxproj`, a new `AtheerAutotrade.entitlements`, and the shared `AtheerAutotrade.xcscheme`. Their current local diff/commit state has not been inspected in this record. | PENDING REVIEW — do not commit, push, or request another Codex pass until the exact diff is reviewed. |
-
-## Codex scope clarification
-
-The user's original and authorized reason for using Codex in this workflow was the specific XCTest problem. A prior assistant instruction incorrectly expanded the task to broad Apple Developer and Xcode configuration. Do not repeat that scope expansion. Codex is not the default executor for all project tasks; use it only for a specifically assigned, bounded task.
-
-## Continuity source-of-truth rule
-
-The continuity system is already represented by `AGENTS.md`, `PROJECT_CONTINUITY.md`, this task register, and `IMPLEMENTATION_STATUS.md`. Do not create parallel status/decision/protocol documents. Update these authoritative files and relevant ADRs only.
+- 2026-11-12: Reconciled signing status against the user's `Build Succeeded` confirmation and the supplied Codex report.
+- 2026-11-12: Started ATP-DOM-001 on `feature/trading-domain-instrument-models`; model and tests authored, execution pending.
