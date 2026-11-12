@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-struct CapitalComCredentials: Codable {
+struct CapitalComCredentials: Codable, Equatable {
     let apiKey: String
     let identifier: String
     let password: String
@@ -18,8 +18,36 @@ enum CapitalComCredentialStore {
         query[kSecReturnAttributes as String] = false
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
-        let status = SecItemCopyMatching(query as CFDictionary, nil)
-        return status == errSecSuccess
+        return SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess
+    }
+
+    /// Reads and decodes the single credential record from Keychain.
+    /// A missing item returns nil; Keychain and decoding failures remain explicit.
+    static func load() throws -> CapitalComCredentials? {
+        var query = baseQuery
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        if status == errSecItemNotFound {
+            return nil
+        }
+
+        guard status == errSecSuccess else {
+            throw CapitalComCredentialStoreError.keychainStatus(status)
+        }
+
+        guard let data = result as? Data else {
+            throw CapitalComCredentialStoreError.invalidStoredData
+        }
+
+        do {
+            return try JSONDecoder().decode(CapitalComCredentials.self, from: data)
+        } catch {
+            throw CapitalComCredentialStoreError.invalidStoredData
+        }
     }
 
     static func save(_ credentials: CapitalComCredentials) throws {
@@ -44,6 +72,10 @@ enum CapitalComCredentialStore {
 
         guard addStatus == errSecSuccess else {
             throw CapitalComCredentialStoreError.keychainStatus(addStatus)
+        }
+
+        guard try load() == credentials else {
+            throw CapitalComCredentialStoreError.verificationFailed
         }
     }
 
