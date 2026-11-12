@@ -31,6 +31,8 @@ struct ApplicationShellView: View {
             DashboardView()
         case .tradingWorkspace:
             WorkspaceLayoutView(workspaceManager: workspaceManager)
+        case .settings:
+            CapitalComSettingsView()
         default:
             DestinationPlaceholderView(section: selection)
         }
