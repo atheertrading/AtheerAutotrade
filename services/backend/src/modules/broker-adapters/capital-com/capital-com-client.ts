@@ -67,6 +67,8 @@ export class CapitalComProtocolError extends Error {
   }
 }
 
+const REQUEST_TIMEOUT_MS = 15_000;
+
 const BASE_URLS: Readonly<Record<CapitalComEnvironment, string>> = Object.freeze({
   demo: "https://demo-api-capital.backend-capital.com",
   live: "https://api-capital.backend-capital.com"
@@ -216,7 +218,8 @@ export class CapitalComClient {
         password: credentials.apiKeyPassword,
         encryptedPassword: false
       }),
-      cache: "no-store"
+      cache: "no-store",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
     });
 
     if (!response.ok) {
@@ -355,7 +358,8 @@ export class CapitalComClient {
         CST: session.cst,
         "X-SECURITY-TOKEN": session.securityToken
       },
-      cache: "no-store"
+      cache: "no-store",
+      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
     });
 
     if (response.status === 401 || response.status === 403) {
