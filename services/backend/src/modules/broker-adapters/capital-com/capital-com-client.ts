@@ -128,6 +128,20 @@ export class CapitalComClient {
     return this.session !== undefined;
   }
 
+  async getSessionForStreaming(): Promise<CapitalComSession> {
+    if (!this.session) return this.createSession();
+
+    try {
+      await this.ping();
+      return this.session ?? this.createSession();
+    } catch (error) {
+      if (error instanceof CapitalComApiError && (error.status === 401 || error.status === 403)) {
+        return this.createSession();
+      }
+      throw error;
+    }
+  }
+
   async createSession(): Promise<CapitalComSession> {
     const credentials = await this.credentialsProvider.getCredentials();
     this.assertCredentials(credentials);
