@@ -103,6 +103,67 @@ function validateEpic(epic: string): string {
   return normalized;
 }
 
+
+function parsePriceLevel(value: unknown, field: string): { readonly bid: number; readonly ask: number } {
+  if (!isRecord(value)) {
+    throw new CapitalComProtocolError(`Capital.com historical price omitted ${field}.`);
+  }
+  const bid = value.bid;
+  const ask = value.ask;
+  if (
+    typeof bid !== "number" || !Number.isFinite(bid) ||
+    typeof ask !== "number" || !Number.isFinite(ask)
+  ) {
+    throw new CapitalComProtocolError(`Capital.com historical ${field} values are invalid.`);
+  }
+  return Object.freeze({ bid, ask });
+}
+
+function parseHistoricalSnapshot(value: unknown): CapitalComPriceSnapshot {
+  if (!isRecord(value)) {
+    throw new CapitalComProtocolError("Capital.com returned a malformed historical candle.");
+  }
+  if (
+    typeof value.snapshotTime !== "string" ||
+    typeof value.snapshotTimeUTC !== "string" ||
+    !Number.isFinite(Date.parse(`${value.snapshotTimeUTC}Z`))
+  ) {
+    throw new CapitalComProtocolError("Capital.com historical candle timestamp is invalid.");
+  }
+
+  const openPrice = parsePriceLevel(value.openPrice, "openPrice");
+  const closePrice = parsePriceLevel(value.closePrice, "closePrice");
+  const highPrice = parsePriceLevel(value.highPrice, "highPrice");
+  const lowPrice = parsePriceLevel(value.lowPrice, "lowPrice");
+
+  for (const side of ["bid", "ask"] as const) {
+    if (
+      highPrice[side] < Math.max(openPrice[side], closePrice[side], lowPrice[side]) ||
+      lowPrice[side] > Math.min(openPrice[side], closePrice[side], highPrice[side])
+    ) {
+      throw new CapitalComProtocolError(`Capital.com historical candle has invalid ${side} OHLC bounds.`);
+    }
+  }
+
+  const lastTradedVolume = value.lastTradedVolume;
+  if (
+    lastTradedVolume !== undefined &&
+    (typeof lastTradedVolume !== "number" || !Number.isFinite(lastTradedVolume) || lastTradedVolume < 0)
+  ) {
+    throw new CapitalComProtocolError("Capital.com historical candle volume is invalid.");
+  }
+
+  return Object.freeze({
+    snapshotTime: value.snapshotTime,
+    snapshotTimeUTC: value.snapshotTimeUTC,
+    openPrice,
+    closePrice,
+    highPrice,
+    lowPrice,
+    ...(typeof lastTradedVolume === "number" ? { lastTradedVolume } : {})
+  });
+}
+
 /**
  * Read-only Capital.com REST adapter foundation.
  *
@@ -258,7 +319,7 @@ export class CapitalComClient {
     }
 
     return Object.freeze({
-      prices: Object.freeze(result.prices as CapitalComPriceSnapshot[]),
+      prices: Object.freeze(result.prices.map(parseHistoricalSnapshot)),
       ...(typeof result.instrumentType === "string"
         ? { instrumentType: result.instrumentType }
         : {})
