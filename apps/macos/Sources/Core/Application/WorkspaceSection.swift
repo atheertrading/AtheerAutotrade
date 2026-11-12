@@ -6,6 +6,7 @@ enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
     case dashboard = "Dashboard"
     case tradingWorkspace = "Trading Workspace"
     case markets = "Markets"
+    case brokers = "Brokers"
     case strategies = "Strategies"
     case positions = "Positions"
     case orders = "Orders"
@@ -26,6 +27,8 @@ enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
             return "rectangle.split.3x1"
         case .markets:
             return "chart.xyaxis.line"
+        case .brokers:
+            return "building.columns"
         case .strategies:
             return "slider.horizontal.3"
         case .positions:
@@ -55,6 +58,8 @@ enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
             return "A configurable trading workspace with resizable panels."
         case .markets:
             return "Market data and instrument monitoring."
+        case .brokers:
+            return "Broker connections, account environments, and API credentials."
         case .strategies:
             return "Strategy research, configuration, and lifecycle management."
         case .positions:
