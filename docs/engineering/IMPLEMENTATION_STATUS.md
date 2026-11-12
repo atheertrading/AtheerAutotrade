@@ -34,9 +34,11 @@
 - Focused test file added at `services/backend/tests/stdio-ipc.test.mjs`; tests have **not yet been executed** in this session.
 - Backend `server.ts` now supports explicit `--transport=stdio` production desktop mode; it serves the IPC protocol on stdin/stdout and does not create the HTTP server in that mode. The default `http` mode remains a development diagnostic endpoint.
 - A child-process integration test was added to exercise handshake/ping and verify stdout contains only protocol frames; tests have not yet been executed.
-- No native Swift process launcher/client or bundled Node runtime exists yet.
-- Native macOS app remains the intended Keychain owner; credential provider and secret transfer are not implemented.
-- Bundled Node runtime, code-signing verification, process supervision, and crash/restart behavior remain pending.
+- Native Swift IPC protocol codec and Process supervisor source are now present under apps/macos/Sources/Core/Backend and registered in the Xcode project. They implement fixed-path child launch, stdio pipes, protocol handshake, request correlation, frame limits, request timeouts, and process termination handling; they have not been compiled or runtime-tested.
+- XCTest source for NDJSON framing and response validation has been added and registered; test execution is pending.
+- The expected signed bundle layout is documented in docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md. The Xcode project does not yet copy a Node runtime or compiled backend into the app bundle.
+- No Node runtime binary or signature verification is included. The supervisor is not yet connected to the SwiftUI application lifecycle.
+- Native macOS app remains the intended Keychain owner; credential provider and secret transfer are not implemented. The Capital.com credential-entry UI is also not present in the current main branch.
 
 ## Not implemented or not operationally integrated
 
@@ -73,16 +75,17 @@
 - ATP-DOM-001: user reported `npm ci --include=dev` succeeded and all 10 backend tests passed after TypeScript compilation.
 - XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
 - PR #14 (ATP-ARCH-REBASE-001) was merged on 2026-11-12 as `9445a749d78c63030e9125041a6103dca0eabafc`.
-- ATP-SEC-IPC-001 adds the backend stdio protocol handler and focused tests. No backend build/test, local Xcode build, broker login, or live data observation has been executed for this batch.
-- Native app process integration, runtime packaging/signing, and Keychain credential transfer remain unimplemented.
+- PR #15 (ATP-SEC-IPC-001 Batches 1–2) was merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. The backend stdio handler and startup mode are present, but its added build/tests have not been executed in this work session.
+- The current feature branch adds native Swift IPC protocol/supervisor source, an XCTest source file, Xcode project membership, and a bundle-layout document. No Xcode build/test or packaged runtime execution has been performed.
+- Native runtime packaging/signing, app lifecycle integration, Keychain credential transfer, and Capital.com credential-entry UI remain unimplemented.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next verification and implementation gates
 
-1. Wire stdio IPC into a dedicated production backend startup mode while preserving HTTP health as development-only.
-2. Add real Node stream integration tests and run the backend build/test suite in a supported Node.js 24 environment.
-3. Implement the native Swift Process launcher and strict NDJSON client; add its files to the Xcode project and verify on the user's actual Mac.
-4. Package a known Node runtime and compiled backend with the signed app; verify hardened-runtime and child-process behavior.
-5. Design a separate one-shot Keychain credential transfer contract before any broker session method is added.
-6. Integrate Capital.com read-only session lifecycle only after the secure boundary is verified.
-7. Keep LIVE disabled; no broker account, order, risk, or execution method is exposed by this IPC batch.
+1. Compile and test the current Swift IPC sources and XCTest cases on the user's actual supported macOS/Xcode environment.
+2. Run the backend Node.js 24 build and full test suite for the merged stdio transport.
+3. Add Xcode build phases that package a pinned, architecture-compatible Node runtime and compiled backend into the documented app bundle layout.
+4. Verify nested code signatures, hardened-runtime behavior, child launch, timeout, crash, shutdown, and explicit restart using the packaged app.
+5. Connect the supervisor to application lifecycle and expose only process readiness/diagnostics.
+6. Design a separate one-shot Keychain credential-transfer contract; then implement the Capital.com credential-entry UI and Keychain provider before broker session methods.
+7. Keep LIVE disabled; no broker account, order, risk, or execution method is exposed by the current IPC protocol.
