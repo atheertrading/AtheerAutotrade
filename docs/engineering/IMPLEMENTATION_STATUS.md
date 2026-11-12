@@ -26,13 +26,13 @@
 ### Runtime packaging source
 - Xcode app target includes a Package Backend Runtime build phase.
 - apps/macos/Scripts/package-backend.sh requires Node.js 24 universal (x86_64 + arm64), compiles the backend, and copies the Node executable and compiled backend into the fixed bundle paths used by the supervisor.
-- The script signs the nested Node executable when Xcode code signing is enabled and a signing identity is supplied. Exact Node patch pinning, release signature verification, and notarization remain outstanding.
+- The script copies package.json ESM metadata and signs the nested Node executable with the minimal V8 JIT entitlement when Xcode code signing is enabled. Exact Node patch pinning, release signature verification, and notarization remain outstanding.
 
 ## Not yet verified
 
 - Current branch has not been built with Xcode 14.3.1 / Swift 5.8.1 on the target Intel Mac.
 - Backend TypeScript build and all Node tests for protocol v2 have not yet been executed. A Node 24 backend CI workflow has been added; its run result must be checked after PR creation.
-- X25519/HKDF/AES-GCM cross-language interoperability between CryptoKit and Node.js has test source but no executed result.
+- Node.js X25519/HKDF/AES-GCM decryption has backend test source but no executed result. CryptoKit-to-Node cross-language interoperability has not yet been tested.
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
 - Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
 - No real Capital.com Demo authentication, market search, historical-price response, live quote, or OHLC event has been verified against a real Demo account.
