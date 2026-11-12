@@ -31,7 +31,7 @@
 
 Required fields are exact. Unknown envelope fields are rejected. The request ID must be a UUID unique for the lifetime of the IPC session.
 
-## 3. Authenticated secret channel establishment
+## 3. Ephemeral encrypted secret channel establishment
 
 Protocol v2 changes the handshake because broker credentials must be encrypted as data while crossing the local process boundary.
 
@@ -41,7 +41,7 @@ Protocol v2 changes the handshake because broker credentials must be encrypted a
 4. Both sides derive the same 256-bit key using X25519 shared secret and HKDF-SHA256 with the fixed context string `atheer.local-ipc.capitalcom.credentials.v1`.
 5. The backend returns its 32-byte raw public key and salt in the handshake result.
 6. The parent encrypts the credential JSON using AES-256-GCM with a fresh 96-bit nonce for each encrypted payload.
-7. The backend authenticates and decrypts the payload in memory, validates the credential structure, and retains the credentials only in the backend process memory for the current broker session.
+7. The backend authenticates and decrypts the payload in memory, validates the credential structure, and accepts exactly one credential submission per child-process session. It retains the credentials only in backend process memory.
 
 Handshake request:
 
@@ -69,6 +69,7 @@ Handshake response includes:
     "system.ping",
     "broker.credentials.submit",
     "broker.connect",
+    "broker.status",
     "broker.disconnect",
     "broker.marketSearch",
     "broker.historicalPrices"
@@ -92,7 +93,7 @@ Encrypted credential envelope:
 }
 ```
 
-The public-key exchange is ephemeral and provides confidentiality/integrity for the credential payload on the inherited pipe. It does not replace code-signature verification of the bundled backend, OS process isolation, Keychain protection at rest, or HTTPS/TLS to Capital.com. JavaScript and Swift runtime memory cannot be claimed to be perfectly zeroized.
+The public-key exchange is ephemeral and provides confidentiality/integrity for the credential payload on the inherited pipe. It does not authenticate the executable by itself and does not replace code-signature verification of the bundled backend, OS process isolation, Keychain protection at rest, or HTTPS/TLS to Capital.com. JavaScript and Swift runtime memory cannot be claimed to be perfectly zeroized.
 
 ## 4. Response envelope
 
@@ -133,8 +134,8 @@ Never include stack traces, file paths, raw provider responses, credentials, ses
 |---|---|---|
 | `system.hello` | Negotiate protocol and establish ephemeral secret channel | Implemented in source |
 | `system.ping` | Confirm local IPC process responds | Implemented in source |
-| `broker.credentials.submit` | Submit one encrypted credential envelope; backend retains it in memory only | Implemented in source |
-| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |
+| `broker.credentials.submit` | Submit exactly one encrypted credential envelope per child session; backend retains it in memory only | Implemented in source |
+| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |\n| `broker.status` | Read current broker session state | Implemented in source |
 | `broker.disconnect` | Invalidate session and clear backend credential/session state | Implemented in source |
 | `broker.marketSearch` | Search Capital.com instruments | Implemented in source |
 | `broker.historicalPrices` | Retrieve validated historical OHLC snapshots | Implemented in source |
@@ -177,7 +178,7 @@ The initial implementation limits a session to 4,096 unique requests. The parent
 5. Encrypt credentials in transit over IPC using the ephemeral v2 secret channel.
 6. Capital.com REST uses HTTPS/TLS; CST and X-SECURITY-TOKEN remain backend-process memory only.
 7. The backend process is bundled and launched from a fixed app-bundle path; do not use arbitrary PATH resolution.
-8. A restarted child is a new session and must complete a fresh key agreement and handshake.
+8. A restarted child is a new session and must complete a fresh key agreement and handshake. The broker credential submission is one-shot per child session; reconnect after disconnect starts a new child session.
 9. No broker account mutation, dealing, risk bypass, order, or execution capability is exposed.
 10. Demo and Live environments remain separate; Live is disabled.
 
