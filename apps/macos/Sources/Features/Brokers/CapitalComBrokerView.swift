@@ -28,6 +28,7 @@ struct CapitalComBrokerView: View {
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .background(AtheerColors.canvas)
+        .onAppear(perform: restoreCredentials)
         .alert("Remove saved credentials?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Remove Credentials", role: .destructive) {
@@ -482,19 +483,45 @@ struct CapitalComBrokerView: View {
 
         do {
             try CapitalComCredentialStore.save(credentials)
+
+            guard let storedCredentials = try CapitalComCredentialStore.load(),
+                  storedCredentials == credentials else {
+                throw CapitalComCredentialStoreError.verificationFailed
+            }
+
+            apiKey = storedCredentials.apiKey
+            identifier = storedCredentials.identifier
+            password = storedCredentials.password
             hasSavedCredentials = true
-            apiKey = ""
-            identifier = ""
-            password = ""
-            feedback = .success("Credentials saved securely in macOS Keychain.")
+            feedback = .success("Credentials saved and verified in macOS Keychain.")
         } catch {
             feedback = .error(error.localizedDescription)
+        }
+    }
+
+    private func restoreCredentials() {
+        do {
+            guard let credentials = try CapitalComCredentialStore.load() else {
+                hasSavedCredentials = false
+                return
+            }
+
+            apiKey = credentials.apiKey
+            identifier = credentials.identifier
+            password = credentials.password
+            hasSavedCredentials = true
+        } catch {
+            hasSavedCredentials = false
+            feedback = .error("Unable to read saved Keychain credentials: \(error.localizedDescription)")
         }
     }
 
     private func deleteCredentials() {
         do {
             try CapitalComCredentialStore.delete()
+            apiKey = ""
+            identifier = ""
+            password = ""
             hasSavedCredentials = false
             feedback = .success("Saved Capital.com credentials were removed.")
         } catch {

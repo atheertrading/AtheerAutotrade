@@ -1,7 +1,7 @@
 import Foundation
 import Security
 
-struct CapitalComCredentials: Codable {
+struct CapitalComCredentials: Codable, Equatable {
     let apiKey: String
     let identifier: String
     let password: String
@@ -18,8 +18,36 @@ enum CapitalComCredentialStore {
         query[kSecReturnAttributes as String] = false
         query[kSecMatchLimit as String] = kSecMatchLimitOne
 
-        let status = SecItemCopyMatching(query as CFDictionary, nil)
-        return status == errSecSuccess
+        return SecItemCopyMatching(query as CFDictionary, nil) == errSecSuccess
+    }
+
+    /// Reads and decodes the single credential record from Keychain.
+    /// A missing item returns nil; Keychain and decoding failures remain explicit.
+    static func load() throws -> CapitalComCredentials? {
+        var query = baseQuery
+        query[kSecReturnData as String] = true
+        query[kSecMatchLimit as String] = kSecMatchLimitOne
+
+        var result: CFTypeRef?
+        let status = SecItemCopyMatching(query as CFDictionary, &result)
+
+        if status == errSecItemNotFound {
+            return nil
+        }
+
+        guard status == errSecSuccess else {
+            throw CapitalComCredentialStoreError.keychainStatus(status)
+        }
+
+        guard let data = result as? Data else {
+            throw CapitalComCredentialStoreError.invalidStoredData
+        }
+
+        do {
+            return try JSONDecoder().decode(CapitalComCredentials.self, from: data)
+        } catch {
+            throw CapitalComCredentialStoreError.invalidStoredData
+        }
     }
 
     static func save(_ credentials: CapitalComCredentials) throws {
@@ -30,20 +58,21 @@ enum CapitalComCredentialStore {
         ]
 
         let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if updateStatus == errSecSuccess {
-            return
-        }
 
-        guard updateStatus == errSecItemNotFound else {
+        if updateStatus == errSecItemNotFound {
+            var insertion = query
+            insertion[kSecValueData as String] = data
+
+            let addStatus = SecItemAdd(insertion as CFDictionary, nil)
+            guard addStatus == errSecSuccess else {
+                throw CapitalComCredentialStoreError.keychainStatus(addStatus)
+            }
+        } else if updateStatus != errSecSuccess {
             throw CapitalComCredentialStoreError.keychainStatus(updateStatus)
         }
 
-        var insertion = query
-        insertion[kSecValueData as String] = data
-        let addStatus = SecItemAdd(insertion as CFDictionary, nil)
-
-        guard addStatus == errSecSuccess else {
-            throw CapitalComCredentialStoreError.keychainStatus(addStatus)
+        guard try load() == credentials else {
+            throw CapitalComCredentialStoreError.verificationFailed
         }
     }
 
@@ -65,11 +94,17 @@ enum CapitalComCredentialStore {
 
 enum CapitalComCredentialStoreError: LocalizedError {
     case keychainStatus(OSStatus)
+    case invalidStoredData
+    case verificationFailed
 
     var errorDescription: String? {
         switch self {
         case .keychainStatus(let status):
             return "Keychain operation failed (OSStatus \(status))."
+        case .invalidStoredData:
+            return "The saved Capital.com credential record could not be decoded."
+        case .verificationFailed:
+            return "Keychain save verification failed."
         }
     }
 }
