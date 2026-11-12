@@ -5,54 +5,66 @@
 ### macOS application
 - Native SwiftUI macOS application target and dark-first navigation shell.
 - Presentation-only destinations for Dashboard, Markets, Strategies, Positions, Orders, Portfolio, Risk Management, Analytics, AI Intelligence, Activity, and Settings.
-- Trading Workspace with its previously merged panel management, resizing, and drag/drop work.
+- Trading Workspace with panel management, resizing, and drag/drop.
 - Apple Development signing configured in the user's local Xcode environment. User confirmed `Build Succeeded` on 2026-11-12. Codex reported valid signatures for the app and embedded XCTest bundle.
 
 ### Backend foundation
 - Node.js built-in HTTP backend with `GET /health`, structured 404 handling, environment configuration, and graceful shutdown.
 - Node.js built-in route-contract tests.
-- Trading Domain now contains a provider-neutral `Instrument` model on branch `feature/trading-domain-instrument-models`. It validates instrument identity, asset class, status, optional currency codes, and optional contract increments/minimum quantity.
-- Contract increments and minimum quantity are represented as exact decimal strings, not JavaScript floating-point numbers.
-- Missing broker-provided specifications remain absent; the model does not invent defaults.
-- Instrument unit tests passed on the user's development Mac on 2026-11-12: 8 instrument tests plus 2 existing route tests, 10 total, 0 failures.
+- Provider-neutral Trading Domain `Instrument` model merged in PR #11 (`fa68db5`). Contract increments and minimum quantity use exact decimal strings; absent provider specifications remain absent.
+- User-run backend verification for ATP-DOM-001: TypeScript build succeeded and 10/10 Node.js tests passed.
 
-## Not implemented
+### Capital.com adapter — implementation authored, verification pending
+On branch `feature/atp-cap-001-capital-market-connectivity`:
+- Read-only REST client for session creation, authenticated ping, market search, and historical prices.
+- In-memory CST and X-SECURITY-TOKEN session state.
+- Credential-provider interface; no concrete Keychain provider yet.
+- WebSocket stream for live quote and OHLC events.
+- WebSocket ping, optional REST session keepalive wiring, bounded reconnect backoff, and re-subscription.
+- Runtime validation of quote fields and OHLC bounds.
+- Mock-based client and stream tests.
+- ADR-0003 and adapter README.
 
-- Broker integration or credentials.
-- Live market data or quote ingestion.
-- Account data, portfolio state, or persistence.
-- Strategy runtime.
-- Risk evaluation.
-- Order management or execution gateway.
-- AI services.
-- Authentication and authorization.
-- LIVE trading.
+No new dependencies were added. The adapter exposes no order, position, dealing, or account-mutation operations.
+
+## Not implemented / not yet connected
+
+- Concrete macOS Keychain-backed Capital.com credentials provider.
+- Secured local application-to-backend authentication and authorization boundary.
+- Application wiring and broker connection lifecycle UI.
+- Actual Capital.com Demo account authentication from this code.
+- Actual market search, historical candles, live quote updates, and OHLC events received from the broker.
+- Sustained feed monitoring, quote-age/staleness detection, gap/duplicate detection, and operational reconnect evidence.
+- Account/portfolio state, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading.
 
 ## Verification results
 
-### Previously recorded foundation verification
+### Existing foundation
 - Backend TypeScript compilation passed with TypeScript 7.0.2 on Node.js 24.22.0.
-- Backend `npm test` passed previously: 2 route-contract tests, 0 failures.
-- Swift sources passed `swiftc -typecheck` against macOS SDK 13.3 for x86_64 and arm64 targets; this was type-checking, not arm64 runtime validation.
+- Previous backend tests: 2 route-contract tests, 0 failures.
+- ATP-DOM-001 user-run verification on 2026-11-12: `npm ci --include=dev` succeeded; `npm test` completed TypeScript compilation and all 10 tests passed, 0 failed.
+- Swift sources previously passed `swiftc -typecheck` against macOS SDK 13.3 for x86_64 and arm64 targets; this was type-checking, not arm64 runtime validation.
 
 ### 2026-11-12 local Xcode signing recovery
-- Codex reported that the test target's Xcode `TargetAttributes` lacked team/provisioning metadata despite its build settings resolving the intended team.
 - Codex reported correcting `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` for the XCTest target.
 - Codex reported Debug build succeeded, four XCTest tests passed with zero failures, and `codesign --verify` passed for the app and embedded XCTest bundle.
-- The user then confirmed Xcode displayed `Build Succeeded`.
+- User confirmed Xcode displayed `Build Succeeded`.
 - Verification destination: macOS x86_64. Apple Silicon arm64 runtime remains unverified.
-- The local signing correction has not been confirmed committed/pushed to GitHub. Do not overwrite the local project file with the repository version.
+- Local signing correction has not been confirmed committed/pushed to GitHub. Do not overwrite the local project file with repository content.
 
-### ATP-DOM-001 branch verification — 2026-11-12
-- User ran `npm ci --include=dev` successfully in the isolated `AtheerAutotrade-ATP-DOM-001` worktree.
-- `npm test` completed `tsc -p tsconfig.json` successfully and ran all tests.
-- Result: 10 tests, 10 passed, 0 failed, 0 cancelled, 0 skipped.
-- The first attempt before dependency installation reported `tsc: command not found`; this was an environment setup issue, resolved by `npm ci --include=dev`.
-- Verification is user-reported from the supplied Terminal output. PR #11 remains open and unmerged pending final review.
+### ATP-CAP-001 — no verification claimed yet
+- Source and mock-based tests were authored on the feature branch.
+- No TypeScript build or adapter test execution has yet been observed for this branch.
+- No Capital.com Demo or Live session has been created by this implementation.
+- No actual broker quote or OHLC event has been received.
+- No persistent-connection or reconnect observation has been completed.
+- The source code branch is not proof of an operational broker connection.
 
 ## Known limitations and future validation
 
-- Preserve the supplied Terminal output as the verification evidence; Node.js runtime version was not included in that output.
-- Validate native app runtime on Apple Silicon hardware or CI.
-- Distribution, notarization, external API exposure, threat modeling, service authentication, and operational controls require separate design and validation.
-- Provider integrations remain out of scope until the relevant contracts and security controls are established.
+- The adapter requires Node.js 24 built-in Fetch and WebSocket APIs, consistent with the backend package engine constraint.
+- The credentials provider and secured local process boundary are prerequisites to desktop-initiated authentication.
+- Capital.com documents a maximum of 40 epics per WebSocket market-data subscription and session keepalive requirements; integration must respect provider limits.
+- Historical snapshots and streaming OHLC events must be reconciled by timestamp without fabricating missing observations.
+- Distribution, notarization, external API exposure, threat modeling, and operational controls require separate design and validation.
+- Validate native app runtime on Apple Silicon hardware or CI before claiming arm64 runtime support.
