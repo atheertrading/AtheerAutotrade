@@ -22,7 +22,7 @@ The desktop client must not own broker protocol logic, risk decisions, order lif
 - The backend currently exposes a local process health endpoint and structured 404 handling.
 - The provider-neutral Trading Domain Instrument model is merged.
 - A read-only Capital.com REST client and WebSocket quote/OHLC transport are merged into the repository. Their integration into the backend runtime and desktop app is not complete.
-- No concrete Keychain credential provider or integrated desktop/backend process client is implemented. The selected stdio IPC protocol handler is implemented as a backend module but is not yet wired into process startup or the SwiftUI app.
+- No concrete Keychain credential provider or integrated desktop/backend process client is implemented. The stdio IPC handler is wired into the backend's explicit `--transport=stdio` startup mode; the native Swift process client is not yet integrated.
 - No actual Capital.com Demo session, broker-originated quote, or candle has been verified from this implementation.
 - No production order, Risk Engine, OMS, Execution Gateway, portfolio reconciliation, or automated strategy path is implemented.
 
