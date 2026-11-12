@@ -20,6 +20,7 @@ export class CapitalComRuntime {
   private client: CapitalComClient | undefined;
   private connectedAt: string | undefined;
   private marketDataStream: ReturnType<typeof createCapitalComMarketDataStream> | undefined;
+  private marketDataEpics: readonly string[] = [];
 
   setCredentials(value: unknown): void {
     if (!isObject(value)
@@ -62,7 +63,9 @@ export class CapitalComRuntime {
     return Object.freeze({
       connected: this.isConnected,
       environment: this.isConnected ? "demo" : null,
-      authenticatedAt: this.connectedAt ?? null
+      authenticatedAt: this.connectedAt ?? null,
+      streaming: this.marketDataStream !== undefined,
+      streamingEpics: this.marketDataEpics
     });
   }
 
@@ -79,11 +82,13 @@ export class CapitalComRuntime {
       onError: () => emit("broker.marketData.error", { message: "Capital.com market data stream reported an error." })
     });
     this.marketDataStream = stream;
+    this.marketDataEpics = [...options.epics];
     try {
       await stream.start(options);
     } catch (error) {
       stream.stop();
       this.marketDataStream = undefined;
+      this.marketDataEpics = [];
       throw error;
     }
   }
@@ -91,6 +96,7 @@ export class CapitalComRuntime {
   stopMarketDataStream(): void {
     this.marketDataStream?.stop();
     this.marketDataStream = undefined;
+    this.marketDataEpics = [];
   }
 
   async searchMarkets(searchTerm: string): Promise<CapitalComMarketSearchResult> {
