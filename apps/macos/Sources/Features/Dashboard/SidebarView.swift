@@ -7,6 +7,8 @@ struct SidebarView: View {
         .dashboard, .tradingWorkspace, .markets, .strategies, .positions, .orders, .portfolio
     ]
 
+    private let brokerSections: [WorkspaceSection] = [.brokers]
+
     private let intelligenceSections: [WorkspaceSection] = [
         .riskManagement, .analytics, .intelligence, .activity
     ]
@@ -19,6 +21,10 @@ struct SidebarView: View {
                 VStack(alignment: .leading, spacing: 0) {
                     sectionLabel("WORKSPACE")
                     sectionList(workspaceSections)
+
+                    sectionLabel("BROKER CONNECTIONS")
+                        .padding(.top, 24)
+                    sectionList(brokerSections)
 
                     sectionLabel("INTELLIGENCE")
                         .padding(.top, 24)
