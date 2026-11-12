@@ -3,7 +3,7 @@
 This register tracks milestone state and prevents completed work from being restarted.
 
 **Last reconciled:** 2026-11-12  
-**Repository baseline:** `main` at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c` when inspected for this work.
+**Repository baseline:** `main` at `28bca625c6a03604e77088c652bd5a2adcd15d34` when ATP-DOM-001 branch was created. PR #8 remains merged at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`.
 
 ## Status definitions
 
