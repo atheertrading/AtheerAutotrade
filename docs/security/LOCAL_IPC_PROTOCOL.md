@@ -1,27 +1,27 @@
-# Local IPC Protocol — Version 1
+# Local IPC Protocol — Version 2
 
 **Product:** ATHEER Trading Pro  
 **Transport:** Parent-owned anonymous standard-I/O pipes  
-**Status:** Initial protocol contract; implementation is limited to handshake and ping.
+**Status:** Source implementation added; build and end-to-end verification pending.
 
 ## 1. Transport contract
 
-- The macOS application launches and supervises one backend child process.
+- The native macOS application launches and supervises the bundled backend child process.
 - Parent → child: UTF-8 NDJSON frames on child standard input.
 - Child → parent: UTF-8 NDJSON frames on child standard output.
 - Child standard error is diagnostics only; never parse it as protocol.
-- One complete JSON object per line, terminated by LF (`\n`). CRLF may be accepted by stripping one terminal CR before parsing.
-- Maximum frame size is 65,536 UTF-8 bytes, excluding line terminator.
+- One complete JSON object per line, terminated by LF. CRLF may be accepted by stripping one terminal CR.
+- Maximum frame size is 65,536 UTF-8 bytes, excluding the line terminator.
 - Empty frames, invalid UTF-8, malformed JSON, invalid envelopes, and oversized frames are protocol violations.
 - Production stdio mode opens no TCP listener and no filesystem socket.
-- No credentials or secrets may be supplied in command-line arguments or environment variables.
+- Credentials and session tokens are never placed in process arguments or environment variables.
 
 ## 2. Request envelope
 
 ```json
 {
   "protocol": "atheer.local-ipc",
-  "version": 1,
+  "version": 2,
   "kind": "request",
   "id": "a valid UUID",
   "method": "system.hello",
@@ -29,33 +29,70 @@
 }
 ```
 
-Required fields:
-- `protocol`: exact string `atheer.local-ipc`.
-- `version`: integer protocol version; currently `1`.
-- `kind`: exact string `request`.
-- `id`: UUID string unique for the lifetime of the IPC session.
-- `method`: allowlisted method name.
-- `payload`: JSON object; arrays and primitive values are not accepted as the top-level payload.
+Required fields are exact. Unknown envelope fields are rejected. The request ID must be a UUID unique for the lifetime of the IPC session.
 
-Unknown envelope fields are rejected to avoid ambiguous interpretation between protocol versions.
+## 3. Authenticated secret channel establishment
 
-## 3. Handshake
+Protocol v2 changes the handshake because broker credentials must be encrypted as data while crossing the local process boundary.
 
-The first request must be `system.hello`. No other method is accepted before successful handshake.
+1. The macOS parent creates a fresh ephemeral Curve25519/X25519 key pair for each child-process session.
+2. The parent sends `clientVersion` and its 32-byte raw X25519 public key (base64) in `system.hello`.
+3. The backend creates its own fresh X25519 key pair and a cryptographically random 32-byte salt.
+4. Both sides derive the same 256-bit key using X25519 shared secret and HKDF-SHA256 with the fixed context string `atheer.local-ipc.capitalcom.credentials.v1`.
+5. The backend returns its 32-byte raw public key and salt in the handshake result.
+6. The parent encrypts the credential JSON using AES-256-GCM with a fresh 96-bit nonce for each encrypted payload.
+7. The backend authenticates and decrypts the payload in memory, validates the credential structure, and retains the credentials only in the backend process memory for the current broker session.
 
-Example:
-
-```json
-{"protocol":"atheer.local-ipc","version":1,"kind":"request","id":"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133","method":"system.hello","payload":{"clientVersion":"0.1.0"}}
-```
-
-Successful response:
+Handshake request:
 
 ```json
-{"protocol":"atheer.local-ipc","version":1,"kind":"response","id":"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133","ok":true,"result":{"protocolVersion":1,"service":"atheerautotrade-backend","capabilities":["system.ping"]}}
+{
+  "protocol": "atheer.local-ipc",
+  "version": 2,
+  "kind": "request",
+  "id": "f2b66c1b-8c25-4c35-ae80-b0d59d7a9133",
+  "method": "system.hello",
+  "payload": {
+    "clientVersion": "0.1.0",
+    "clientPublicKey": "BASE64_X25519_PUBLIC_KEY"
+  }
+}
 ```
 
-The parent must compare the returned protocol version and required capabilities before considering the child ready. A version mismatch is fatal; do not silently downgrade.
+Handshake response includes:
+
+```json
+{
+  "protocolVersion": 2,
+  "service": "atheerautotrade-backend",
+  "capabilities": [
+    "system.ping",
+    "broker.credentials.submit",
+    "broker.connect",
+    "broker.disconnect",
+    "broker.marketSearch",
+    "broker.historicalPrices"
+  ],
+  "keyAgreement": {
+    "algorithm": "X25519-HKDF-SHA256-AES-256-GCM",
+    "publicKey": "BASE64_X25519_PUBLIC_KEY",
+    "salt": "BASE64_RANDOM_SALT"
+  }
+}
+```
+
+Encrypted credential envelope:
+
+```json
+{
+  "algorithm": "AES-256-GCM",
+  "nonce": "BASE64_12_BYTE_NONCE",
+  "ciphertext": "BASE64_CIPHERTEXT",
+  "tag": "BASE64_16_BYTE_AUTHENTICATION_TAG"
+}
+```
+
+The public-key exchange is ephemeral and provides confidentiality/integrity for the credential payload on the inherited pipe. It does not replace code-signature verification of the bundled backend, OS process isolation, Keychain protection at rest, or HTTPS/TLS to Capital.com. JavaScript and Swift runtime memory cannot be claimed to be perfectly zeroized.
 
 ## 4. Response envelope
 
@@ -64,7 +101,7 @@ Success:
 ```json
 {
   "protocol": "atheer.local-ipc",
-  "version": 1,
+  "version": 2,
   "kind": "response",
   "id": "request UUID",
   "ok": true,
@@ -77,9 +114,9 @@ Failure:
 ```json
 {
   "protocol": "atheer.local-ipc",
-  "version": 1,
+  "version": 2,
   "kind": "response",
-  "id": "request UUID or null when it cannot be recovered",
+  "id": "request UUID or null",
   "ok": false,
   "error": {
     "code": "SAFE_MACHINE_CODE",
@@ -88,59 +125,71 @@ Failure:
 }
 ```
 
-Do not include stack traces, file paths, raw provider responses, credentials, tokens, request payloads, or internal exception messages in responses.
+Never include stack traces, file paths, raw provider responses, credentials, session tokens, request payloads, or internal exception messages in responses.
 
-## 5. Initial method allowlist
+## 5. Application method allowlist
 
-| Method | Purpose | Availability |
+| Method | Purpose | State |
 |---|---|---|
-| `system.hello` | Negotiate protocol version and capabilities | Implemented first |
-| `system.ping` | Confirm the IPC process responds | Initial implementation |
-| `system.getReadiness` | Future aggregate backend readiness snapshot | Not yet exposed |
-| `broker.connect` | Future read-only broker session request | Not exposed |
-| `broker.disconnect` | Future broker session shutdown | Not exposed |
-| `broker.credentials.submit` | Future one-shot credential handoff from native Keychain owner | Not exposed; requires separate security review |
+| `system.hello` | Negotiate protocol and establish ephemeral secret channel | Implemented in source |
+| `system.ping` | Confirm local IPC process responds | Implemented in source |
+| `broker.credentials.submit` | Submit one encrypted credential envelope; backend retains it in memory only | Implemented in source |
+| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |
+| `broker.disconnect` | Invalidate session and clear backend credential/session state | Implemented in source |
+| `broker.marketSearch` | Search Capital.com instruments | Implemented in source |
+| `broker.historicalPrices` | Retrieve validated historical OHLC snapshots | Implemented in source |
+| `broker.stream.start` | Start real-time quote/OHLC subscriptions | Not yet exposed through IPC |
+| `broker.stream.stop` | Stop real-time subscriptions | Not yet exposed through IPC |
+| Account, order, position, dealing, and execution methods | No capability is exposed | Prohibited in this milestone |
 
-Unknown methods return `METHOD_NOT_FOUND`. No generic method invocation, shell command, filesystem access, arbitrary URL fetch, or dealing operation is permitted.
+All broker methods are read-only. The backend rejects Live environment selection. No generic method invocation, shell command, filesystem access, arbitrary URL fetch, or dealing operation is permitted.
 
 ## 6. Protocol errors and session termination
 
-Safe error codes:
+Safe error codes include:
 - `INVALID_FRAME`
 - `INVALID_ENVELOPE`
 - `INVALID_REQUEST_ID`
 - `DUPLICATE_REQUEST_ID`
 - `HANDSHAKE_REQUIRED`
+- `KEY_AGREEMENT_FAILED`
 - `PROTOCOL_VERSION_UNSUPPORTED`
 - `METHOD_NOT_FOUND`
 - `INVALID_PAYLOAD`
 - `FRAME_TOO_LARGE`
 - `SESSION_REQUEST_LIMIT`
+- `CREDENTIALS_REQUIRED`
+- `BROKER_NOT_CONNECTED`
+- `BROKER_API_ERROR`
+- `BROKER_OPERATION_FAILED`
 - `INTERNAL_ERROR`
 
-Invalid UTF-8, oversized frame, unsupported protocol version, invalid envelope, duplicate ID, or session request-limit breach terminates the IPC session after a bounded error response where possible. An unknown application method is a request-level error and does not by itself terminate the session.
+Invalid UTF-8, oversized frames, unsupported protocol versions, invalid envelopes, duplicate IDs, or session request-limit breaches terminate the IPC session. An unknown application method is a request-level error and does not by itself terminate the session.
 
-The initial implementation limits a session to 4,096 unique requests. The parent should use a request timeout and terminate a child that stops responding. No automatic replay is permitted after timeout or process restart.
+The initial implementation limits a session to 4,096 unique requests. The parent uses request timeouts and terminates a child that stops responding. No automatic replay is permitted after timeout or process restart.
 
-## 7. Initial security rules
+## 7. Security rules
 
-1. Stdout is reserved exclusively for protocol frames.
-2. Diagnostics go to stderr and are sanitized.
-3. Never log serialized request/response frames or payloads.
-4. Never place secrets in the process environment, command line, launch arguments, or files.
-5. The initial method set exposes no credentials, account, broker, risk, order, or execution capability.
-6. Parent owns process creation, pipe endpoints, shutdown, and restart.
-7. A restarted child is a new session and must complete handshake again.
-8. Any future credential-transfer method must be narrowly scoped, one-shot, memory-only, redacted, and separately reviewed; it must not be treated as an ordinary diagnostic request.
+1. Stdout is protocol-only; diagnostics use sanitized stderr.
+2. Never log serialized request/response frames or payloads.
+3. Never place secrets in process environment, command line, launch arguments, files, or telemetry.
+4. Keychain remains the source of credentials at rest; the native app owns Keychain access.
+5. Encrypt credentials in transit over IPC using the ephemeral v2 secret channel.
+6. Capital.com REST uses HTTPS/TLS; CST and X-SECURITY-TOKEN remain backend-process memory only.
+7. The backend process is bundled and launched from a fixed app-bundle path; do not use arbitrary PATH resolution.
+8. A restarted child is a new session and must complete a fresh key agreement and handshake.
+9. No broker account mutation, dealing, risk bypass, order, or execution capability is exposed.
+10. Demo and Live environments remain separate; Live is disabled.
 
 ## 8. Versioning policy
 
-- Additive optional response fields may be introduced only if old clients safely ignore them.
-- New required request fields, changed semantics, new framing, or incompatible errors require a protocol version increment.
-- Parent and child must fail closed on unsupported versions.
-- Keep capability negotiation explicit. A client must not call a capability absent from the handshake response.
+Incompatible handshake, framing, required-field, method, or error-semantic changes require a protocol version increment. Parent and child fail closed on unsupported versions. Capability negotiation is mandatory; a client must not call a method absent from the handshake response.
 
-## 9. References
+## 9. Verification status
+
+The implementation source is present in the repository branch, but the backend TypeScript build/tests, Xcode build, packaged runtime launch, X25519/AES-GCM cross-language interoperability, and actual Capital.com Demo authentication have not yet been verified on the target environment.
+
+## 10. References
 
 - [ADR-0005 — Secure macOS IPC](../decisions/ADR-0005-SECURE-MACOS-IPC.md)
 - [ADR-0004 — Production Architecture Baseline](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
