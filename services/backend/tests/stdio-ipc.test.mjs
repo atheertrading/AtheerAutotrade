@@ -18,7 +18,7 @@ function request(id, method, payload = {}) {
   const requestPayload = method === "system.hello" ? { ...payload, clientPublicKey } : payload;
   return JSON.stringify({
     protocol,
-    version: 1,
+    version: 2,
     kind: "request",
     id,
     method,
@@ -173,7 +173,7 @@ test("production stdio transport serves child-process requests with protocol-onl
   assert.equal(diagnostics, "");
   const responses = output.split("\n").filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(responses.length, 2);
-  assert.equal(responses[0].result.protocolVersion, 1);
+  assert.equal(responses[0].result.protocolVersion, 2);
   assert.deepEqual(responses[1].result, { status: "alive" });
 });
 
