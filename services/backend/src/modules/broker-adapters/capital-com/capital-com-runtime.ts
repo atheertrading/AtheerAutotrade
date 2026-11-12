@@ -55,7 +55,7 @@ export class CapitalComRuntime {
       connected: true,
       environment,
       authenticatedAt: this.connectedAt,
-      capabilities: ["broker.session", "broker.marketSearch", "broker.historicalPrices"]
+      capabilities: ["broker.session", "broker.marketSearch", "broker.historicalPrices", "broker.marketDataStream"]
     });
   }
 
