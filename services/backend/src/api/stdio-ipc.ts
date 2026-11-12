@@ -2,7 +2,7 @@ import { CapitalComRuntime } from "../modules/broker-adapters/capital-com/capita
 import { IpcSecretChannel } from "../security/ipc-secret-channel.js";
 
 export const LOCAL_IPC_PROTOCOL = "atheer.local-ipc";
-export const LOCAL_IPC_VERSION = 1;
+export const LOCAL_IPC_VERSION = 2;
 export const LOCAL_IPC_MAX_FRAME_BYTES = 65_536;
 export const LOCAL_IPC_MAX_SESSION_REQUESTS = 4_096;
 
