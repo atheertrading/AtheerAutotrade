@@ -50,6 +50,7 @@ chmod 755 "${NODE_DEST}"
 rm -rf "${BACKEND_DEST}/dist"
 mkdir -p "${BACKEND_DEST}/dist"
 cp -R "${BACKEND_ROOT}/dist/." "${BACKEND_DEST}/dist/"
+cp "${BACKEND_ROOT}/package.json" "${BACKEND_DEST}/package.json"
 
 if [[ "${CODE_SIGNING_ALLOWED:-NO}" == "YES" ]]; then
   SIGNING_IDENTITY="${EXPANDED_CODE_SIGN_IDENTITY:--}"
