@@ -140,3 +140,27 @@ test("missing session tokens fail closed", async () => {
   await assert.rejects(client.createSession(), /omitted CST/);
   assert.equal(client.isAuthenticated, false);
 });
+
+test("historical prices reject malformed OHLC bounds", async () => {
+  const client = new CapitalComClient("demo", credentialsProvider(), async (url, init) => {
+    if (init.method === "POST") {
+      return response({}, { CST: "cst-test", "X-SECURITY-TOKEN": "security-test" });
+    }
+    return response({
+      prices: [{
+        snapshotTime: "2026-11-12T10:01:00",
+        snapshotTimeUTC: "2026-11-12T08:01:00",
+        openPrice: { bid: 100, ask: 101 },
+        closePrice: { bid: 102, ask: 103 },
+        highPrice: { bid: 99, ask: 98 },
+        lowPrice: { bid: 98, ask: 99 }
+      }]
+    });
+  });
+
+  await client.createSession();
+  await assert.rejects(
+    client.getHistoricalPrices("OIL_CRUDE"),
+    /invalid bid OHLC bounds/
+  );
+});
