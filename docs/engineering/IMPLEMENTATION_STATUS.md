@@ -2,59 +2,54 @@
 
 ## Implemented
 
+### macOS application
 - Native SwiftUI macOS application target and dark-first navigation shell.
-- Product identity and presentation-only destinations for Dashboard, Markets, Strategies, Positions, Orders, Portfolio, Risk Management, Analytics, AI Intelligence, Activity, and Settings.
-- Dashboard labels unavailable services and does not display fabricated market, portfolio, or activity data.
+- Presentation-only destinations for Dashboard, Markets, Strategies, Positions, Orders, Portfolio, Risk Management, Analytics, AI Intelligence, Activity, and Settings.
+- Trading Workspace with its previously merged panel management, resizing, and drag/drop work.
+- Apple Development signing configured in the user's local Xcode environment. User confirmed `Build Succeeded` on 2026-11-12. Codex reported valid signatures for the app and embedded XCTest bundle.
+
+### Backend foundation
 - Node.js built-in HTTP backend with `GET /health`, structured 404 handling, environment configuration, and graceful shutdown.
-- Node.js built-in automated route-contract tests.
-- Architecture, module-boundary, security, and initial decision documentation.
+- Node.js built-in route-contract tests.
+- Trading Domain now contains a provider-neutral `Instrument` model on branch `feature/trading-domain-instrument-models`. It validates instrument identity, asset class, status, optional currency codes, and optional contract increments/minimum quantity.
+- Contract increments and minimum quantity are represented as exact decimal strings, not JavaScript floating-point numbers.
+- Missing broker-provided specifications remain absent; the model does not invent defaults.
+- Instrument unit tests have been authored but are pending execution.
 
 ## Not implemented
 
-- Broker integration, credentials, account data, market data, portfolio state, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, authentication, or LIVE trading.
-
-## Planned
-
-- Incremental implementation of service contracts and domain modules, with validation and security controls before integrations.
-- CI checks and Apple Silicon runtime validation.
+- Broker integration or credentials.
+- Live market data or quote ingestion.
+- Account data, portfolio state, or persistence.
+- Strategy runtime.
+- Risk evaluation.
+- Order management or execution gateway.
+- AI services.
+- Authentication and authorization.
+- LIVE trading.
 
 ## Verification results
 
-- Backend `npm ci --offline --cache .npm-cache` completed using the pre-existing local npm cache; no registry download was needed.
+### Previously recorded foundation verification
 - Backend TypeScript compilation passed with TypeScript 7.0.2 on Node.js 24.22.0.
-- Backend `npm test` passed: 2 route-contract tests, 0 failures. Tests invoke the route handler without opening a socket because sandbox network binding is denied.
-- Swift sources passed `swiftc -typecheck` against macOS SDK 13.3 for both `x86_64-apple-macosx13.0` and `arm64-apple-macosx13.0`.
-- `plutil -lint` accepted the Xcode project file and `xmllint --noout` accepted the shared scheme XML.
-- Git initialization was attempted after confirming there was no repository, but the environment denied writing `.git`; the workspace policy exposes `.git` as read-only. No repository or commit was created.
-- Full Xcode build was attempted but `xcodebuild` exited with signal 132 after CoreSimulator reported an invalid service connection and Xcode was denied access to its user log path. No successful `.app` build is claimed.
-- Backend service startup was attempted but the sandbox denied binding to `127.0.0.1:3000` with `EPERM`. No live HTTP request was verified.
+- Backend `npm test` passed previously: 2 route-contract tests, 0 failures.
+- Swift sources passed `swiftc -typecheck` against macOS SDK 13.3 for x86_64 and arm64 targets; this was type-checking, not arm64 runtime validation.
 
-## Blocked
+### 2026-11-12 local Xcode signing recovery
+- Codex reported that the test target's Xcode `TargetAttributes` lacked team/provisioning metadata despite its build settings resolving the intended team.
+- Codex reported correcting `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` for the XCTest target.
+- Codex reported Debug build succeeded, four XCTest tests passed with zero failures, and `codesign --verify` passed for the app and embedded XCTest bundle.
+- The user then confirmed Xcode displayed `Build Succeeded`.
+- Verification destination: macOS x86_64. Apple Silicon arm64 runtime remains unverified.
+- The local signing correction has not been confirmed committed/pushed to GitHub. Do not overwrite the local project file with the repository version.
 
-- Full Xcode build and live HTTP verification are blocked by the current execution environment's CoreSimulator/log-path and local socket restrictions, respectively. Re-run these checks in an environment that permits Xcode build services and loopback socket binding.
-- Provider integrations remain out of scope pending future design and authorization.
+### ATP-DOM-001 current branch verification
+- Instrument domain model and eight Node.js test cases are authored.
+- No backend compile or test execution has yet been performed for this branch. Do not claim this milestone is verified until `npm test` passes.
 
-## Requires future validation
+## Known limitations and future validation
 
-- Universal arm64 app execution on Apple Silicon hardware or CI.
-- Distribution, signing, notarization, deployment, threat modeling, and service authentication before any external exposure.
-- Architecture and operational controls before any trading-related capability.
-
-
-## Latest local Xcode configuration activity — 2026-11-12
-
-A user-provided Codex transcript reports local (not yet confirmed committed/pushed) changes to:
-- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj`: automatic Apple Development signing and related configuration.
-- `apps/macos/AtheerAutotrade.entitlements`: App Sandbox plus outgoing network client entitlement.
-- `apps/macos/AtheerAutotrade.xcodeproj/xcshareddata/xcschemes/AtheerAutotrade.xcscheme`: existing XCTest target added to the shared Test action.
-
-Codex reported no Swift source or workspace feature changes.
-
-### Verification reported in the transcript
-
-- Xcode project resolution/effective settings inspection: reported successful.
-- Normal Debug build: failed at code signing because Xcode had no configured Developer account/Team and the machine had zero signing identities.
-- XCTest: command reported `TEST SUCCEEDED`, 4 passed, 0 failed, using a command-line-only signing override.
-- No signed app, embedded signed entitlements, Developer Portal capability, or runtime network verification was established.
-
-These are transcript-reported results, not independently inspected artifacts. The local configuration changes remain pending exact diff review before acceptance or publication.
+- Validate the new instrument model and tests on the user's Node.js 24 / TypeScript 7.0.2 environment.
+- Validate native app runtime on Apple Silicon hardware or CI.
+- Distribution, notarization, external API exposure, threat modeling, service authentication, and operational controls require separate design and validation.
+- Provider integrations remain out of scope until the relevant contracts and security controls are established.
