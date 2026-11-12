@@ -110,14 +110,10 @@ flowchart TB
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Draft
-    Draft --> Submitted: user or strategy submits intent
-    Draft --> Cancelled: discard
-    Submitted --> Validating: schema and authorization checks
-    Validating --> Rejected: invalid or unauthorized
-    Validating --> RiskPending: validation passed
-    RiskPending --> RiskRejected: risk rule failed
-    RiskPending --> Approved: risk decision approved
+    [*] --> Submitted
+    Submitted --> Validating: user or strategy submits intent
+    Validating --> Rejected: invalid, unauthorized, or risk rule failed
+    Validating --> Approved: validation and risk decision passed
     Approved --> Queued: durable dispatch record
     Queued --> Submitting: gateway begins broker request
     Submitting --> Acknowledged: broker confirms acceptance
@@ -137,13 +133,12 @@ stateDiagram-v2
     CancelPending --> PartiallyFilled: fill races with cancel
     CancelPending --> Filled: final fill races with cancel
     Rejected --> [*]
-    RiskRejected --> [*]
     Cancelled --> [*]
     Filled --> [*]
     ManualReview --> Reconciling: controlled retry of inquiry only
 ```
 
-The 14 named operational states are: Draft, Submitted, Validating, Rejected, RiskPending, RiskRejected, Approved, Queued, Submitting, SubmissionUnknown, Reconciling, Acknowledged, PartiallyFilled, Filled, CancelPending, Cancelled, and ManualReview. This list currently contains **17** named states when terminal and uncertainty states are counted. The historical suite title referred to a 14-state OMS model, but its exact original state enumeration was not recovered. This reconstructed model deliberately makes the additional uncertainty and reconciliation states explicit; it must not be mislabeled as the original 14-state definition.
+This reconstructed state machine contains **14 named states**: Submitted, Validating, Rejected, Approved, Queued, Submitting, SubmissionUnknown, Reconciling, Acknowledged, PartiallyFilled, Filled, CancelPending, Cancelled, and ManualReview. The historical ATP-GAI-02 title referred to a 14-state OMS model, but the original verbatim state enumeration was not recovered. This is a newly reconstructed 14-state proposal, not a claim that it reproduces the earlier source exactly.
 
 ## D03 — Centralized Risk Validation
 
