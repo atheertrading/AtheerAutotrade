@@ -96,6 +96,7 @@ Current implementation branch: `fix/atp-cap-credentials-restore` (ATP-CAP-UI-002
 ### ATP-CAP-UI-002 — Credential restoration and Keychain verification (PR #18; pending)
 
 - Add Keychain `load()` with explicit missing-item, malformed-data, and OSStatus handling.
+- Retain the native macOS Keychain accessibility policy; do not apply iOS-style accessibility attributes without opting into the Data Protection Keychain and its entitlement requirements.
 - Verify the stored credential payload after both Keychain insert and update.
 - Restore saved values when the broker screen appears; do not clear fields after Save.
 - Clear form state only after explicit credential removal.
