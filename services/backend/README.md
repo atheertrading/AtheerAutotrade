@@ -8,7 +8,7 @@ This Node.js/TypeScript service is the backend modular monolith for ATHEER Tradi
 
 The macOS application will launch and supervise the backend as a child process. Parent-to-child requests use standard input; child-to-parent responses use standard output. Standard output is reserved exclusively for versioned NDJSON protocol frames. Standard error is for sanitized diagnostics only.
 
-The protocol handler currently exists at `src/api/stdio-ipc.ts`. It implements:
+The protocol handler at `src/api/stdio-ipc.ts` is wired into `server.ts` through the explicit `--transport=stdio` startup mode. It implements:
 - protocol version 1 handshake (`system.hello`);
 - process liveness ping (`system.ping`);
 - 65,536-byte maximum frame size;
