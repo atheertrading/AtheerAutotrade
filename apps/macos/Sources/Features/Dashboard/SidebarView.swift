@@ -4,7 +4,7 @@ struct SidebarView: View {
     @Binding var selection: WorkspaceSection
 
     private let workspaceSections: [WorkspaceSection] = [
-        .dashboard, .markets, .strategies, .positions, .orders, .portfolio
+        .dashboard, .tradingWorkspace, .markets, .strategies, .positions, .orders, .portfolio
     ]
 
     private let intelligenceSections: [WorkspaceSection] = [
