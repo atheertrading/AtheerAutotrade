@@ -38,7 +38,7 @@
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — source implementation on active branch; Node/Xcode/crypto interoperability/real Demo verification pending |
+| ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — Node 24 CI passed (31/31); Xcode/crypto interoperability/packaged runtime/real Demo verification pending |
 
 Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
 
@@ -70,7 +70,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift — active Connect/Disconnect state, authenticated market search, and layered data-protection explanation.
 - apps/macos/Scripts/package-backend.sh and Xcode project build phase — Node.js 24 universal runtime and compiled backend packaging into fixed app-bundle paths.
 - Added backend Node 24 CI workflow and encrypted-channel interoperability test source.
-- No build, CI, target-Mac runtime, cross-language crypto, or real Capital.com Demo result has yet been confirmed for this branch.
+- Node 24 CI run 43332525299 passed TypeScript compilation and 31/31 backend tests. Xcode, CryptoKit/Node interoperability, packaged runtime, and real Capital.com Demo results remain pending.
 
 ### Remaining scope and safety boundaries
 
