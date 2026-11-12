@@ -131,3 +131,16 @@ The implementation is based on the official Capital.com Public API contracts. It
 6. Only then consider the broker-connectivity milestone operationally verified.
 
 No local stash changes have been applied or discarded. The user's local repository synchronization remains pending.
+
+
+## 10. Architecture diagram preservation — 2026-11-12
+
+### ATA-DOC-001 — Mermaid architecture suite
+
+- Recovered prior conversation references to the ATP-GAI-02 / ATP-GAI-02-R1.1 ten-diagram suite defined on 2026-11-11: system architecture, OMS lifecycle, centralized risk, broker reconnection, market-data freshness, strategy execution, portfolio reconciliation, security, telemetry, and deployment/failure isolation.
+- The conversation archive returned titles and scope, but not the original Mermaid source blocks. An additional retrieval confirmed that the historical R1 material included ASCII System A/System B boundaries, not verbatim Mermaid for the ten diagrams.
+- A reconstructed and AtheerAutotrade-adapted catalogue was committed on branch `docs/atp-mermaid-architecture-suite` at `f70493bc05eaa55069d42ec85492b70c621bcc53`; subsequent documentation commits are recorded on that branch.
+- Canonical document: `docs/architecture/diagrams/README.md` (ATA-ARCH-DIAG-001). The system overview links to it.
+- The inherited System A Engineering Workbench / System B ATHEER Production separation is recorded as a design-lineage principle only, not as a claim about the current AtheerAutotrade deployment.
+- These are target architecture diagrams, not implementation evidence. Mermaid rendering review and PR review remain pending.
+- Do not describe the new source as verbatim recovery. If original source files or archive are later located, compare them and preserve provenance.

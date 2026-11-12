@@ -18,4 +18,4 @@ No order, risk-evaluation, account-mutation, or execution flow is implemented.
 
 The desktop target is macOS 13.0 and is configured for Intel x86_64 and Apple Silicon arm64. The backend uses Node.js built-in HTTP on loopback by default. The health response indicates process health only. It does not imply broker connectivity, trading readiness, or LIVE authorization.
 
-See [Module Boundaries](MODULE_BOUNDARIES.md), [Security Baseline](../security/SECURITY_BASELINE.md), and [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md).
+See [Module Boundaries](MODULE_BOUNDARIES.md), [Architecture Diagram Catalogue](diagrams/README.md), [Security Baseline](../security/SECURITY_BASELINE.md), and [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md).

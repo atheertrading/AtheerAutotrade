@@ -98,3 +98,20 @@ Review and compile ATP-CAP-001 in an isolated worktree. Correct only evidenced d
 - 2026-11-12: PR #11 merged as `fa68db5`; ATP-DOM-001 is now DONE — MERGED AND VERIFIED.
 - 2026-11-12: Started ATP-CAP-001 on `feature/atp-cap-001-capital-market-connectivity`; added read-only REST session/market history client, quote/OHLC WebSocket stream, and mock-based tests. No build or live account verification is claimed.
 - 2026-11-12: Recorded local changes in `stash@{0}`; do not alter the stash until local synchronization is planned.
+
+
+## Architecture documentation preservation
+
+| ID | Milestone | Scope | Status |
+|---|---|---|---|
+| ATA-DOC-001 | Preserve and adapt the prior Mermaid architecture suite | Add ten source-controlled Mermaid diagrams, provenance notes, implementation-status caveats, and links from the system overview | IN PROGRESS — committed on documentation branch; PR review and Mermaid rendering validation pending |
+
+Branch: `docs/atp-mermaid-architecture-suite`.
+
+Acceptance criteria:
+1. Ten Mermaid diagrams are present as editable Markdown source.
+2. Provenance distinguishes recovered titles/scope from reconstructed Mermaid source; no false claim of verbatim recovery.
+3. Diagrams align with AtheerAutotrade's current architecture and safety boundaries.
+4. Documentation clearly distinguishes target architecture from implemented/verified behavior.
+5. The system overview, implementation status, task register, and continuity record link or record the catalogue.
+6. Mermaid rendering and technical review are completed before marking the documentation milestone verified.
