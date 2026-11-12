@@ -29,7 +29,7 @@ The adapter contains:
 - WebSocket quote and OHLC stream components with keepalive, bounded reconnect, and re-subscription;
 - strict response and market-data payload validation.
 
-The current runtime composes the REST client with the encrypted IPC broker lifecycle. WebSocket streaming exists as adapter source but is not yet surfaced through IPC or consumed by the macOS UI. Market-data freshness/gap detection is not yet integrated. Account/position endpoints, orders, dealing, and execution are deliberately absent from the current IPC allowlist.
+The current runtime composes the REST client with the encrypted IPC broker lifecycle. WebSocket streaming is surfaced through IPC v2 event frames and the macOS broker screen can start/stop a selected epic's quote and one-minute OHLC subscriptions. Actual broker-originated event delivery is not yet verified. Market-data freshness/gap detection is not yet integrated. Account/position endpoints, orders, dealing, and execution are deliberately absent from the current IPC allowlist.
 
 Do not treat source implementation, a successful process handshake, or an IPC ping as proof of a real broker session. Actual Capital.com Demo authentication and broker-originated market data remain unverified until tested against a real Demo account.
 
