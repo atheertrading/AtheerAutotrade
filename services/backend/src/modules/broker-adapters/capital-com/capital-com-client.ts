@@ -167,8 +167,14 @@ export class CapitalComClient {
     let payload: SessionResponse = {};
     try {
       const parsed: unknown = await response.json();
-      if (isRecord(parsed) && typeof parsed.streamingHost === "string") {
-        payload = { streamingHost: parsed.streamingHost };
+      if (isRecord(parsed)) {
+        const streamingHost =
+          typeof parsed.streamingHost === "string"
+            ? parsed.streamingHost
+            : typeof parsed.streamEndpoint === "string"
+              ? parsed.streamEndpoint
+              : undefined;
+        if (streamingHost) payload = { streamingHost };
       }
     } catch {
       // Session tokens are returned in response headers; an empty body is valid.
