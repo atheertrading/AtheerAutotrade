@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-11-13  
 **Latest observed main baseline:** `f13ce0e3f8157a4901c99b8d928f2540cd213adc`  
-**Active branch:** `security/atp-sec-ipc-001-swift-supervisor`
+**Active branch:** `fix/atp-cap-credentials-restore`
 
 ## Status definitions
 
@@ -30,7 +30,7 @@
 | ATP-DOM-001 | Provider-neutral instrument domain model | PR #11 squash-merged as `fa68db5`; user reported TypeScript build and 10 backend tests passed | DONE — MERGED AND USER-VERIFIED |
 | ATA-DOC-001 | Preserve adapted Mermaid architecture catalogue | PR #13 merged as `58766938`; ten editable diagrams with provenance and target-architecture caveats | DONE — MERGED |
 | ATP-ARCH-REBASE-001 | Establish ATHEER Trading Pro product identity and modular-monolith architecture baseline | ADR-0004 and aligned architecture/security/engineering docs; PR #14 squash-merged as `9445a749d78c63030e9125041a6103dca0eabafc` | DONE — MERGED; no runtime build required |
-| ATP-SEC-IPC-001-B1B2 | Backend stdio protocol and production transport mode | PR #15 merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`; backend build/tests remain unverified | DONE — MERGED; PENDING VERIFICATION |
+| ATP-SEC-IPC-001-B1B2 | Backend stdio protocol and production transport mode | PR #15 merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`; backend build/tests remain unverified | DONE — MERGED; PENDING VERIFICATION |\n| ATP-CAP-UI-001 | Capital.com broker screen and Keychain credential entry | PR #17 merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`; Xcode/UI/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
 
 ## Active milestone
 
@@ -42,7 +42,7 @@ Merged backend foundation: PR #15, commit `8cb8734624957c8bfb367ee8bfe4a2bbb51ce
 
 Native Swift IPC supervisor: PR #16, merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 
-Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now carries ATP-CAP-UI-001 changes).
+Current implementation branch: `fix/atp-cap-credentials-restore` (ATP-CAP-UI-002 correction only). PR #17 merged the original Capital.com UI into main.
 
 ### Batch 1 changes on active branch
 
@@ -70,13 +70,13 @@ Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now 
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — expected signed runtime/backend layout and packaging gates.
 - No Xcode build/test, Node build/test, runtime packaging, or child-process execution has been performed for this batch. No Keychain provider, credential handoff, or Capital.com credential UI has been added.
 
-### ATP-CAP-UI-001 — Capital.com broker screen (implemented on active branch; verification pending)
+### ATP-CAP-UI-001 — Capital.com broker screen (merged in PR #17; verification pending)
 
 - `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — Capital.com screen with broker status, DEMO environment, LIVE lock state, API key/identifier/password fields, save/remove controls, restoration of saved credentials on appearance, retention of values after Save, connection readiness, and disabled Connect control until IPC credential handoff is verified.
 - `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; supports typed `load()`, device-only unlocked accessibility for new items, and read-back verification after both insert and update; does not persist secrets in preferences or files.
 - `WorkspaceSection.swift`, `SidebarView.swift`, and `ApplicationShellView.swift` — expose the screen in the application sidebar under **BROKER CONNECTIONS → Brokers**.
 - `project.pbxproj` — registers both Swift files and their groups in the app target.
-- This is an active-branch implementation only; not merged into `main`, not built, and not run on the target Mac. Credential transfer and actual broker authentication remain disabled.
+- The UI baseline is merged into `main` via PR #17. It has not been built or run on the target Mac in this verification cycle. Credential transfer and actual broker authentication remain disabled.
 
 ### ATP-SEC-IPC-001 acceptance criteria
 
@@ -90,6 +90,14 @@ Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now 
 8. No broker, account, order, or execution capability is exposed until subsequent milestones.
 9. Backend tests and macOS build/runtime tests pass on the supported development Mac and toolchain.
 10. No credentials are committed, logged, or passed through process arguments/environment; LIVE remains disabled.
+
+### ATP-CAP-UI-002 — Credential restoration and Keychain verification (PR #18; pending)
+
+- Add Keychain `load()` with explicit missing-item, malformed-data, and OSStatus handling.
+- Verify the stored credential payload after both Keychain insert and update.
+- Restore saved values when the broker screen appears; do not clear fields after Save.
+- Clear form state only after explicit credential removal.
+- PR #18 is draft. Source has been read back from GitHub; Xcode build and Keychain runtime tests remain pending on the target Mac.
 
 ## Planned implementation sequence after IPC
 
@@ -124,11 +132,11 @@ Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now 
 
 ## Current next action
 
-First compile and verify the Capital.com broker screen and Keychain store on the user's actual Mac. Then finish signed runtime/backend packaging, packaged IPC verification, and the one-shot credential-transfer contract. Enable broker connection only after those gates pass.
+First compile and verify PR #18's Keychain load/save/restore/delete paths and the Capital.com screen on the user's actual Mac. Then finish signed runtime/backend packaging, packaged IPC verification, and the one-shot credential-transfer contract. Enable broker connection only after those gates pass.
 
 ## Change log
 
-- 2026-11-13: Corrected ATP-CAP-UI-001 credential persistence: Keychain read-back/load, insert/update verification, saved-field restoration, and no longer clearing fields after Save. Xcode verification remains pending.
+- 2026-11-13: PR #17 merged ATP-CAP-UI-001 as `9297f28fd2079dc5801cd89baf2b4723ed625a75`. Opened draft PR #18 for ATP-CAP-UI-002: Keychain read-back/load, insert/update verification, saved-field restoration, and retaining fields after Save. Xcode verification remains pending.
 
 - 2026-11-12: PR #14 merged as `9445a749d78c63030e9125041a6103dca0eabafc`; ATP-ARCH-REBASE-001 completed.
 - 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
