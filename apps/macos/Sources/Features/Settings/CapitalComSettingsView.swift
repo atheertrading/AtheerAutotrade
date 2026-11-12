@@ -147,7 +147,6 @@ private final class CapitalComConnectionModel: ObservableObject {
         Task {
             defer { isTesting = false }
             do {
-                try CapitalComKeychain.save(credentials, environment: selectedEnvironment)
                 var request = URLRequest(
                     url: selectedEnvironment.baseURL.appendingPathComponent("api/v1/session"),
                     timeoutInterval: 15
@@ -171,8 +170,9 @@ private final class CapitalComConnectionModel: ObservableObject {
                     throw ConnectionError.authenticationFailed(http.statusCode)
                 }
 
+                try CapitalComKeychain.save(credentials, environment: selectedEnvironment)
                 connectionState = "REST connected"
-                connectionMessage = "Capital.com accepted the credentials and returned an authenticated session. Session tokens were not persisted."
+                connectionMessage = "Capital.com accepted the credentials and returned an authenticated session. Credentials were saved to Keychain; session tokens were not persisted."
                 lastTest = Date()
             } catch {
                 connectionState = "Connection failed"
@@ -263,8 +263,8 @@ struct CapitalComSettingsView: View {
     private var credentialsCard: some View {
         VStack(alignment: .leading, spacing: 14) {
             cardTitle("API credentials", subtitle: "Credentials are saved in macOS Keychain, not in application preferences or source files.")
-            credentialField("Account identifier", text: $model.identifier)
-            credentialField("API key", text: $model.apiKey)
+            credentialField("Account identifier", text: $model.identifier, secure: false)
+            credentialField("API key", text: $model.apiKey, secure: true)
             VStack(alignment: .leading, spacing: 6) {
                 Text("API key password")
                     .font(.system(size: 11, weight: .medium))
@@ -343,14 +343,18 @@ struct CapitalComSettingsView: View {
         }
     }
 
-    private func credentialField(_ title: String, text: Binding<String>) -> some View {
+    private func credentialField(_ title: String, text: Binding<String>, secure: Bool) -> some View {
         VStack(alignment: .leading, spacing: 6) {
             Text(title)
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(AtheerColors.textSecondary)
-            TextField(title, text: text)
-                .textFieldStyle(.roundedBorder)
-                .textContentType(.username)
+            if secure {
+                SecureField(title, text: text)
+                    .textFieldStyle(.roundedBorder)
+            } else {
+                TextField(title, text: text)
+                    .textFieldStyle(.roundedBorder)
+            }
         }
     }
 }
