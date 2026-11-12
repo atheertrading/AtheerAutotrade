@@ -512,7 +512,7 @@ struct CapitalComBrokerView: View {
             hasSavedCredentials = true
         } catch {
             hasSavedCredentials = false
-            feedback = .error("Unable to read saved Keychain credentials: \\(error.localizedDescription)")
+            feedback = .error("Unable to read saved Keychain credentials: \(error.localizedDescription)")
         }
     }
 
