@@ -68,3 +68,12 @@ No new dependencies were added. The adapter exposes no order, position, dealing,
 - Historical snapshots and streaming OHLC events must be reconciled by timestamp without fabricating missing observations.
 - Distribution, notarization, external API exposure, threat modeling, and operational controls require separate design and validation.
 - Validate native app runtime on Apple Silicon hardware or CI before claiming arm64 runtime support.
+
+
+## Architecture documentation — Mermaid suite
+
+- Added `docs/architecture/diagrams/README.md` (ATA-ARCH-DIAG-001), containing ten Mermaid architecture and lifecycle diagrams adapted for AtheerAutotrade from the recovered ATP-GAI-02 diagram catalogue.
+- The prior conversation history preserved the ten titles and scopes, but not the original Mermaid source blocks. The committed diagrams are explicitly labelled **reconstructed and adapted**, not verbatim recovery.
+- Diagrams describe target architecture and control flows; they are not evidence that the depicted modules are implemented or operational.
+- The OMS diagram is a reconstructed 14-state proposal with explicit unknown-submission and reconciliation handling. Its exact state list is not asserted to match the unrecovered original.
+- No runtime code or dependencies changed. Mermaid rendering and technical review remain pending.
