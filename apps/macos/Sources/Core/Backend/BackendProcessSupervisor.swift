@@ -65,19 +65,7 @@ final class BackendProcessSupervisor {
 
     func stop() {
         queue.async {
-            self.isStopping = true
-            self.isReady = false
-            self.failAll(with: LocalIPCError.processTerminated)
-            self.detachHandlers()
-
-            if let child = self.process, child.isRunning {
-                child.terminate()
-            }
-
-            self.closePipes()
-            self.process = nil
-            self.decoder.reset()
-            self.isStopping = false
+            self.terminateChild(with: LocalIPCError.processTerminated)
         }
     }
 
@@ -259,40 +247,47 @@ final class BackendProcessSupervisor {
 
     private func handleOutputClosed() {
         guard !isStopping else { return }
-        isReady = false
-        failAll(with: LocalIPCError.processTerminated)
-        finishStart(.failure(LocalIPCError.processTerminated))
-        if let child = process, child.isRunning {
-            child.terminate()
-        }
-        detachHandlers()
-        closePipes()
-        process = nil
-        decoder.reset()
+        terminateChild(with: LocalIPCError.processTerminated)
     }
 
     private func handleTermination(status: Int32) {
-        guard !isStopping else { return }
+        isStopping = true
         isReady = false
         failAll(with: LocalIPCError.processTerminated)
-        finishStart(.failure(LocalIPCError.processTerminated))
         detachHandlers()
         closePipes()
         process = nil
         decoder.reset()
+        isStopping = false
+        finishStart(.failure(LocalIPCError.processTerminated))
         _ = status
     }
 
     private func stopAfterProtocolFailure() {
+        terminateChild(with: LocalIPCError.invalidResponse)
+    }
+
+    /// Keeps the process reference until termination is observed, preventing a
+    /// caller from launching a second child while the previous child is exiting.
+    private func terminateChild(with error: Error) {
+        guard !isStopping else { return }
+        isStopping = true
         isReady = false
-        failAll(with: LocalIPCError.invalidResponse)
-        detachHandlers()
+        failAll(with: error)
+        outputPipe?.fileHandleForReading.readabilityHandler = nil
+        errorPipe?.fileHandleForReading.readabilityHandler = nil
+
         if let child = process, child.isRunning {
             child.terminate()
+            return
         }
+
+        detachHandlers()
         closePipes()
         process = nil
         decoder.reset()
+        isStopping = false
+        finishStart(.failure(error))
     }
 
     private func finishStart(_ result: Result<Void, Error>) {
