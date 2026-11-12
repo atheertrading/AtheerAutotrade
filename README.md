@@ -1,23 +1,30 @@
-# AtheerAutotrade
+# ATHEER Trading Pro
 
-AtheerAutotrade is a new, independent foundation for a multi-asset trading platform. This repository currently contains a native macOS application shell and an independent Node.js/TypeScript backend foundation.
+**ATHEER Trading Pro** is a professional, production-oriented automated multi-asset trading system. This repository currently uses **AtheerAutotrade** as a temporary technical project identifier; the repository and Xcode identifiers will remain unchanged until a controlled migration plan is approved.
 
-## Status
+## Current engineering status
 
-The desktop app is a navigation shell. The backend exposes a process health endpoint only. Neither component connects to a broker, consumes market data, manages a portfolio, evaluates strategies, or submits orders. LIVE trading is not implemented or enabled.
+This repository contains an incremental foundation:
+- a native SwiftUI macOS application shell and Trading Workspace;
+- a Node.js/TypeScript modular-monolith backend foundation with a process-health endpoint;
+- a provider-neutral Trading Domain Instrument model;
+- read-only Capital.com REST and WebSocket adapter source merged into the repository; operational integration and verification remain pending.
+
+The complete broker lifecycle is not integrated or verified. No actual Capital.com Demo session or broker-originated market observation has been verified from this implementation. Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and LIVE dealing are not implemented. Architecture diagrams describe target architecture, not implementation evidence.
 
 ## Repository layout
 
 - `apps/macos/` — native SwiftUI macOS application and Xcode project.
-- `services/backend/` — TypeScript modular-monolith backend and local HTTP health API.
+- `services/backend/` — Node.js/TypeScript modular-monolith backend.
 - `docs/` — architecture, security, engineering status, and architecture decision records.
 - `quality/` — planned test and validation areas.
 - `tooling/` — development and CI scripts as they are introduced.
 
 ## Requirements
 
-- Xcode 14.3.1 or compatible, Swift 5.8+, macOS SDK 13+, deployment target macOS 13.0.
-- This batch uses Node.js 24.22.0 and npm 11.19.1; TypeScript 7.0.2 is pinned as a local development dependency. Recommended future runtime baseline: Node.js 24.22.2 LTS (the latest 24.x patch checked for this batch), adopted through a separately reviewed toolchain change.
+- macOS deployment target: 13.0.
+- Swift source compatibility and Xcode version must be verified against the actual development Mac before changing the recorded toolchain.
+- The backend currently targets Node.js 24 and uses built-in HTTP, Fetch, and WebSocket APIs. Consult the package engine and lockfile for the exact pinned toolchain.
 
 ## Build the macOS app
 
@@ -40,13 +47,14 @@ npm test
 npm start
 ```
 
-The backend listens on `127.0.0.1:3000` by default. Set `HOST` or `PORT` to override those local-development defaults. `GET /health` reports the API process health only; it does not assert trading readiness or broker connectivity.
+The backend currently listens on `127.0.0.1:3000` by default. `GET /health` reports process health only; it does not assert broker connectivity, market-data readiness, or trading readiness. Do not expose broker operations through an unauthenticated local API.
 
 ## Engineering continuity
 
-- [Project Continuity Record](docs/engineering/PROJECT_CONTINUITY.md) — authoritative cross-session handoff and durable project constraints.
-- [Engineering Task Register](docs/engineering/TASK_REGISTER.md) — completed milestones, pending verification, and the next authorized action.
-- [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md) — implemented, planned, and unvalidated product scope.
-- [Repository Agent Instructions](AGENTS.md) — mandatory context-loading and implementation protocol for coding agents, including Codex.
-
-See [System Overview](docs/architecture/SYSTEM_OVERVIEW.md) for architectural boundaries.
+- [Project Continuity Record](docs/engineering/PROJECT_CONTINUITY.md)
+- [Engineering Task Register](docs/engineering/TASK_REGISTER.md)
+- [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md)
+- [Repository Agent Instructions](AGENTS.md)
+- [System Overview](docs/architecture/SYSTEM_OVERVIEW.md)
+- [Module Boundaries](docs/architecture/MODULE_BOUNDARIES.md)
+- [ADR-0004 — Production Architecture Baseline](docs/decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)

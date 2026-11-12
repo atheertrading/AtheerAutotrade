@@ -1,21 +1,20 @@
 # Engineering Task Register
 
-This register tracks milestone state and prevents completed work from being restarted.
-
 **Last reconciled:** 2026-11-12  
-**Main baseline:** PR #11 merge commit `fa68db5635042b43cda16e687eeffa4f138c5cbe`.
+**Latest observed main baseline:** `58766938b1d68c8653909f7b2c50e6e78b354dd1`  
+**Active branch:** `architecture/atp-arch-rebase-001`
 
 ## Status definitions
 
 - **DONE — MERGED:** Change is present in the repository.
 - **DONE — VERIFIED:** Acceptance criteria were tested and evidence is recorded.
 - **IN PROGRESS:** Implementation is underway; acceptance criteria are not yet met.
-- **PENDING VERIFICATION:** Implementation is present, but the required result has not been confirmed.
+- **PENDING VERIFICATION:** Implementation is present, but required results are not confirmed.
 - **PLANNED:** Not implemented.
 - **BLOCKED:** Cannot proceed until a named dependency is resolved.
 - **SUPERSEDED:** Replaced by a later decision or implementation.
 
-## Completed repository milestones
+## Completed milestones
 
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
@@ -27,91 +26,81 @@ This register tracks milestone state and prevents completed work from being rest
 | ATP-TEST-001 | Establish hosted XCTest target and four WorkspaceManager tests | PR #6 merged | DONE — MERGED |
 | ATP-TEST-002 | Correct XCTest group path | PR #7 merged | DONE — MERGED |
 | ATP-TEST-003 | Enable app Debug testability and correct Swift key paths | PR #8 merged as `b18b0ff` | DONE — MERGED |
-| ATP-APPLE-001 | Configure Apple Development signing and resolve XCTest bundle signing | User confirmed `Build Succeeded`; Codex reported app/test signatures valid and 4 XCTest passed, 0 failed on x86_64 | DONE — LOCAL VERIFIED; GitHub publication not confirmed |
-| ATP-DOM-001 | Provider-neutral instrument domain model | PR #11 squash-merged as `fa68db5`; user ran TypeScript build and 10 backend tests successfully | DONE — MERGED AND VERIFIED |
+| ATP-APPLE-001 | Configure Apple Development signing and resolve XCTest bundle signing | User confirmed Build Succeeded; Codex reported app/test signatures valid and 4 XCTest passed, 0 failed on x86_64 | DONE — LOCAL VERIFIED; GitHub publication not confirmed |
+| ATP-DOM-001 | Provider-neutral instrument domain model | PR #11 squash-merged as `fa68db5`; user reported TypeScript build and 10 backend tests passed | DONE — MERGED AND USER-VERIFIED |
+| ATA-DOC-001 | Preserve adapted Mermaid architecture catalogue | PR #13 merged as `58766938`; ten editable diagrams with provenance and target-architecture caveats | DONE — MERGED; Mermaid rendering review not recorded |
 
-## Active implementation
+## Active milestone
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-CAP-001 | Capital.com read-only REST and WebSocket market connectivity | Session lifecycle, market search, historical prices, live quote/OHLC subscriptions, keepalive, bounded reconnect, mock-based tests | IN PROGRESS — source authored; build/tests and live account verification pending |
+| ATP-ARCH-REBASE-001 | Rebase architecture and engineering governance on ATHEER Trading Pro production baseline | Product identity, modular-monolith ownership, mandatory safety/execution invariants, broker/data lifecycle, health/readiness model, reconcile continuity and task records | IN PROGRESS — architecture branch created; ADR and core architecture docs committed; consistency review and draft PR pending |
 
-Implementation branch: `feature/atp-cap-001-capital-market-connectivity`.
+Branch: `architecture/atp-arch-rebase-001`.
 
-Current branch files:
-- `services/backend/src/modules/broker-adapters/capital-com/capital-com-client.ts`
-- `services/backend/src/modules/broker-adapters/capital-com/capital-com-market-data-stream.ts`
-- `services/backend/src/modules/broker-adapters/capital-com/README.md`
-- `services/backend/tests/capital-com-client.test.mjs`
-- `services/backend/tests/capital-com-market-data-stream.test.mjs`
-- `docs/decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md`
+### Changes committed on active branch
 
-No new runtime or development dependencies were added. The adapter contains no dealing, order, position, or account mutation methods.
+- `docs/decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md`
+- `README.md`
+- `docs/architecture/SYSTEM_OVERVIEW.md`
+- `docs/architecture/MODULE_BOUNDARIES.md`
+- `docs/engineering/PROJECT_CONTINUITY.md`
 
-## ATP-CAP-001 acceptance criteria
+No runtime code, dependencies, Xcode project settings, or broker execution methods were changed. No build or tests were run for this documentation-only work.
 
-The milestone is not complete until all criteria below are met:
+### ATP-ARCH-REBASE-001 acceptance criteria
 
-1. A production-appropriate credentials provider retrieves credentials from macOS Keychain without exposing them in source, logs, environment variables, or unauthenticated HTTP.
-2. The application/backend boundary is secured before broker operations are exposed.
-3. Capital.com Demo session authentication succeeds and session tokens remain memory-only.
-4. Provider market search resolves a real epic and maps verified metadata into the provider-neutral instrument model.
-5. Historical OHLC data is retrieved and validated for a selected instrument and resolution.
-6. WebSocket delivers real quote updates and OHLC events for that instrument.
-7. WebSocket and REST session keepalive work within documented session limits.
-8. Disconnect/reconnect recovery re-subscribes without silently losing track of feed state.
-9. Quote age, timestamp order, gaps, duplicates, and candle OHLC integrity are monitored and exposed as explicit data-quality states.
-10. A sustained Demo observation period is recorded with actual timestamps, reconnect evidence, and zero fabricated market observations.
+1. ATHEER Trading Pro is consistently recorded as product identity; AtheerAutotrade remains a temporary technical identifier pending controlled migration.
+2. Modular-monolith topology and module ownership are explicit.
+3. UI, strategy, and AI cannot bypass centralized Risk Engine.
+4. OMS is the durable order-lifecycle owner; Execution Gateway is the only broker dealing path.
+5. Unknown broker submission outcomes require reconciliation and never blind retry.
+6. Broker-confirmed account/execution state is authoritative; missing data remains unknown.
+7. Broker authentication, REST session, WebSocket state, feed quality, persistence, trading readiness, and LIVE authorization are distinct.
+8. Local IPC and Keychain credential handoff remain blocked pending a threat-modeled transport ADR; loopback is not treated as authentication.
+9. Architecture diagrams and engineering records agree with the accepted ADR.
+10. A draft PR is opened with an evidence-based summary; no merge until reviewed.
 
-A successful TypeScript build, mocked unit tests, a TCP/WebSocket handshake, or a one-time quote is not sufficient to mark this milestone verified.
+## Planned implementation sequence after architecture baseline
 
-## Remaining validation
-
-| ID | Item | Evidence | Status / rule |
+| ID | Milestone | Dependency / scope | Status |
 |---|---|---|---|
-| ATP-CAP-001-BUILD | Compile backend and run focused adapter tests | Tests authored on feature branch; no execution result yet | PENDING VERIFICATION |
-| ATP-CAP-001-KEYCHAIN | Implement Keychain credential provider and secure local app/backend boundary | No implementation yet | PLANNED |
-| ATP-CAP-001-DEMO | Authenticate and retrieve real Demo market data | No account authentication or real data received | PLANNED |
-| ATP-CAP-001-STABILITY | Verify persistent stream, stale detection, and reconnect recovery | No sustained observation evidence yet | PLANNED |
-| ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Current verified local build destination was x86_64 | PLANNED; do not claim arm64 runtime validation |
+| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Threat-model and prototype supported macOS IPC options; define Keychain ownership, client identity, token handoff, restart/revocation behavior | PLANNED |
+| ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
+| ATP-CAP-LIFECYCLE-001 | Capital.com read-only session lifecycle integration | Secure credential provider and runtime; auth, ping, explicit connection states | PLANNED |
+| ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
+| ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
+| ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
+| ATP-OMS-001 | Order Management System | Durable lifecycle, outbox/idempotency, unknown outcomes, broker reconciliation | PLANNED |
+| ATP-EXEC-001 | Controlled Execution Gateway | Broker dealing only after OMS + Risk authorization; explicit user approval and safety gates | PLANNED |
+| ATP-STRAT-001 | Strategy Runtime | Signals only; no direct execution authority | PLANNED |
+| ATP-PORT-INTEL-001 | Portfolio, reconciliation, and advisory intelligence | Broker-authoritative state and advisory-only AI | PLANNED |
+| ATP-SYSTEM-VERIFY-001 | End-to-end operational validation | Integration, recovery, security, safety, performance, and sustained broker evidence | PLANNED |
 
-## Product capabilities not yet implemented
+## Other pending verification
 
-Account/portfolio integration, persistence, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading remain unimplemented.
+| ID | Item | Evidence | Status |
+|---|---|---|---|
+| ATP-CAP-001-BUILD | Compile adapter and run focused tests | Adapter source/tests merged; no current observed build/test result for this branch in this session | PENDING VERIFICATION |
+| ATP-CAP-001-DEMO | Verify actual Capital.com Demo authentication and market data | No real session or broker-originated quote/candle evidence | PLANNED |
+| ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Prior runtime verification was x86_64 | PLANNED |
 
-All exposure-increasing intents must eventually pass through the centralized Risk Engine. No UI, strategy, AI, or broker-adapter route may bypass it. LIVE trading remains disabled.
+## Preservation constraints
 
-## Codex assignment boundary
-
-Codex's original authorized assignment in this workflow was the bounded XCTest problem. It is not the default executor for all project work. Any future Codex assignment must specify objective, allowed files, acceptance criteria, and verification.
-
-## Local working-copy preservation
-
-The user's local repository had uncommitted tracked changes and untracked files. They were saved with `git stash push --include-untracked` as `stash@{0}`. The working tree was clean afterward, but local `main` remained behind `origin/main`. Do not pop or drop the stash or run destructive synchronization until a reviewed local reconciliation plan is prepared.
+- Do not pop/drop/apply the user's local stash or run destructive synchronization without a reviewed plan.
+- Do not overwrite local project files with GitHub versions.
+- Do not repeat Xcode tests for a backend/documentation-only milestone without a technical reason.
+- No credentials in ChatGPT, source, Git, logs, or process arguments.
+- LIVE dealing remains disabled; no real trade without explicit user approval.
 
 ## Current next action
 
-Review and compile ATP-CAP-001 in an isolated worktree. Correct only evidenced defects. Then implement the Keychain-backed credential provider and secured local integration boundary. Do not request or repeat Xcode workspace tests for this backend milestone.
+Complete the remaining engineering-record and diagram consistency review for ATP-ARCH-REBASE-001 and resolve the PR #14 mergeability/review state. After architecture review, design and record the secure local IPC/Keychain credential-provider decision before implementing broker operations in the desktop app.
+
+- 2026-11-12: Opened draft PR #14 for ATP-ARCH-REBASE-001; not merged pending review and GitHub mergeability inspection.
 
 ## Change log
 
-- 2026-11-12: PR #11 merged as `fa68db5`; ATP-DOM-001 is now DONE — MERGED AND VERIFIED.
-- 2026-11-12: Started ATP-CAP-001 on `feature/atp-cap-001-capital-market-connectivity`; added read-only REST session/market history client, quote/OHLC WebSocket stream, and mock-based tests. No build or live account verification is claimed.
-- 2026-11-12: Recorded local changes in `stash@{0}`; do not alter the stash until local synchronization is planned.
-
-
-## Architecture documentation preservation
-
-| ID | Milestone | Scope | Status |
-|---|---|---|---|
-| ATA-DOC-001 | Preserve and adapt the prior Mermaid architecture suite | Add ten source-controlled Mermaid diagrams, provenance notes, implementation-status caveats, and links from the system overview | IN PROGRESS — committed on documentation branch; PR review and Mermaid rendering validation pending |
-
-Branch: `docs/atp-mermaid-architecture-suite`.
-
-Acceptance criteria:
-1. Ten Mermaid diagrams are present as editable Markdown source.
-2. Provenance distinguishes recovered titles/scope from reconstructed Mermaid source; no false claim of verbatim recovery.
-3. Diagrams align with AtheerAutotrade's current architecture and safety boundaries.
-4. Documentation clearly distinguishes target architecture from implemented/verified behavior.
-5. The system overview, implementation status, task register, and continuity record link or record the catalogue.
-6. Mermaid rendering and technical review are completed before marking the documentation milestone verified.
+- 2026-11-12: Added ATP-ARCH-REBASE-001 on `architecture/atp-arch-rebase-001`; ADR-0004 and core architecture docs committed.
+- 2026-11-12: PR #13 Mermaid catalogue merged on main; main baseline advanced to `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
+- 2026-11-12: Established ATHEER Trading Pro as product identity; AtheerAutotrade retained as temporary technical identifier.

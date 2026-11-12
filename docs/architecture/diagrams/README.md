@@ -1,6 +1,7 @@
-# Architecture Diagram Catalogue
+# ATHEER Trading Pro — Architecture Diagram Catalogue
 
-**Project:** AtheerAutotrade  
+**Product:** ATHEER Trading Pro  
+**Repository identifier:** AtheerAutotrade (temporary technical name)  
 **Document ID:** ATA-ARCH-DIAG-001  
 **Status:** Architecture reference — reconstructed and adapted; not implementation evidence  
 **Created:** 2026-11-12  
@@ -18,6 +19,7 @@ These diagrams describe the intended architecture and control flows. They do not
 - [Implementation Status](../../engineering/IMPLEMENTATION_STATUS.md)
 - [Task Register](../../engineering/TASK_REGISTER.md)
 - [ADR-0003 — Capital.com Read-Only Market Connectivity](../../decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md)
+- [ADR-0004 — ATHEER Production Architecture Baseline](../../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
 
 ## 2. Diagram index
 
