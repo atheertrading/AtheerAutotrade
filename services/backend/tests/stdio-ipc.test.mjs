@@ -71,6 +71,8 @@ test("handshake and ping work across fragmented UTF-8 input", async () => {
   assert.equal(responses[0].ok, true);
   assert.ok(responses[0].result.capabilities.includes("system.ping"));
   assert.ok(responses[0].result.capabilities.includes("broker.connect"));
+  assert.ok(responses[0].result.capabilities.includes("broker.stream.start"));
+  assert.ok(responses[0].result.capabilities.includes("broker.stream.stop"));
   assert.equal(responses[0].result.keyAgreement.algorithm, "X25519-HKDF-SHA256-AES-256-GCM");
   assert.equal(responses[1].ok, true);
   assert.deepEqual(responses[1].result, { status: "alive" });
