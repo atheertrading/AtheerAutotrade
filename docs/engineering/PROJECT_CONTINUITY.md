@@ -45,7 +45,7 @@ Repository records are authoritative over conversation summaries. When documents
 - On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). The current feature branch adds the first native Swift IPC client/supervisor source and Xcode project membership; it has not been compiled or runtime-tested.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- No concrete macOS Keychain credential provider is implemented. ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode is merged, and native Swift client/supervisor source is authored on the current feature branch but not yet verified. Capital.com credential-entry UI remains absent.
+- ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode is merged, and native Swift client/supervisor source is authored on the current feature branch but not yet verified. The same feature branch now adds `CapitalComCredentialStore.swift` (macOS Keychain storage) and `CapitalComBrokerView.swift` (professional Capital.com credentials screen), with navigation through **Broker Connections → Brokers**. These UI/Keychain files are not merged or Xcode-verified. The Connect action is intentionally disabled until signed runtime packaging and one-shot credential handoff are verified.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
 - Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
@@ -127,7 +127,7 @@ Batch 3 authored on the current branch:
 - Xcode project membership for the two production Swift files and the test file.
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
 
-No Xcode build/test, backend build/test, runtime package, or child process execution has been performed for this batch. No Keychain provider or credential-transfer method exists; no Capital.com credential UI exists. No broker/account/order/execution method is exposed.
+No Xcode build/test, backend build/test, runtime package, or child process execution has been performed for this branch. The branch now includes a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
 
 ### Next batch
 
@@ -136,7 +136,7 @@ No Xcode build/test, backend build/test, runtime package, or child process execu
 3. Add packaging copy phases for a pinned Node runtime and compiled backend output.
 4. Verify nested code signatures, hardened-runtime behavior, process launch, timeout, child crash, and explicit restart.
 5. Connect the supervisor to application lifecycle and expose process readiness.
-6. Design one-shot Keychain credential transfer, then implement the Capital.com credential UI and native Keychain provider before broker session methods.
+6. Build and test the new Capital.com screen/Keychain store on the target Mac; then design one-shot Keychain credential transfer before enabling connection or broker session methods.
 
 ### Local repository preservation
 
