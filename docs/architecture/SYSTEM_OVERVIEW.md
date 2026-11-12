@@ -21,7 +21,7 @@ The desktop client must not own broker protocol logic, risk decisions, order lif
 - The macOS application is a SwiftUI navigation and workspace shell.
 - The backend currently exposes a local process health endpoint and structured 404 handling.
 - The provider-neutral Trading Domain Instrument model is merged.
-- A read-only Capital.com REST client and WebSocket quote/OHLC transport have been authored on a separate feature branch. Their integration into the backend runtime and desktop app is not complete.
+- A read-only Capital.com REST client and WebSocket quote/OHLC transport are merged into the repository. Their integration into the backend runtime and desktop app is not complete.
 - No concrete Keychain credential provider or authenticated desktop/backend boundary is implemented.
 - No actual Capital.com Demo session, broker-originated quote, or candle has been verified from this implementation.
 - No production order, Risk Engine, OMS, Execution Gateway, portfolio reconciliation, or automated strategy path is implemented.
