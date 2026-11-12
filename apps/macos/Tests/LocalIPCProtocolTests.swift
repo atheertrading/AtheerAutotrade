@@ -11,7 +11,7 @@ final class LocalIPCProtocolTests: XCTestCase {
 
         XCTAssertEqual(frame.last, 0x0A)
         let json = try XCTUnwrap(
-            JSONSerialization.jsonObject(with: frame.dropLast()) as? [String: Any]
+            JSONSerialization.jsonObject(with: Data(frame.dropLast())) as? [String: Any]
         )
         XCTAssertEqual(json["protocol"] as? String, LocalIPCProtocol.identifier)
         XCTAssertEqual(json["version"] as? Int, LocalIPCProtocol.version)
@@ -23,7 +23,7 @@ final class LocalIPCProtocolTests: XCTestCase {
         let first = Data("{\"kind\":\"response\"}".utf8)
         let second = Data("{\"kind\":\"response2\"}".utf8)
 
-        XCTAssertTrue(try decoder.append(first + Data([0x0A]) + second.prefix(5)).count == 1)
+        XCTAssertEqual(try decoder.append(first + Data([0x0A]) + Data(second.prefix(5))).count, 1)
         let remaining = Data(second.dropFirst(5)) + Data([0x0A])
         let frames = try decoder.append(remaining)
 
