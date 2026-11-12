@@ -116,14 +116,14 @@ Batch 1 authored:
 - `services/backend/tests/stdio-ipc.test.mjs` — focused protocol tests authored but not executed.
 - Updated security baseline, system overview, architecture diagrams, backend README, ADR index, task register, and implementation status.
 
-No Swift source or Xcode project file changed. The stdio handler is not wired into backend process startup. No bundled Node runtime, native Swift Process supervisor/client, Keychain provider, or credential-transfer method exists yet. No broker/account/order/execution method is exposed. No build or test result has been observed for this batch.
+No Swift source or Xcode project file changed. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was added. No bundled Node runtime, native Swift Process supervisor/client, Keychain provider, or credential-transfer method exists yet. No broker/account/order/execution method is exposed. No build or test result has been observed for this batch.
 
 ### Next batch
 
-1. Wire stdio IPC into a dedicated production backend startup mode while keeping loopback HTTP health diagnostic-only.
-2. Add process-level stream tests and run Node 24 build/tests in an actual supported environment.
+1. Run Node 24 backend build/tests for the stdio production mode in an actual supported environment.
+2. Define the signed app bundle layout and Node runtime packaging approach.
 3. Implement native Swift child-process supervision and a strict NDJSON client; update Xcode project membership.
-4. Design runtime packaging/signing and verify hardened-runtime behavior.
+4. Verify code signing, hardened-runtime behavior, process termination, and restart.
 5. Design a separate one-shot Keychain credential-transfer contract before adding broker session methods.
 
 ### Local repository preservation
