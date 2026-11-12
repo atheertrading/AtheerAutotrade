@@ -111,7 +111,7 @@ Created and committed:
 
 No runtime source code changed. No build or tests were run because this is a documentation/architecture milestone.
 
-- Draft PR #14 is open: https://github.com/atheertrading/AtheerAutotrade/pull/14. It is not merged; GitHub reported mergeable=false at creation, so inspect the PR state/checks before any merge decision.
+- Draft PR #14 is open: https://github.com/atheertrading/AtheerAutotrade/pull/14. It is not merged; GitHub initially reported mergeable=false during PR creation; a subsequent PR read reports mergeable=true and mergeable_state=clean. No CI check runs are configured or reported.
 
 ### Remaining within ATP-ARCH-REBASE-001
 
