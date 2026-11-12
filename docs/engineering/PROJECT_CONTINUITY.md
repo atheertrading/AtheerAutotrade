@@ -56,7 +56,7 @@ Repository records are authoritative over conversation summaries. When documents
 - Backend remains a Node.js/TypeScript modular monolith with explicit module ownership and typed boundaries.
 - Backend owns broker lifecycle, market-data ingestion, domain orchestration, persistence, Risk, OMS, execution, and reconciliation.
 - Capital.com is the primary broker target; initial broker integration remains read-only.
-- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; credential transfer is deferred pending a dedicated contract.
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; protocol v2 transfers credentials only as AES-256-GCM ciphertext over the per-session X25519/HKDF channel.
 - The Execution Gateway is the only dealing path. It accepts dispatch only from OMS with a Risk decision bound to the exact immutable intent.
 - Every exposure-increasing intent passes through centralized Risk Engine.
 - Broker-confirmed account and execution state is authoritative. Unknown submission outcomes require reconciliation; never blind retry.
@@ -127,7 +127,7 @@ Batch 3 authored and merged via PR #16:
 - Xcode project membership for the two production Swift files and the test file.
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
 
-PR #16 is merged, but target-Mac Xcode build/runtime verification for the supervisor remains pending. PR #17 and PR #18 are merged. The active branch implements encrypted IPC v2 and read-only Demo session/market search methods. No WebSocket stream IPC, broker account/position reconciliation, order/dealing, or LIVE method is enabled.
+PR #16 is merged, but target-Mac Xcode build/runtime verification for the supervisor remains pending. PR #17 and PR #18 are merged. The active branch implements encrypted IPC v2, read-only Demo session/market search/history, and WebSocket quote/OHLC event IPC with macOS UI consumption. Broker account/position reconciliation, order/dealing, and LIVE methods remain absent.
 
 ### Next batch
 
