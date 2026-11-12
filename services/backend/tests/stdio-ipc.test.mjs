@@ -1,21 +1,28 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import { spawn } from "node:child_process";
+import { generateKeyPairSync } from "node:crypto";
 import {
   LOCAL_IPC_MAX_FRAME_BYTES,
   serveStdioIpc
 } from "../dist/api/stdio-ipc.js";
 
 const protocol = "atheer.local-ipc";
+const testKeyPair = generateKeyPairSync("x25519");
+const clientPublicKey = testKeyPair.publicKey
+  .export({ format: "der", type: "spki" })
+  .subarray(-32)
+  .toString("base64");
 
 function request(id, method, payload = {}) {
+  const requestPayload = method === "system.hello" ? { ...payload, clientPublicKey } : payload;
   return JSON.stringify({
     protocol,
     version: 1,
     kind: "request",
     id,
     method,
-    payload
+    payload: requestPayload
   }) + "\n";
 }
 
@@ -55,7 +62,9 @@ test("handshake and ping work across fragmented UTF-8 input", async () => {
 
   assert.equal(responses.length, 2);
   assert.equal(responses[0].ok, true);
-  assert.deepEqual(responses[0].result.capabilities, ["system.ping"]);
+  assert.ok(responses[0].result.capabilities.includes("system.ping"));
+  assert.ok(responses[0].result.capabilities.includes("broker.connect"));
+  assert.equal(responses[0].result.keyAgreement.algorithm, "X25519-HKDF-SHA256-AES-256-GCM");
   assert.equal(responses[1].ok, true);
   assert.deepEqual(responses[1].result, { status: "alive" });
 });
