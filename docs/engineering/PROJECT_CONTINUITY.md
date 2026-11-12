@@ -101,25 +101,31 @@ Reassess the toolchain only when the development environment changes or a task r
 
 ## 9. Latest handoff — 2026-11-12
 
-### ATP-ARCH-REBASE-001 — IN PROGRESS
+### ATP-ARCH-REBASE-001 — DONE / MERGED
 
-Branch: `architecture/atp-arch-rebase-001`.
+PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dca0eabafc`. ADR-0004 establishes ATHEER Trading Pro as product identity and the modular-monolith architecture baseline.
 
-Created and committed:
-- `docs/decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md` — product identity, modular-monolith topology, module ownership, mandatory risk/OMS/execution invariants, broker/data lifecycle, deferred local IPC decision, and distinct health/readiness states.
-- Updated system overview, module boundaries, and repository README to align with ADR-0004 and ATHEER Trading Pro product identity.
+### ATP-SEC-IPC-001 — IN PROGRESS
 
-No runtime source code changed. No build or tests were run because this is a documentation/architecture milestone.
+Active branch: `security/atp-sec-ipc-001-stdio-boundary`, created from the merged architecture baseline.
 
-- Draft PR #14 is open: https://github.com/atheertrading/AtheerAutotrade/pull/14. It is not merged; GitHub initially reported mergeable=false during PR creation; a subsequent PR read reports mergeable=true and mergeable_state=clean. No CI check runs are configured or reported.
+Batch 1 authored:
+- `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
+- `docs/security/LOCAL_IPC_PROTOCOL.md` — versioned NDJSON contract, strict envelope, handshake, limits, method allowlist, and safe errors.
+- `services/backend/src/api/stdio-ipc.ts` — protocol handler for handshake and ping only; bounded frames, UUIDs, duplicate detection, request limits, and method allowlist.
+- `services/backend/tests/stdio-ipc.test.mjs` — focused protocol tests authored but not executed.
+- Updated security baseline, system overview, architecture diagrams, backend README, ADR index, task register, and implementation status.
 
-### Remaining within ATP-ARCH-REBASE-001
+No Swift source or Xcode project file changed. The stdio handler is not wired into backend process startup. No bundled Node runtime, native Swift Process supervisor/client, Keychain provider, or credential-transfer method exists yet. No broker/account/order/execution method is exposed. No build or test result has been observed for this batch.
 
-1. Reconcile the remaining engineering status documents with the accepted product identity and current branch/PR evidence.
-2. Review the architecture catalogue against ADR-0004 and update only material mismatches.
-3. Open a draft PR for technical review; do not merge until architecture consistency is checked.
-4. After this milestone is reviewed, begin a focused secure local IPC/credential-provider architecture spike and record its decision before coding the broker app integration.
+### Next batch
+
+1. Wire stdio IPC into a dedicated production backend startup mode while keeping loopback HTTP health diagnostic-only.
+2. Add process-level stream tests and run Node 24 build/tests in an actual supported environment.
+3. Implement native Swift child-process supervision and a strict NDJSON client; update Xcode project membership.
+4. Design runtime packaging/signing and verify hardened-runtime behavior.
+5. Design a separate one-shot Keychain credential-transfer contract before adding broker session methods.
 
 ### Local repository preservation
 
-The user's local project and stash must remain untouched by GitHub-side work. No local filesystem or Xcode build was accessed in this session.
+All work in this handoff was performed through GitHub. No local filesystem, Xcode build, or local Git working copy was accessed. Preserve all user local changes and stashes.
