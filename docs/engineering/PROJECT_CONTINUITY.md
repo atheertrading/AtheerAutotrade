@@ -101,42 +101,48 @@ Reassess the toolchain only when the development environment changes or a task r
 
 ## 9. Latest handoff — 2026-11-13
 
-### ATP-ARCH-REBASE-001 — DONE / MERGED
+### Merged baseline
 
-PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dca0eabafc`. ADR-0004 establishes ATHEER Trading Pro as product identity and the modular-monolith architecture baseline.
+- PR #14 merged ADR-0004 product identity and modular-monolith architecture as 9445a749d78c63030e9125041a6103dca0eabafc.
+- PR #15 merged backend stdio IPC foundation as 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
+- PR #16 merged native Swift IPC protocol/supervisor source as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
+- PR #17 merged the Capital.com broker screen and Keychain store as 9297f28fd2079dc5801cd89baf2b4723ed625a75.
+- PR #18 merged Keychain load/read-back verification and saved-field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
+- Current observed main baseline: 675ea4af4d54610539218858e3d2f99c4c9a1985.
 
-### ATP-SEC-IPC-001 — IN PROGRESS
+### ATP-CAP-SESSION-001 — current branch / PR #19
 
-PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. PR #16 merged native Swift IPC protocol/supervisor source as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
+Current branch: feat/atp-capitalcom-operational-connection  
+Draft PR: https://github.com/atheertrading/AtheerAutotrade/pull/19
 
-PR #17 (`feat(macOS): add Capital.com broker screen and Keychain credentials`) was merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`. PR #18 (`fix(macOS): restore and verify Capital.com Keychain credentials`) was merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`. Current branch: `feat/atp-capitalcom-operational-connection`.
+The branch extends the merged work; it does not recreate the app or replace the existing adapter.
 
-Batch 1 authored:
-- `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
-- `docs/security/LOCAL_IPC_PROTOCOL.md` — versioned NDJSON contract, strict envelope, handshake, limits, method allowlist, and safe errors.
-- `services/backend/src/api/stdio-ipc.ts` — protocol handler for handshake and ping only; bounded frames, UUIDs, duplicate detection, request limits, and method allowlist.
-- `services/backend/tests/stdio-ipc.test.mjs` — focused protocol tests authored but not executed.
-- Updated security baseline, system overview, architecture diagrams, backend README, ADR index, task register, and implementation status.
+Implemented in source:
+- IPC protocol v2 with per-child ephemeral X25519/HKDF-SHA256/AES-256-GCM encrypted credential transfer and one-shot credential submission.
+- CapitalComRuntime for Demo REST session creation, authenticated ping, status, market search, historical prices, and WebSocket stream lifecycle.
+- WebSocket quote/OHLC event frames from backend to native Swift UI, including subscription state and bounded frame validation.
+- SwiftUI Connect/Disconnect, authenticated market discovery, live quote/one-minute OHLC view, two-column broker workspace, and app-termination child shutdown.
+- Xcode build phase and packaging script for a bundled universal Node.js 24 runtime, ESM package metadata, and compiled backend. A minimal V8 JIT entitlement is applied to the Node helper when code signing is enabled.
+- Updated security, protocol, bundle, ADR, implementation-status, and task-register documentation.
 
-Batch 1–2 backend work is merged. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was authored, but the merged backend build/test result is not confirmed in this work session.
+Verification:
+- GitHub Actions Backend CI run 43332767979 passed on Node.js 24.22.2: TypeScript build succeeded and 31/31 tests passed.
+- The Node tests cover IPC framing, handshake, one-shot encrypted credential submission, AES-GCM authentication-tag rejection, and the existing backend tests.
+- CryptoKit-to-Node cross-language interoperability has not been tested.
+- Xcode 14.3.1 / Swift 5.8.1 build, app-bundle packaging, nested signing/entitlement verification, packaged child-process launch, and real Capital.com Demo authentication remain pending.
+- Actual WebSocket subscription acknowledgements and sustained quote/OHLC delivery remain unverified.
+- Account/position reconciliation, Risk Engine, OMS, Execution Gateway, order/dealing, and LIVE remain absent.
 
-Batch 3 authored and merged via PR #16:
-- `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict request/response envelope handling and bounded NDJSON framing.
-- `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — fixed-path child launch, stdio pipes, handshake, request IDs/timeouts, stderr drain, and termination handling.
-- `apps/macos/Tests/LocalIPCProtocolTests.swift` — focused XCTest source.
-- Xcode project membership for the two production Swift files and the test file.
-- `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
+### Next acceptance sequence
 
-PR #16 is merged, but target-Mac Xcode build/runtime verification for the supervisor remains pending. PR #17 and PR #18 are merged. The active branch implements encrypted IPC v2, read-only Demo session/market search/history, and WebSocket quote/OHLC event IPC with macOS UI consumption. Broker account/position reconciliation, order/dealing, and LIVE methods remain absent.
-
-### Next batch
-
-1. Compile and test the native Swift IPC source and XCTest target on the user's actual Mac.
-2. Run the merged backend Node 24 build/tests in a supported environment.
-3. Add packaging copy phases for a pinned Node runtime and compiled backend output.
-4. Verify nested code signatures, hardened-runtime behavior, process launch, timeout, child crash, and explicit restart.
-5. Connect the supervisor to application lifecycle and expose process readiness.
-6. Build and test PR #18's Capital.com screen/Keychain persistence correction on the target Mac; then design one-shot Keychain credential transfer before enabling connection or broker session methods.
+1. Build the macOS target on the actual Intel Mac using Xcode 14.3.1 / Swift 5.8.1.
+2. Verify the Xcode backend packaging phase, universal Node runtime, ESM entry point, JIT entitlement, nested signature, and outer app signature.
+3. Verify CryptoKit/Node X25519-HKDF-AES-GCM interoperability, invalid-tag rejection, and one-shot handoff.
+4. Launch the packaged child and verify protocol v2, app shutdown, process restart, and UI state.
+5. Authenticate against the user's Capital.com Demo account; verify ping, market search, historical prices, WebSocket subscription acknowledgements, and sustained quote/OHLC delivery. Credentials must remain on the user's Mac and must not be shared in ChatGPT.
+6. Implement market-data freshness, stale-state, gap detection, and recovery.
+7. Implement read-only account/position snapshots and reconciliation only after confirming official API contracts.
+8. Keep all order/dealing/LIVE capabilities disabled until Risk Engine, OMS, Execution Gateway, authorization, audit, and reconciliation gates are implemented and verified.
 
 ### Local repository preservation
 
