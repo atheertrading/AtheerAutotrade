@@ -53,7 +53,7 @@ Present in the repository at differing verification levels:
 - SwiftUI application shell and Trading Workspace;
 - minimal Node.js HTTP process-health API;
 - provider-neutral Instrument model;
-- read-only Capital.com REST and WebSocket adapter source on a separate branch, with mock-based tests.
+- read-only Capital.com REST and WebSocket adapter source merged into the repository, with mock-based tests.
 
 Not yet implemented or integrated:
 - backend composition root and service lifecycle;
