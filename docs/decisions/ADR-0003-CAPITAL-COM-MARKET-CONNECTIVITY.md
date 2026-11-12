@@ -30,6 +30,6 @@ Capital.com's official Public API documents:
 
 ## Consequences
 
-The repository contains a read-only REST client, quote/OHLC WebSocket adapter, mock-based tests, encrypted IPC v2 credential transfer, a CapitalComRuntime session service, and native macOS Connect/Disconnect and market-search controls. The Xcode project includes a build phase for the bundled Node runtime/backend. These are source-level implementations only: actual Demo authentication, market search/history responses, WebSocket-to-UI integration, sustained stream observation, stale-data detection, and end-to-end verification remain outstanding.
+The repository contains a read-only REST client, quote/OHLC WebSocket adapter, mock-based tests, encrypted IPC v2 credential transfer, a CapitalComRuntime session service, and native macOS Connect/Disconnect and market-search controls. The Xcode project includes a build phase for the bundled Node runtime/backend. WebSocket quote/OHLC events are now routed through IPC v2 to the macOS UI. These are source-level implementations only: actual Demo authentication, market search/history responses, live WebSocket subscription acknowledgements, sustained stream observation, stale-data detection, and end-to-end verification remain outstanding.
 
 The backend currently requires Node.js 24 and uses its built-in Fetch and WebSocket APIs; no new package dependency is introduced.
