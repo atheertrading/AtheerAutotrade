@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #15 merge: `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
+- Latest observed `main` baseline after PR #16 merge: `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -107,9 +107,9 @@ PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dc
 
 ### ATP-SEC-IPC-001 — IN PROGRESS
 
-PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
+PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. PR #16 merged native Swift IPC protocol/supervisor source as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 
-Current branch: `security/atp-sec-ipc-001-swift-supervisor`.
+Current branch: `security/atp-sec-ipc-001-swift-supervisor`; the branch now carries the separate ATP-CAP-UI-001 implementation for review.
 
 Batch 1 authored:
 - `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
@@ -127,7 +127,7 @@ Batch 3 authored on the current branch:
 - Xcode project membership for the two production Swift files and the test file.
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
 
-No Xcode build/test, backend build/test, runtime package, or child process execution has been performed for this branch. The branch now includes a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
+PR #16 is merged, but Xcode build/test, backend build/test, runtime package, or child process execution has not been performed for that IPC implementation. The current branch adds ATP-CAP-UI-001: a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
 
 ### Next batch
 
