@@ -67,7 +67,7 @@
 
 - ATP-DOM-001: user reported `npm ci --include=dev` succeeded and all 10 backend tests passed after TypeScript compilation.
 - XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
-- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001. Draft PR #14 is open and unmerged; GitHub reported mergeable=false at creation.
+- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001. Draft PR #14 is open and unmerged; GitHub initially reported mergeable=false; a subsequent PR read reports mergeable=true / clean. No CI check runs are configured or reported.
 - No source runtime code or dependencies changed during this architecture documentation work.
 - Apple Silicon arm64 runtime remains unverified.
 
