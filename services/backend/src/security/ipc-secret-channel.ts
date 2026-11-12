@@ -4,7 +4,8 @@ import {
   diffieHellman,
   generateKeyPairSync,
   hkdfSync,
-  randomBytes
+  randomBytes,
+  type KeyObject
 } from "node:crypto";
 
 const SPKI_X25519_PREFIX = Buffer.from("302a300506032b656e032100", "hex");
@@ -31,9 +32,9 @@ function decodeBase64(value: unknown, expectedLength: number, field: string): Bu
  * The private key and derived key remain in process memory only.
  */
 export class IpcSecretChannel {
-  private readonly privateKey;
+  private readonly privateKey: KeyObject;
   private readonly salt = randomBytes(32);
-  private readonly rawPublicKey;
+  private readonly rawPublicKey: Buffer;
   private sessionKey: Buffer | undefined;
 
   constructor() {
