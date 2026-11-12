@@ -160,6 +160,7 @@ export async function serveStdioIpc(
               "system.ping",
               "broker.credentials.submit",
               "broker.connect",
+              "broker.status",
               "broker.disconnect",
               "broker.marketSearch",
               "broker.historicalPrices"
@@ -201,6 +202,11 @@ export async function serveStdioIpc(
                 throw new TypeError("Only the explicitly selected Capital.com Demo environment is supported.");
               }
               await writeResponse(output, success(request.id, await broker.connect("demo")));
+              break;
+            }
+            case "broker.status": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.status does not accept payload fields.");
+              await writeResponse(output, success(request.id, broker.status()));
               break;
             }
             case "broker.disconnect": {
