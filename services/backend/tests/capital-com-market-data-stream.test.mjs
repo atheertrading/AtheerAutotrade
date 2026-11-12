@@ -88,7 +88,9 @@ test("stream subscribes to quotes and OHLC after WebSocket opens", async () => {
     payload: {
       subscriptions: {
         "OIL_CRUDE:MINUTE:classic": "PROCESSED",
-        "OIL_CRUDE:MINUTE_5:classic": "PROCESSED"
+        "OIL_CRUDE:MINUTE_5:classic": "PROCESSED",
+        "EURUSD:MINUTE:classic": "PROCESSED",
+        "EURUSD:MINUTE_5:classic": "PROCESSED"
       }
     }
   });
