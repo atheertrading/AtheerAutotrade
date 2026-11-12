@@ -1,17 +1,17 @@
 # Module boundaries
 
-All modules below are architectural ownership boundaries. Except for the Application Shell and minimal Backend API health route, they are planned and have no trading behavior in this milestone.
+These modules are architectural ownership boundaries. The current implementation state is incremental: the Application Shell and minimal Backend API are present; the provider-neutral Instrument model is merged; a read-only Capital.com adapter and quote/OHLC stream are under review on a feature branch. No order execution or automated trading flow is implemented.
 
 | Module | Responsibility | Boundary |
 |---|---|---|
 | Application Shell | Navigation, presentation, user interaction | UI components cannot execute broker orders or bypass backend controls. |
 | Backend API | Input validation, authentication/authorization boundary, request routing, response contracts | Must not embed provider-specific execution logic. |
-| Trading Domain | Instrument, order-intent, and lifecycle concepts | Domain rules remain independent of provider SDKs. |
+| Trading Domain | Instrument, order-intent, and lifecycle concepts | Domain rules remain independent of provider SDKs. Provider-neutral Instrument is implemented; order-intent acceptance is not. |
 | Risk Engine | Centralized pre-trade and exposure controls | Every exposure-increasing order intent must pass through this engine. AI agents cannot bypass it. |
 | Order Management | Durable order intent and lifecycle coordination | Does not call broker APIs directly; delegates through the Execution Gateway. |
 | Execution Gateway | Controlled boundary between accepted intent and external execution | Enforces idempotency and explicit outcome handling; no blind retry after unknown outcomes. |
-| Broker Adapters | Provider-specific protocols and mapping | Isolated behind explicit interfaces; broker-confirmed data is authoritative for actual account and execution state. |
-| Market Data | External quote, trade, and reference-data ingestion | Market observations are distinct from broker-confirmed account state. |
+| Broker Adapters | Provider-specific protocols and mapping | Capital.com read-only REST/market-stream adapter is under implementation review. No dealing or execution methods are exposed. |
+| Market Data | External quote, trade, and reference-data ingestion | Capital.com quote/OHLC transport is under implementation review; validated ingestion, stale-data handling, and continuity monitoring remain outstanding. Market observations are distinct from broker-confirmed account state. |
 | Strategy Runtime | Strategy lifecycle and evaluation | Cannot access broker execution APIs; emits intents through controlled domain interfaces. |
 | Portfolio | Account and position views and derived metrics | Actual state reconciles against broker-confirmed data. |
 | Intelligence | Analytical and AI-assisted workflows | Cannot bypass the Risk Engine or gain implicit execution authority. |
@@ -31,4 +31,4 @@ All modules below are architectural ownership boundaries. Except for the Applica
 9. Credentials are never stored in source code.
 10. Emergency controls distinguish blocking new exposure from managing existing positions.
 
-These constraints describe future architecture and do not authorize or implement execution functionality.
+Read-only market-data adapter code does not authorize or implement execution functionality.
