@@ -284,9 +284,10 @@ Internal projections must not overwrite broker-confirmed facts. Unmatched or con
 ```mermaid
 flowchart TB
     OP["Human Operator"] -->|OS-authenticated session| APP["macOS Application"]
-    APP -->|Parent-owned anonymous stdio pipes| IPC["Local Backend API"]
-    API --> AUTHZ["Identity, Authorization and Policy"]
-    KEYCHAIN[("macOS Keychain")] -->|Credential retrieval by authorized component| PROVIDER["Backend Credential Provider"]
+    APP -->|Parent-owned anonymous stdio pipes| IPC["Versioned stdio IPC Protocol"]
+    IPC --> AUTHZ["Identity, Authorization and Policy"]
+    KEYCHAIN[("macOS Keychain")] -->|Native app access| APP
+    IPC -.->|Future one-shot secret transfer; not implemented| PROVIDER["In-memory broker credential provider"]
     PROVIDER --> ADAPTER["Capital.com Adapter"]
     ADAPTER -->|TLS + in-memory session headers| BROKER["Capital.com API"]
     AUTHZ --> AUDIT[("Append-Only Security and Decision Audit")]
@@ -352,10 +353,10 @@ flowchart TB
             SECRETS[("macOS Keychain")]
         end
         APP <-->|Parent-owned anonymous stdio pipes| IPC
-        HTTP --> MODULES
+        IPC --> MODULES
         MODULES --> ADAPTER
         MODULES <--> DB
-        ADAPTER --> SECRETS
+        SECRETS -->|Native app access only| APP
     end
 
     subgraph EXTERNAL["External Dependency Boundary"]
