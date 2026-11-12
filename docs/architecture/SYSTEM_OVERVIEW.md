@@ -14,7 +14,7 @@ The target topology consists of:
 - provider-specific broker adapters, initially Capital.com;
 - explicit domain, market-data, persistence, risk, order-management, execution, portfolio, strategy, and intelligence modules.
 
-The desktop client must not own broker protocol logic, risk decisions, order lifecycle, or execution authority. The backend owns these responsibilities through typed interfaces and explicit application/domain events. Keep modules in one deployable backend until concrete operational or scaling evidence justifies extraction.
+The desktop client must not own broker protocol logic, risk decisions, order lifecycle, or execution authority. In desktop deployment, the macOS application launches and supervises the backend child process; the two communicate over parent-owned anonymous standard-I/O pipes using the versioned NDJSON contract. The backend owns broker protocol, domain orchestration, persistence, risk, OMS, and execution through typed interfaces and explicit application/domain events. Keep modules in one deployable backend until concrete operational or scaling evidence justifies extraction.
 
 ## Current implementation — verified repository state, not runtime claims
 
@@ -22,7 +22,7 @@ The desktop client must not own broker protocol logic, risk decisions, order lif
 - The backend currently exposes a local process health endpoint and structured 404 handling.
 - The provider-neutral Trading Domain Instrument model is merged.
 - A read-only Capital.com REST client and WebSocket quote/OHLC transport are merged into the repository. Their integration into the backend runtime and desktop app is not complete.
-- No concrete Keychain credential provider or authenticated desktop/backend boundary is implemented.
+- No concrete Keychain credential provider or integrated desktop/backend process client is implemented. The selected stdio IPC protocol handler is implemented as a backend module but is not yet wired into process startup or the SwiftUI app.
 - No actual Capital.com Demo session, broker-originated quote, or candle has been verified from this implementation.
 - No production order, Risk Engine, OMS, Execution Gateway, portfolio reconciliation, or automated strategy path is implemented.
 
@@ -65,4 +65,4 @@ The system distinguishes:
 - Every exposure-increasing order intent passes through the centralized Risk Engine.
 - LIVE dealing remains disabled until all required safety controls and explicit user authorization are implemented and verified.
 
-See [Module Boundaries](MODULE_BOUNDARIES.md), [ADR-0004](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md), [Security Baseline](../security/SECURITY_BASELINE.md), and [Architecture Diagram Catalogue](diagrams/README.md).
+See [Module Boundaries](MODULE_BOUNDARIES.md), [ADR-0004](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md), [ADR-0005](../decisions/ADR-0005-SECURE-MACOS-IPC.md), [Local IPC Protocol](../security/LOCAL_IPC_PROTOCOL.md), [Security Baseline](../security/SECURITY_BASELINE.md), and [Architecture Diagram Catalogue](diagrams/README.md).
