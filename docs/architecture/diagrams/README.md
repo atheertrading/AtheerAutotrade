@@ -96,10 +96,6 @@ flowchart TB
     GATEWAY --> ADAPTER
     ADAPTER --> PORTFOLIO
 
-    classDef implemented fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20
-    classDef planned fill:#fff8e1,stroke:#f9a825,color:#5d4037
-    class UI,WORKSPACE,API,DOMAIN,ADAPTER implemented
-    class AUTH,MARKET,STRATEGY,RISK,OMS,GATEWAY,PORTFOLIO,INTEL,STORE planned
 ```
 
 ## D02 — OMS 14-State Machine
