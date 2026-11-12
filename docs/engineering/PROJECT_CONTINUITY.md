@@ -42,7 +42,7 @@ Repository records are authoritative over conversation summaries. When documents
 ## 4. Current implementation baseline
 
 - Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
-- On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). The current feature branch adds the first native Swift IPC client/supervisor source and Xcode project membership; it has not been compiled or runtime-tested.
+- On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). Native Swift IPC client/supervisor source and Xcode project membership were merged via PR #16; they have not been compiled or runtime-tested.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
 - ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode and native Swift client/supervisor source are merged through PR #16 but not yet build/runtime-verified. PR #17 merged `CapitalComCredentialStore.swift` and `CapitalComBrokerView.swift`, with navigation through **Broker Connections → Brokers**. PR #18 contains the Keychain read-back/save verification and view restoration correction; it remains draft and unmerged. The Connect action remains disabled until signed runtime packaging and one-shot credential handoff are verified.
@@ -120,7 +120,7 @@ Batch 1 authored:
 
 Batch 1–2 backend work is merged. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was authored, but the merged backend build/test result is not confirmed in this work session.
 
-Batch 3 authored on the current branch:
+Batch 3 authored and merged via PR #16:
 - `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict request/response envelope handling and bounded NDJSON framing.
 - `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — fixed-path child launch, stdio pipes, handshake, request IDs/timeouts, stderr drain, and termination handling.
 - `apps/macos/Tests/LocalIPCProtocolTests.swift` — focused XCTest source.
