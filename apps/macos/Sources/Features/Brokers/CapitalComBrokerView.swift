@@ -11,6 +11,11 @@ struct CapitalComBrokerView: View {
     @State private var marketSearchTerm = ""
     @State private var marketResults: [MarketRow] = []
     @State private var isSearchingMarkets = false
+    @State private var isStreaming = false
+    @State private var streamingStatus = "Stopped"
+    @State private var selectedEpic: String?
+    @State private var latestQuote: QuoteSnapshot?
+    @State private var latestCandleSummary = ""
     @State private var feedback: Feedback?
     @State private var showingDeleteConfirmation = false
 
@@ -24,6 +29,13 @@ struct CapitalComBrokerView: View {
         let name: String
         let instrumentType: String
         let status: String
+    }
+
+    private struct QuoteSnapshot {
+        let epic: String
+        let bid: Double
+        let ask: Double
+        let timestamp: Double
     }
 
     var body: some View {
@@ -43,8 +55,12 @@ struct CapitalComBrokerView: View {
         }
         .background(AtheerColors.canvas)
         .onAppear {
+            installMarketDataEventHandler()
             restoreCredentials()
             refreshConnectionStatus()
+        }
+        .onDisappear {
+            BackendProcessSupervisor.shared.setEventHandler(nil)
         }
         .alert("Remove saved credentials?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
@@ -193,6 +209,49 @@ struct CapitalComBrokerView: View {
                 .disabled(!isConnected || isSearchingMarkets || marketSearchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
 
+            if isStreaming || latestQuote != nil {
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack {
+                        Text("LIVE MARKET DATA")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .tracking(0.8)
+                            .foregroundColor(AtheerColors.textTertiary)
+                        Spacer()
+                        Text(streamingStatus.uppercased())
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(streamingStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
+                    }
+                    if let quote = latestQuote {
+                        HStack(spacing: 18) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("BID").font(.system(size: 9, weight: .bold)).foregroundColor(AtheerColors.textTertiary)
+                                Text(quote.bid, format: .number.precision(.fractionLength(2...6)))
+                                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("ASK").font(.system(size: 9, weight: .bold)).foregroundColor(AtheerColors.textTertiary)
+                                Text(quote.ask, format: .number.precision(.fractionLength(2...6)))
+                                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                            }
+                            Spacer()
+                            Text(Date(timeIntervalSince1970: quote.timestamp / 1000), style: .time)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundColor(AtheerColors.textSecondary)
+                        }
+                    }
+                    if !latestCandleSummary.isEmpty {
+                        Text(latestCandleSummary)
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundColor(AtheerColors.textSecondary)
+                    }
+                }
+                .padding(13)
+                .background(AtheerColors.canvas)
+                .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
+            }
+
             if !marketResults.isEmpty {
                 VStack(spacing: 0) {
                     ForEach(marketResults) { market in
@@ -212,6 +271,14 @@ struct CapitalComBrokerView: View {
                             Text(market.status)
                                 .font(.system(size: 10, weight: .semibold))
                                 .foregroundColor(market.status == "TRADEABLE" ? AtheerColors.positive : AtheerColors.textSecondary)
+
+                            Button(selectedEpic == market.id && isStreaming ? "Stop" : "Live") {
+                                toggleMarketData(for: market)
+                            }
+                            .buttonStyle(.plain)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(selectedEpic == market.id && isStreaming ? AtheerColors.negative : AtheerColors.accent)
+                            .disabled(!isConnected)
                         }
                         .padding(.vertical, 9)
                         if market.id != marketResults.last?.id {
@@ -576,6 +643,94 @@ struct CapitalComBrokerView: View {
             Label(message, systemImage: "exclamationmark.triangle.fill")
                 .foregroundColor(AtheerColors.negative)
                 .font(.system(size: 11, weight: .medium))
+        }
+    }
+
+    private func installMarketDataEventHandler() {
+        BackendProcessSupervisor.shared.setEventHandler { name, payload in
+            DispatchQueue.main.async {
+                switch name {
+                case "broker.marketData.status":
+                    let status = payload["status"] as? String ?? "unknown"
+                    streamingStatus = status
+                    isStreaming = status != "stopped"
+                    if status == "stopped" {
+                        latestQuote = nil
+                        latestCandleSummary = ""
+                    }
+                case "broker.marketData.quote":
+                    guard
+                        let epic = payload["epic"] as? String,
+                        let bid = payload["bid"] as? Double,
+                        let ask = payload["ask"] as? Double,
+                        let timestamp = payload["timestamp"] as? Double
+                    else { return }
+                    guard selectedEpic == epic else { return }
+                    latestQuote = QuoteSnapshot(epic: epic, bid: bid, ask: ask, timestamp: timestamp)
+                case "broker.marketData.ohlc":
+                    guard
+                        let epic = payload["epic"] as? String,
+                        selectedEpic == epic,
+                        let resolution = payload["resolution"] as? String,
+                        let close = payload["close"] as? Double
+                    else { return }
+                    latestCandleSummary = "\(resolution) close: \(close)"
+                case "broker.marketData.error":
+                    streamingStatus = "error"
+                    isStreaming = false
+                    feedback = .error(payload["message"] as? String ?? "Market data stream error.")
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    private func toggleMarketData(for market: MarketRow) {
+        if selectedEpic == market.id && isStreaming {
+            stopMarketData()
+        } else if isStreaming {
+            stopMarketData {
+                startMarketData(for: market)
+            }
+        } else {
+            startMarketData(for: market)
+        }
+    }
+
+    private func startMarketData(for market: MarketRow) {
+        selectedEpic = market.id
+        latestQuote = nil
+        latestCandleSummary = ""
+        streamingStatus = "connecting"
+        isStreaming = true
+
+        BackendProcessSupervisor.shared.startCapitalComMarketData(epic: market.id) { result in
+            DispatchQueue.main.async {
+                if case .failure(let error) = result {
+                    isStreaming = false
+                    streamingStatus = "error"
+                    feedback = .error(error.localizedDescription)
+                } else {
+                    streamingStatus = "awaiting subscription confirmation"
+                }
+            }
+        }
+    }
+
+    private func stopMarketData(completion: (() -> Void)? = nil) {
+        BackendProcessSupervisor.shared.stopCapitalComMarketData { result in
+            DispatchQueue.main.async {
+                if case .failure(let error) = result {
+                    feedback = .error(error.localizedDescription)
+                } else {
+                    isStreaming = false
+                    streamingStatus = "stopped"
+                    latestQuote = nil
+                    latestCandleSummary = ""
+                }
+                completion?()
+            }
         }
     }
 
