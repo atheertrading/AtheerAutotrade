@@ -305,6 +305,7 @@ final class BackendProcessSupervisor {
                         capabilities.contains("broker.connect"),
                         capabilities.contains("broker.status"),
                         capabilities.contains("broker.marketSearch"),
+                        capabilities.contains("broker.historicalPrices"),
                         capabilities.contains("broker.stream.start"),
                         capabilities.contains("broker.stream.stop"),
                         let keyAgreement = response["keyAgreement"] as? [String: Any],
