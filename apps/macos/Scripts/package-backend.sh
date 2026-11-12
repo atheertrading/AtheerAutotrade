@@ -4,12 +4,19 @@ set -euo pipefail
 REPOSITORY_ROOT="$(cd "${SRCROOT}/../.." && pwd)"
 BACKEND_ROOT="${REPOSITORY_ROOT}/services/backend"
 NODE_SOURCE="${ATHEER_NODE_BINARY:-$(command -v node || true)}"
+if [[ -z "${NODE_SOURCE}" && -x "/usr/local/bin/node" ]]; then
+  NODE_SOURCE="/usr/local/bin/node"
+fi
+if [[ -z "${NODE_SOURCE}" && -x "/opt/homebrew/bin/node" ]]; then
+  NODE_SOURCE="/opt/homebrew/bin/node"
+fi
 
 if [[ -z "${NODE_SOURCE}" || ! -x "${NODE_SOURCE}" ]]; then
   echo "error: Node.js 24 is required to package the ATHEER backend runtime." >&2
   exit 1
 fi
 
+export PATH="$(dirname "${NODE_SOURCE}"):${PATH}"
 NODE_MAJOR="$("${NODE_SOURCE}" -p 'process.versions.node.split(".")[0]')"
 if [[ "${NODE_MAJOR}" != "24" ]]; then
   echo "error: ATHEER backend requires Node.js 24.x; found $("${NODE_SOURCE}" --version)." >&2
