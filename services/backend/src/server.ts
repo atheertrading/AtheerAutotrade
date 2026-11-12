@@ -9,21 +9,30 @@ function startHttpDiagnosticServer(): void {
       route(request, response);
     } catch {
       console.error("Unhandled diagnostic request error.");
-      if (!response.headersSent) response.writeHead(500, {
-        "content-type": "application/json; charset=utf-8",
-        "cache-control": "no-store"
-      });
-      response.end(JSON.stringify({ error: { code: "INTERNAL_ERROR", message: "The request could not be completed." } }));
+      if (!response.headersSent) {
+        response.writeHead(500, {
+          "content-type": "application/json; charset=utf-8",
+          "cache-control": "no-store"
+        });
+      }
+      response.end(JSON.stringify({
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "The request could not be completed."
+        }
+      }));
     }
   });
 
-  server.on("error", () => {
-    console.error("HTTP diagnostic server failed");
+  server.on("error", (error) => {
+    console.error("HTTP diagnostic server failed", error);
     process.exitCode = 1;
   });
+
   server.on("clientError", (_error, socket) => {
     socket.end("HTTP/1.1 400 Bad Request\r\nConnection: close\r\n\r\n");
   });
+
   server.listen(environment.port, environment.host, () => {
     console.error(`${environment.serviceName} diagnostic endpoint listening on http://${environment.host}:${environment.port}`);
   });
@@ -48,6 +57,7 @@ function startHttpDiagnosticServer(): void {
       }
     });
   }
+
   process.on("SIGINT", () => shutdown("SIGINT"));
   process.on("SIGTERM", () => shutdown("SIGTERM"));
 }
@@ -57,7 +67,9 @@ const transport = transportArgument?.slice("--transport=".length) ?? "http";
 
 if (transport === "stdio") {
   void serveStdioIpc(process.stdin, process.stdout)
-    .then(() => process.stdin.destroy())
+    .then(() => {
+      process.stdin.destroy();
+    })
     .catch(() => {
       console.error("Local IPC runtime failed.");
       process.exitCode = 1;
