@@ -32,7 +32,7 @@ This register tracks milestone state and prevents completed work from being rest
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-DOM-001 | Provider-neutral instrument domain model | Immutable instrument identity, asset class/status, optional currency and contract metadata, exact decimal strings, runtime validation, unit tests | PENDING VERIFICATION |
+| ATP-DOM-001 | Provider-neutral instrument domain model | TypeScript build passed; all 10 backend tests passed on user's Mac on 2026-11-12 | DONE — VERIFIED; PR #11 pending merge |
 
 Implementation branch: `feature/trading-domain-instrument-models`.
 
@@ -47,7 +47,7 @@ No new runtime or development dependencies were added. No broker, market-data, o
 
 | ID | Item | Evidence | Status / rule |
 |---|---|---|---|
-| ATP-DOM-001-VERIFY | Run backend build and tests including instrument validation cases | Test source authored; no local execution result yet | PENDING VERIFICATION. Run `npm test` in `services/backend` once after pulling this branch. |
+| ATP-DOM-001-VERIFY | Run backend build and tests including instrument validation cases | User ran `npm ci --include=dev` and `npm test` in isolated worktree; TypeScript build passed, 10 tests passed, 0 failed | DONE — VERIFIED on 2026-11-12 |
 | ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Current verified local build destination was x86_64 | PLANNED; do not claim arm64 runtime validation. |
 
 ## Product capabilities not yet implemented
@@ -62,9 +62,10 @@ Codex's original authorized assignment in this workflow was the bounded XCTest p
 
 ## Current next action
 
-Validate ATP-DOM-001 by running the backend build and test suite on the user's development Mac. Review the PR and merge only after the test suite passes. Do not rerun the completed Xcode signing repair or reopen Git troubleshooting.
+Review the final PR diff and merge PR #11. After merge, synchronize the local project carefully, preserving unrelated local Xcode signing changes. Do not rerun the completed Xcode signing repair or reopen Git troubleshooting.
 
 ## Change log
 
 - 2026-11-12: Reconciled signing status against the user's `Build Succeeded` confirmation and the supplied Codex report.
-- 2026-11-12: Started ATP-DOM-001 on `feature/trading-domain-instrument-models`; model and tests authored, execution pending.
+- 2026-11-12: Started ATP-DOM-001 on `feature/trading-domain-instrument-models`; model and tests authored.
+- 2026-11-12: User verified ATP-DOM-001 backend build and all 10 tests successfully in an isolated worktree; PR #11 remains open pending final review and merge.
