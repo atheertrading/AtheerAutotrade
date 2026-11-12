@@ -1,7 +1,7 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`  
+**Latest observed main baseline:** `f13ce0e3f8157a4901c99b8d928f2540cd213adc`  
 **Active branch:** `security/atp-sec-ipc-001-swift-supervisor`
 
 ## Status definitions
@@ -40,7 +40,9 @@
 
 Merged backend foundation: PR #15, commit `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
 
-Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor`.
+Native Swift IPC supervisor: PR #16, merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
+
+Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now carries ATP-CAP-UI-001 changes).
 
 ### Batch 1 changes on active branch
 
@@ -128,5 +130,6 @@ First compile and verify the Capital.com broker screen and Keychain store on the
 
 - 2026-11-12: PR #14 merged as `9445a749d78c63030e9125041a6103dca0eabafc`; ATP-ARCH-REBASE-001 completed.
 - 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
-- 2026-11-12: Started `security/atp-sec-ipc-001-swift-supervisor`; native Swift IPC source, XCTest source, Xcode membership, and signed bundle layout contract authored. Verification pending.
+- 2026-11-12: Started `security/atp-sec-ipc-001-swift-supervisor`; native Swift IPC source, XCTest source, Xcode membership, and signed bundle layout contract authored. PR #16 subsequently merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`; verification pending.
+- 2026-11-13: Added ATP-CAP-UI-001 on the same branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. Verification and PR #17 pending.
 - 2026-11-13: Added ATP-CAP-UI-001 on the same active branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. PR #16 remains draft; Xcode build and UI/Keychain tests are pending.
