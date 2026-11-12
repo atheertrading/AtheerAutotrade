@@ -25,7 +25,7 @@ export interface CapitalComOhlcUpdate {
 export interface CapitalComStreamCallbacks {
   readonly onQuote: (quote: CapitalComQuote) => void;
   readonly onOhlc: (bar: CapitalComOhlcUpdate) => void;
-  readonly onStatus?: (status: "connecting" | "connected" | "reconnecting" | "stopped") => void;
+  readonly onStatus?: (status: "connecting" | "transport-connected" | "connected" | "reconnecting" | "stopped") => void;
   readonly onError?: (error: Error) => void;
 }
 
@@ -134,6 +134,7 @@ export class CapitalComMarketDataStream {
   private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
   private reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
   private options: CapitalComStreamOptions | undefined;
+  private readonly confirmedSubscriptions = new Set<string>();
 
   constructor(
     private readonly getSession: () => Promise<CapitalComSession>,
@@ -196,9 +197,10 @@ export class CapitalComMarketDataStream {
       socket.addEventListener("open", () => {
         if (this.stopped || this.socket !== socket) return;
         this.reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
+        this.confirmedSubscriptions.clear();
         this.sendSubscriptions(socket, session);
         this.startKeepalive(socket, session);
-        this.callbacks.onStatus?.("connected");
+        this.callbacks.onStatus?.("transport-connected");
       });
 
       socket.addEventListener("message", (event: MessageEvent) => {
@@ -212,6 +214,7 @@ export class CapitalComMarketDataStream {
 
       socket.addEventListener("close", () => {
         if (this.socket === socket) this.socket = undefined;
+        this.confirmedSubscriptions.clear();
         this.clearKeepalive();
         if (!this.stopped) this.scheduleReconnect();
       });
@@ -308,12 +311,40 @@ export class CapitalComMarketDataStream {
       const parsed: unknown = JSON.parse(text);
       if (!isRecord(parsed) || !isRecord(parsed.payload)) return;
 
+      if (parsed.status === "ERROR") {
+        this.callbacks.onError?.(new Error("Capital.com rejected a market data stream request."));
+        return;
+      }
+
+      if (
+        parsed.destination === "marketData.subscribe" ||
+        parsed.destination === "OHLCMarketData.subscribe"
+      ) {
+        const subscriptions = parsed.payload.subscriptions;
+        if (
+          parsed.status !== "OK" ||
+          !isRecord(subscriptions) ||
+          Object.keys(subscriptions).length === 0 ||
+          Object.values(subscriptions).some((status) => status !== "PROCESSED")
+        ) {
+          this.callbacks.onError?.(new Error("Capital.com did not confirm all market data subscriptions."));
+          return;
+        }
+
+        this.confirmedSubscriptions.add(parsed.destination);
+        if (
+          this.confirmedSubscriptions.has("marketData.subscribe") &&
+          this.confirmedSubscriptions.has("OHLCMarketData.subscribe")
+        ) {
+          this.callbacks.onStatus?.("connected");
+        }
+        return;
+      }
+
       if (parsed.destination === "quote") {
         this.callbacks.onQuote(parseQuote(parsed.payload));
       } else if (parsed.destination === "ohlc.event") {
         this.callbacks.onOhlc(parseOhlc(parsed.payload));
-      } else if (parsed.status === "ERROR") {
-        this.callbacks.onError?.(new Error("Capital.com rejected a market data stream request."));
       }
     } catch (error) {
       this.callbacks.onError?.(
