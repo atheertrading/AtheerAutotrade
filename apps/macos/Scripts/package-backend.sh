@@ -54,7 +54,7 @@ cp "${BACKEND_ROOT}/package.json" "${BACKEND_DEST}/package.json"
 
 if [[ "${CODE_SIGNING_ALLOWED:-NO}" == "YES" ]]; then
   SIGNING_IDENTITY="${EXPANDED_CODE_SIGN_IDENTITY:--}"
-  codesign --force --options runtime --timestamp=none --sign "${SIGNING_IDENTITY}" "${NODE_DEST}"
+  codesign --force --options runtime --entitlements "${SRCROOT}/Scripts/AtheerNodeRuntime.entitlements" --timestamp=none --sign "${SIGNING_IDENTITY}" "${NODE_DEST}"
   codesign --verify --strict "${NODE_DEST}"
 fi
 
