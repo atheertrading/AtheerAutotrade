@@ -30,17 +30,21 @@ If documents conflict, identify the conflict, prefer newer directly verified evi
 
 ## 3. Repository baseline
 
-The GitHub comparison performed for ATP-DOM-001 identified main at commit `28bca625c6a03604e77088c652bd5a2adcd15d34` as the branch base. PR #8 remains merged at `b18b0ff600459e2bd504a39d40c26c09b1fbaa3c`. This is repository-observed state, not proof that every local working copy is synchronized.
-
-The user confirmed that the earlier Git issue was resolved and files were pushed. Do not reopen Git troubleshooting without new evidence.
+- PR #11 (ATP-DOM-001) was squash-merged on 2026-11-12 as `fa68db5635042b43cda16e687eeffa4f138c5cbe`.
+- ATP-DOM-001 was verified by the user in an isolated worktree: TypeScript build succeeded and all 10 backend tests passed.
+- The earlier local Git status showed the user's `main` branch behind origin and containing local changes. The user safely saved tracked and untracked changes in `stash@{0}`; the working tree then reported clean and `main...origin/main [behind 33]`.
+- Do not pop, drop, apply, or overwrite that stash until the local synchronization plan is explicitly reviewed. Do not reset, clean, force-push, or change branches destructively.
+- The current broker implementation is being authored on `feature/atp-cap-001-capital-market-connectivity`; it is not yet merged into main.
 
 ## 4. Current implementation baseline
 
 - Native SwiftUI macOS application shell, dashboard, navigation destinations, and Trading Workspace are present.
 - Workspace persistence, panel management, resizing, and drag/drop are present.
 - Node.js/TypeScript backend exposes a local process health endpoint and structured 404 handling.
-- The provider-neutral Trading Domain instrument model is implemented on branch `feature/trading-domain-instrument-models`; see ATP-DOM-001 in the task register. On 2026-11-12, the user ran `npm ci --include=dev` successfully and `npm test` completed the TypeScript build plus all 10 backend tests with 10 passed and 0 failed.
-- Broker connectivity, live market data, account/portfolio integration, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading are not implemented.
+- Provider-neutral Trading Domain Instrument model is merged in PR #11.
+- The new Capital.com branch contains a read-only REST client (session creation, ping, market search, historical prices) and WebSocket market-data stream (quotes and OHLC), with reconnect and keepalive behavior plus mock-based tests.
+- The Capital.com adapter is not yet wired into the HTTP server or macOS application. No Keychain-backed credentials provider exists. No real Demo or Live account has been authenticated from this implementation. No real quote or candle has yet been received and verified. Therefore broker connectivity and operational market data remain **NOT VERIFIED**.
+- Account/portfolio integration, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading are not implemented.
 
 ## 5. XCTest, signing, and Codex boundaries
 
@@ -55,9 +59,9 @@ On 2026-11-12, Codex also reported:
 
 The user subsequently confirmed that Xcode displayed `Build Succeeded`. The informational XCTest framework messages about skipping strip on Apple-signed binaries are not errors.
 
-**Publication status:** The local Xcode signing correction has not been confirmed as committed/pushed to GitHub. The current feature branch does not intentionally include Xcode project or signing changes. Preserve the user's working copy; do not overwrite or reset it. Before a future release or merge that relies on signed builds, reconcile the local signing change with the repository.
+**Publication status:** The local Xcode signing correction has not been confirmed as committed/pushed to GitHub. Preserve the user's working copy and stash. Do not overwrite the local project file with the repository version.
 
-Codex is a task-bounded implementation/test tool, not the default project architect or executor. The original authorized Codex task was the XCTest problem. Do not silently expand future Codex tasks into broad audits or unrelated changes.
+Codex is a task-bounded implementation/test tool, not the default project architect or executor. The original authorized Codex task was the XCTest problem. Do not silently expand future Codex tasks into broad audits or unrelated implementation.
 
 ## 6. Development environment
 
@@ -85,6 +89,7 @@ These are recorded environment details, not a live machine inspection. Re-check 
 - Never store broker or Apple account credentials in source code, Git, logs, or ChatGPT.
 - LIVE trading remains disabled until all required safety gates and explicit user authorization are satisfied.
 - Missing broker specifications or market observations must remain unknown; never fabricate defaults.
+- Capital.com adapter must remain read-only until separate execution and Risk Engine milestones are accepted.
 
 ## 8. Working protocol
 
@@ -93,24 +98,36 @@ These are recorded environment details, not a live machine inspection. Re-check 
 3. Inspect relevant current files before editing.
 4. Define scope, dependencies, acceptance criteria, and verification.
 5. Implement one milestone without unrelated refactoring.
-6. Verify affected behavior only.
+6. Verify affected behavior only; do not repeat completed checks without a technical reason.
 7. Record actual results and the next action in the task register and implementation status.
 
 ## 9. Latest handoff — 2026-11-12
 
-The Apple Development / XCTest signing recovery is closed on the user's local Xcode environment based on the user's `Build Succeeded` confirmation and Codex's reported signature and XCTest verification. No arm64 runtime validation is claimed.
+### Completed: ATP-DOM-001
 
-The active implementation milestone is ATP-DOM-001: provider-neutral instrument identity and contract metadata. It is intentionally limited to a validated domain model and unit tests. It does not add broker integration, quote ingestion, order intent acceptance, risk evaluation, persistence, or execution.
+PR #11 merged at `fa68db5635042b43cda16e687eeffa4f138c5cbe`. The immutable provider-neutral Instrument model and its tests are present on main. User-run verification in the isolated worktree: `npm ci --include=dev` succeeded; `npm test` compiled TypeScript and passed 10/10 tests.
 
-Branch: `feature/trading-domain-instrument-models`.
+### Active: ATP-CAP-001 — Capital.com read-only market connectivity
 
-The branch contains:
-- `services/backend/src/modules/trading-domain/instrument.ts`
-- `services/backend/tests/instrument.test.mjs`
-- Updated Trading Domain README.
+Branch: `feature/atp-cap-001-capital-market-connectivity`.
 
-The implementation uses exact decimal strings for price/quantity increments and minimum quantity, keeps absent provider specifications absent, and freezes validated instrument objects.
+Current branch additions:
+- `services/backend/src/modules/broker-adapters/capital-com/capital-com-client.ts`
+- `services/backend/src/modules/broker-adapters/capital-com/capital-com-market-data-stream.ts`
+- `services/backend/src/modules/broker-adapters/capital-com/README.md`
+- `services/backend/tests/capital-com-client.test.mjs`
+- `services/backend/tests/capital-com-market-data-stream.test.mjs`
+- `docs/decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md`
 
-**Verification — user-run on 2026-11-12:** `npm ci --include=dev` completed successfully; `npm test` completed the TypeScript build and all 10 Node.js tests passed (10 passed, 0 failed, 0 skipped). The initial `tsc: command not found` was resolved by installing the lockfile dependencies in the isolated worktree; no global TypeScript installation or package-manifest change was required.
+The implementation is based on the official Capital.com Public API contracts. It has not yet been compiled or run in the user's environment. It has not authenticated to a real Demo account. Do not report broker connectivity, streaming stability, or candle integrity as achieved.
 
-The next action is final PR review and merge, followed by synchronizing the local project without overwriting unrelated local changes. Do not repeat the completed signing repair.
+### Required next actions
+
+1. Review the new TypeScript adapter and tests for compile/runtime defects; run the backend build and focused tests in an isolated worktree based on this branch.
+2. Implement a Keychain-backed credential provider and a secured local app-to-backend boundary. Do not expose credentials through unauthenticated HTTP.
+3. Wire a controlled read-only connection lifecycle into the application.
+4. Verify Demo authentication, market discovery, historical bars, real-time quotes, and OHLC updates using an actual Capital.com account.
+5. Add quote-age monitoring, stale-data states, reconnect recovery, timestamp/gap detection, and sustained-feed evidence.
+6. Only then consider the broker-connectivity milestone operationally verified.
+
+No local stash changes have been applied or discarded. The user's local repository synchronization remains pending.
