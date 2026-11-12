@@ -318,3 +318,20 @@ export class CapitalComMarketDataStream {
     }
   }
 }
+
+/**
+ * Wires stream reconnection to the REST client's session renewal and keeps
+ * both REST and WebSocket session activity alive while streaming.
+ */
+export function createCapitalComMarketDataStream(
+  client: import("./capital-com-client.js").CapitalComClient,
+  callbacks: CapitalComStreamCallbacks,
+  socketFactory?: SocketFactory
+): CapitalComMarketDataStream {
+  return new CapitalComMarketDataStream(
+    () => client.getSessionForStreaming(),
+    callbacks,
+    socketFactory,
+    () => client.ping()
+  );
+}
