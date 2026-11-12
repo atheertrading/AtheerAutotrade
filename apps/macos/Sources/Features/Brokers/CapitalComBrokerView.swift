@@ -42,7 +42,10 @@ struct CapitalComBrokerView: View {
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .background(AtheerColors.canvas)
-        .onAppear(perform: restoreCredentials)
+        .onAppear {
+            restoreCredentials()
+            refreshConnectionStatus()
+        }
         .alert("Remove saved credentials?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Remove Credentials", role: .destructive) {
@@ -572,6 +575,22 @@ struct CapitalComBrokerView: View {
             Label(message, systemImage: "exclamationmark.triangle.fill")
                 .foregroundColor(AtheerColors.negative)
                 .font(.system(size: 11, weight: .medium))
+        }
+    }
+
+    private func refreshConnectionStatus() {
+        BackendProcessSupervisor.shared.capitalComStatus { result in
+            DispatchQueue.main.async {
+                if case .success(let response) = result {
+                    isConnected = response["connected"] as? Bool == true
+                    connectionDetail = isConnected
+                        ? "Demo API session authenticated"
+                        : "No active broker session"
+                } else {
+                    isConnected = false
+                    connectionDetail = "Backend unavailable"
+                }
+            }
         }
     }
 
