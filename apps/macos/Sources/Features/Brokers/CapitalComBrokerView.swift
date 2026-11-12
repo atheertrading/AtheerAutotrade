@@ -742,7 +742,17 @@ struct CapitalComBrokerView: View {
                     connectionDetail = isConnected
                         ? "Demo API session authenticated"
                         : "No active broker session"
-                    if !isConnected { marketResults = [] }
+                    isStreaming = response["streaming"] as? Bool == true
+                    let activeEpics = response["streamingEpics"] as? [String] ?? []
+                    selectedEpic = activeEpics.first
+                    streamingStatus = isStreaming ? "active" : "stopped"
+                    if !isConnected {
+                        marketResults = []
+                        isStreaming = false
+                        selectedEpic = nil
+                        latestQuote = nil
+                        latestCandleSummary = ""
+                    }
                 } else {
                     isConnected = false
                     connectionDetail = "Backend unavailable"
