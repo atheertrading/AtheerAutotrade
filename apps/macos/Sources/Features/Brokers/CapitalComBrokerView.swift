@@ -230,6 +230,23 @@ struct CapitalComBrokerView: View {
                 .disabled(!canSave)
                 .opacity(canSave ? 1 : 0.48)
 
+                Button {
+                } label: {
+                    HStack(spacing: 7) {
+                        Image(systemName: "link")
+                        Text("Connect to Capital.com")
+                    }
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundColor(AtheerColors.textSecondary)
+                    .padding(.horizontal, 15)
+                    .frame(height: 40)
+                    .background(AtheerColors.elevated)
+                    .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
+                }
+                .buttonStyle(.plain)
+                .disabled(true)
+                .help("Connection will be enabled after the signed backend runtime and secure credential handoff are verified.")
+
                 if hasSavedCredentials {
                     Button("Remove Saved Credentials", role: .destructive) {
                         showingDeleteConfirmation = true
