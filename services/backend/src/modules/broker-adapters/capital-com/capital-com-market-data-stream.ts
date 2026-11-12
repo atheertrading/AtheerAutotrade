@@ -137,7 +137,8 @@ export class CapitalComMarketDataStream {
   constructor(
     private readonly getSession: () => Promise<CapitalComSession>,
     private readonly callbacks: CapitalComStreamCallbacks,
-    private readonly socketFactory: SocketFactory = (url) => new WebSocket(url)
+    private readonly socketFactory: SocketFactory = (url) => new WebSocket(url),
+    private readonly keepRestSessionAlive?: () => Promise<void>
   ) {}
 
   async start(options: CapitalComStreamOptions): Promise<void> {
@@ -182,6 +183,12 @@ export class CapitalComMarketDataStream {
       const session = await this.getSession();
       const host = session.streamingHost ?? "wss://api-streaming-capital.backend-capital.com/";
       const url = new URL("connect", host.endsWith("/") ? host : `${host}/`);
+      if (
+        url.protocol !== "wss:" ||
+        url.hostname !== "api-streaming-capital.backend-capital.com"
+      ) {
+        throw new Error("Capital.com returned an untrusted streaming endpoint.");
+      }
       const socket = this.socketFactory(url.toString());
       this.socket = socket;
 
@@ -253,6 +260,15 @@ export class CapitalComMarketDataStream {
         cst: session.cst,
         securityToken: session.securityToken
       }));
+
+      if (this.keepRestSessionAlive) {
+        void this.keepRestSessionAlive().catch((error: unknown) => {
+          this.callbacks.onError?.(
+            error instanceof Error ? error : new Error("Capital.com REST keepalive failed.")
+          );
+          if (this.socket === socket) socket.close(1011, "REST session keepalive failed");
+        });
+      }
     }, KEEPALIVE_INTERVAL_MS);
   }
 
