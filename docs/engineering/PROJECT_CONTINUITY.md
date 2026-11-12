@@ -111,6 +111,8 @@ Created and committed:
 
 No runtime source code changed. No build or tests were run because this is a documentation/architecture milestone.
 
+- Draft PR #14 is open: https://github.com/atheertrading/AtheerAutotrade/pull/14. It is not merged; GitHub reported mergeable=false at creation, so inspect the PR state/checks before any merge decision.
+
 ### Remaining within ATP-ARCH-REBASE-001
 
 1. Reconcile the remaining engineering status documents with the accepted product identity and current branch/PR evidence.
