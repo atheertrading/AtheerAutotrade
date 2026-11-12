@@ -334,6 +334,7 @@
 			);
 			inputPaths = (
 				"$(SRCROOT)/Scripts/package-backend.sh",
+				"$(SRCROOT)/Scripts/AtheerNodeRuntime.entitlements",
 				"$(SRCROOT)/../../services/backend/package-lock.json",
 				"$(SRCROOT)/../../services/backend/src/server.ts",
 			);
