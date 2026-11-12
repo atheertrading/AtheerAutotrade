@@ -8,7 +8,7 @@ This repository contains an incremental foundation:
 - a native SwiftUI macOS application shell and Trading Workspace;
 - a Node.js/TypeScript modular-monolith backend foundation with a process-health endpoint;
 - a provider-neutral Trading Domain Instrument model;
-- read-only Capital.com REST and WebSocket adapter source authored on a separate feature branch.
+- read-only Capital.com REST and WebSocket adapter source merged into the repository; operational integration and verification remain pending.
 
 The complete broker lifecycle is not integrated or verified. No actual Capital.com Demo session or broker-originated market observation has been verified from this implementation. Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and LIVE dealing are not implemented. Architecture diagrams describe target architecture, not implementation evidence.
 
