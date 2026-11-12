@@ -3,7 +3,7 @@ import Foundation
 /// Owns the backend child process and its anonymous stdio pipes.
 ///
 /// Expected signed bundle layout:
-/// - Contents/Frameworks/AtheerNodeRuntime/bin/node
+/// - Contents/Helpers/AtheerNodeRuntime/bin/node
 /// - Contents/Resources/Backend/dist/server.js
 ///
 /// The runtime is resolved only from the app bundle. PATH lookup and shell
@@ -86,7 +86,7 @@ final class BackendProcessSupervisor {
             .appendingPathComponent("Contents", isDirectory: true)
 
         let nodeURL = resources
-            .appendingPathComponent("Frameworks/AtheerNodeRuntime/bin/node")
+            .appendingPathComponent("Helpers/AtheerNodeRuntime/bin/node")
         let backendURL = resources
             .appendingPathComponent("Resources/Backend/dist/server.js")
 
@@ -262,6 +262,13 @@ final class BackendProcessSupervisor {
         isReady = false
         failAll(with: LocalIPCError.processTerminated)
         finishStart(.failure(LocalIPCError.processTerminated))
+        if let child = process, child.isRunning {
+            child.terminate()
+        }
+        detachHandlers()
+        closePipes()
+        process = nil
+        decoder.reset()
     }
 
     private func handleTermination(status: Int32) {
@@ -295,7 +302,7 @@ final class BackendProcessSupervisor {
     }
 
     private func failAll(with error: Error) {
-        let requests = pending.values
+        let requests = Array(pending.values)
         pending.removeAll()
         requests.forEach {
             $0.timeout.cancel()
