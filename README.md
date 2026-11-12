@@ -58,3 +58,5 @@ The backend currently listens on `127.0.0.1:3000` by default. `GET /health` repo
 - [System Overview](docs/architecture/SYSTEM_OVERVIEW.md)
 - [Module Boundaries](docs/architecture/MODULE_BOUNDARIES.md)
 - [ADR-0004 — Production Architecture Baseline](docs/decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
+- [ADR-0005 — Secure macOS IPC](docs/decisions/ADR-0005-SECURE-MACOS-IPC.md)
+- [Local IPC Protocol](docs/security/LOCAL_IPC_PROTOCOL.md)

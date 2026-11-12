@@ -1,17 +1,43 @@
 # Backend foundation
 
-This service is a TypeScript modular monolith using Node.js built-in HTTP modules. The HTTP runtime is deliberately limited to `GET /health` and structured 404 handling. It binds to loopback by default and accepts `HOST` and `PORT` configuration.
+This Node.js/TypeScript service is the backend modular monolith for ATHEER Trading Pro. It is a separate process from the native SwiftUI macOS client.
 
-## Broker adapter implementation in progress
+## Runtime modes
 
-A read-only Capital.com adapter is under review in `src/modules/broker-adapters/capital-com/`. It contains authenticated REST session and historical-price methods, plus WebSocket quote/OHLC subscriptions. It is not registered in the HTTP router, not wired to the macOS application, and cannot retrieve credentials until a concrete Keychain-backed provider is implemented.
+### Production desktop mode — stdio IPC
 
-Do not interpret the adapter source or a healthy backend process as proof of broker connectivity. No real Demo account session, quote, or candle has yet been verified.
+The macOS application will launch and supervise the backend as a child process. Parent-to-child requests use standard input; child-to-parent responses use standard output. Standard output is reserved exclusively for versioned NDJSON protocol frames. Standard error is for sanitized diagnostics only.
+
+The protocol handler at `src/api/stdio-ipc.ts` is wired into `server.ts` through the explicit `--transport=stdio` startup mode. It implements:
+- protocol version 1 handshake (`system.hello`);
+- process liveness ping (`system.ping`);
+- 65,536-byte maximum frame size;
+- strict request envelope and UUID validation;
+- duplicate request ID detection;
+- 4,096-request session limit;
+- explicit method allowlist and safe error responses.
+
+**The native Swift process launcher/client and bundled Node runtime are not yet implemented.** The backend build and tests have not yet been executed in a real Node.js environment.
+
+### Development/diagnostic mode — loopback HTTP
+
+The existing HTTP runtime currently exposes only `GET /health` and structured 404 handling. It binds to loopback by default and accepts `HOST` and `PORT` configuration. This mode is for development/diagnostics only; it is not the production desktop IPC boundary and must never expose broker/account operations.
+
+## Broker adapter
+
+The read-only Capital.com adapter source contains authenticated REST session and historical-price methods plus WebSocket quote/OHLC subscriptions. It is not registered in the HTTP router or the stdio IPC method allowlist, is not wired to the macOS application, and cannot retrieve credentials until the native Keychain provider and a separately reviewed secret-transfer contract are implemented.
+
+Do not interpret a healthy backend process, a successful IPC ping, or adapter source as proof of broker connectivity. No real Demo account session, quote, or candle has yet been verified.
 
 ## Build and test
 
 Run `npm ci`, `npm run build`, and `npm test`. The test suite uses Node.js built-in `node:test`.
 
-## Boundaries
+## Security boundaries
 
-The API must not directly expose broker credentials or order execution. Broker connectivity and market-data ingestion remain separate modules. Any future exposure-increasing intent is subject to the centralized Risk Engine boundary described in `docs/architecture/MODULE_BOUNDARIES.md`.
+- The native macOS application owns Keychain access.
+- The Node.js backend has no direct Keychain access.
+- No credential is passed through command-line arguments, environment variables, source files, or logs.
+- No production TCP listener or filesystem socket is part of the selected desktop IPC design.
+- The stdio protocol initially exposes no broker, account, credential, risk, order, or execution methods.
+- Any future exposure-increasing intent remains subject to the centralized Risk Engine; the Execution Gateway remains the only dealing path.

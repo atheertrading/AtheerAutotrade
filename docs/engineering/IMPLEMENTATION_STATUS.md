@@ -27,16 +27,21 @@
 - Mock-based client and stream tests.
 - Source exists in repository history; this status does not claim a real Demo session, broker-originated data, sustained stream, or reconnect continuity.
 
-### Architecture and governance documentation
-- Repository agent instructions and engineering continuity/task/status records.
-- Provider-neutral instrument and Capital.com connectivity ADRs.
-- Ten editable Mermaid architecture diagrams with explicit reconstruction provenance and target-architecture caveats.
-- ADR-0004 and the architecture rebase are being developed on `architecture/atp-arch-rebase-001`; not yet merged.
+### Security and local IPC
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop/backend IPC; no TCP listener or filesystem socket is required in desktop mode.
+- Versioned NDJSON protocol specification added at `docs/security/LOCAL_IPC_PROTOCOL.md`.
+- Backend protocol handler added at `services/backend/src/api/stdio-ipc.ts`; source includes handshake, ping, strict envelope validation, frame limits, UUID/duplicate checks, method allowlist, and safe error responses.
+- Focused test file added at `services/backend/tests/stdio-ipc.test.mjs`; tests have **not yet been executed** in this session.
+- Backend `server.ts` now supports explicit `--transport=stdio` production desktop mode; it serves the IPC protocol on stdin/stdout and does not create the HTTP server in that mode. The default `http` mode remains a development diagnostic endpoint.
+- A child-process integration test was added to exercise handshake/ping and verify stdout contains only protocol frames; tests have not yet been executed.
+- No native Swift process launcher/client or bundled Node runtime exists yet.
+- Native macOS app remains the intended Keychain owner; credential provider and secret transfer are not implemented.
+- Bundled Node runtime, code-signing verification, process supervision, and crash/restart behavior remain pending.
 
 ## Not implemented or not operationally integrated
 
 - Backend runtime composition root and module lifecycle orchestration.
-- Authenticated local application-to-backend IPC/API boundary.
+- Integrated local application-to-backend IPC: protocol handler exists, but backend runtime and native Swift client are not connected.
 - Concrete macOS Keychain-backed credential provider and secure credential handoff.
 - Broker session orchestration integrated into backend runtime and desktop application.
 - Actual Capital.com Demo authentication, market search, historical bars, live quotes, and OHLC events verified from this code.
@@ -59,7 +64,7 @@
 - OMS owns durable intent lifecycle; Execution Gateway is the only dealing path and accepts only Risk-approved, OMS-authorized intent.
 - Broker-confirmed account and execution state is authoritative.
 - Unknown broker submission outcomes require reconciliation, never blind retry.
-- Loopback binding alone is not authentication. Secure local IPC and Keychain credential handoff require a dedicated threat-modeled ADR before broker operations are exposed.
+- Production desktop IPC uses parent-owned anonymous standard-I/O pipes per ADR-0005; loopback HTTP is diagnostic-only. Native app owns Keychain access; credential handoff remains separately deferred.
 - Process health, backend readiness, broker REST, WebSocket, feed quality, persistence, trading readiness, and LIVE authorization are separate states.
 - LIVE remains disabled until all safety controls and explicit user authorization are implemented and verified.
 
@@ -67,16 +72,17 @@
 
 - ATP-DOM-001: user reported `npm ci --include=dev` succeeded and all 10 backend tests passed after TypeScript compilation.
 - XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
-- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001. Draft PR #14 is open and unmerged; GitHub initially reported mergeable=false; a subsequent PR read reports mergeable=true / clean. No CI check runs are configured or reported.
-- No source runtime code or dependencies changed during this architecture documentation work.
+- PR #14 (ATP-ARCH-REBASE-001) was merged on 2026-11-12 as `9445a749d78c63030e9125041a6103dca0eabafc`.
+- ATP-SEC-IPC-001 adds the backend stdio protocol handler and focused tests. No backend build/test, local Xcode build, broker login, or live data observation has been executed for this batch.
+- Native app process integration, runtime packaging/signing, and Keychain credential transfer remain unimplemented.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next verification and implementation gates
 
-1. Complete architecture document/diagram consistency review and resolve the mergeability/review state of draft PR #14.
-2. Design and threat-model secure local IPC and Keychain credential-provider ownership; record the selected mechanism in a dedicated ADR before implementation.
-3. Implement backend runtime/composition and distinct readiness states.
-4. Integrate Capital.com read-only session lifecycle only after the secure boundary exists.
-5. Implement Market Data quality/freshness and sustained-feed verification.
-6. Establish durable domain/persistence foundations before Risk, OMS, and Execution.
-7. Keep LIVE disabled throughout all preceding milestones.
+1. Wire stdio IPC into a dedicated production backend startup mode while preserving HTTP health as development-only.
+2. Add real Node stream integration tests and run the backend build/test suite in a supported Node.js 24 environment.
+3. Implement the native Swift Process launcher and strict NDJSON client; add its files to the Xcode project and verify on the user's actual Mac.
+4. Package a known Node runtime and compiled backend with the signed app; verify hardened-runtime and child-process behavior.
+5. Design a separate one-shot Keychain credential transfer contract before any broker session method is added.
+6. Integrate Capital.com read-only session lifecycle only after the secure boundary is verified.
+7. Keep LIVE disabled; no broker account, order, risk, or execution method is exposed by this IPC batch.

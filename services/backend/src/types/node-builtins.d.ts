@@ -33,7 +33,13 @@ declare module "node:http" {
 }
 
 declare const process: {
+  argv: string[];
   env: Record<string, string | undefined>;
+  stdin: AsyncIterable<Uint8Array> & { destroy(): void };
+  stdout: {
+    write(chunk: string): boolean;
+    once(event: "drain", listener: () => void): unknown;
+  };
   exitCode: number | undefined;
   on(event: "SIGINT" | "SIGTERM", listener: () => void): void;
 };
