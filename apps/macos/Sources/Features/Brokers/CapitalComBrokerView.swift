@@ -40,17 +40,27 @@ struct CapitalComBrokerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 20) {
                 pageHeader
-                connectionOverview
-                marketDiscoveryCard
-                credentialsCard
-                securityNotice
-                integrationStatus
+
+                HStack(alignment: .top, spacing: 18) {
+                    VStack(spacing: 18) {
+                        connectionOverview
+                        credentialsCard
+                        securityNotice
+                    }
+                    .frame(width: 350)
+
+                    VStack(spacing: 18) {
+                        marketDiscoveryCard
+                        integrationStatus
+                    }
+                    .frame(maxWidth: .infinity)
+                }
             }
             .frame(maxWidth: 1040, alignment: .leading)
-            .padding(.horizontal, 34)
-            .padding(.vertical, 30)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 26)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .background(AtheerColors.canvas)
