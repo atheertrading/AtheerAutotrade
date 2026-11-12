@@ -62,7 +62,6 @@ enum CapitalComCredentialStore {
         if updateStatus == errSecItemNotFound {
             var insertion = query
             insertion[kSecValueData as String] = data
-            insertion[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
 
             let addStatus = SecItemAdd(insertion as CFDictionary, nil)
             guard addStatus == errSecSuccess else {
