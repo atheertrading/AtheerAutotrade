@@ -95,7 +95,9 @@ No runtime code, dependencies, Xcode project settings, or broker execution metho
 
 ## Current next action
 
-Complete the remaining engineering-record and diagram consistency review for ATP-ARCH-REBASE-001, then open a draft PR. After architecture review, design and record the secure local IPC/Keychain credential-provider decision before implementing broker operations in the desktop app.
+Complete the remaining engineering-record and diagram consistency review for ATP-ARCH-REBASE-001 and resolve the PR #14 mergeability/review state. After architecture review, design and record the secure local IPC/Keychain credential-provider decision before implementing broker operations in the desktop app.
+
+- 2026-11-12: Opened draft PR #14 for ATP-ARCH-REBASE-001; not merged pending review and GitHub mergeability inspection.
 
 ## Change log
 
