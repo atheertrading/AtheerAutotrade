@@ -11,7 +11,7 @@
 - Capital.com broker screen with DEMO environment, Keychain credential entry/save/restore/delete, connection state, Connect/Disconnect actions, and authenticated market discovery UI.
 - Native app owns macOS Keychain access. Credential values are not persisted in preferences or project files.
 - IPCSecretChannel.swift uses ephemeral Curve25519/X25519 key agreement, HKDF-SHA256, and AES-256-GCM to encrypt the credential payload before it crosses the local app/backend pipe.
-- BackendProcessSupervisor.swift starts the backend from fixed app-bundle paths, performs protocol v2 handshake/capability negotiation, correlates requests, applies timeouts, and supervises child termination.
+- BackendProcessSupervisor.swift starts the backend from fixed app-bundle paths, performs protocol v2 handshake/capability negotiation, correlates requests, applies timeouts, consumes broker market-data events, and supervises child termination. The SwiftUI app delegate requests child shutdown during application termination.
 - Historical user evidence: Xcode Build Succeeded on 2026-11-12; four XCTest cases and signing checks were reported passing on x86_64. These results predate the current IPC v2 changes and do not verify this branch.
 
 ### Backend foundation
@@ -34,7 +34,7 @@
 - Backend TypeScript build and all Node tests for protocol v2 have not yet been executed. A Node 24 backend CI workflow has been added; its run result must be checked after PR creation.
 - X25519/HKDF/AES-GCM cross-language interoperability between CryptoKit and Node.js has test source but no executed result.
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
-- Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, process shutdown/restart, and UI state synchronization have not been verified.
+- Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
 - No real Capital.com Demo authentication, market search, historical-price response, live quote, or OHLC event has been verified against a real Demo account.
 
 ## Not implemented or not operationally integrated
