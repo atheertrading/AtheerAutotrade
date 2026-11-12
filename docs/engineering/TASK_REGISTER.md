@@ -74,7 +74,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ### Remaining scope and safety boundaries
 
-- WebSocket quote/OHLC adapter source is not yet exposed through IPC or consumed by the UI.
+- WebSocket quote/OHLC adapter is wired through IPC v2 event frames and the macOS UI; actual quote/OHLC delivery and sustained stream behavior remain unverified.
 - Market-data freshness, stale-state, gap detection, and recovery remain unimplemented.
 - Broker account/position snapshots and reconciliation remain unimplemented.
 - LIVE, order, dealing, and execution methods remain absent. All future exposure-increasing intents must pass through centralized Risk Engine and OMS authorization.
@@ -84,7 +84,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ID | Milestone | Dependency / scope | Status |
 |---|---|---|---|
 | ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
-| ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | PLANNED |
+| ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
 | ATP-CAP-ACCOUNT-001 | Read-only broker account and position snapshots | Confirm official Capital.com API contracts, normalize and reconcile broker-authoritative state | PLANNED |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
