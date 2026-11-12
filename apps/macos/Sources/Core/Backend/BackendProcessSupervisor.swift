@@ -31,6 +31,7 @@ final class BackendProcessSupervisor {
     private var isReady = false
     private var isStopping = false
     private var secretChannel: IPCSecretChannel?
+    private var eventHandler: ((String, [String: Any]) -> Void)?
 
     func start(completion: @escaping StartCompletion) {
         queue.async {
@@ -70,6 +71,32 @@ final class BackendProcessSupervisor {
         queue.async {
             self.terminateChild(with: LocalIPCError.processTerminated)
         }
+    }
+
+    func setEventHandler(_ handler: ((String, [String: Any]) -> Void)?) {
+        queue.async {
+            self.eventHandler = handler
+        }
+    }
+
+    func startCapitalComMarketData(
+        epic: String,
+        completion: @escaping Completion
+    ) {
+        request(
+            method: "broker.stream.start",
+            payload: [
+                "epics": [epic],
+                "resolutions": ["MINUTE"],
+                "candleType": "classic"
+            ],
+            timeout: 20,
+            completion: completion
+        )
+    }
+
+    func stopCapitalComMarketData(completion: @escaping Completion) {
+        request(method: "broker.stream.stop", payload: [:], timeout: 10, completion: completion)
     }
 
     /// Loads credentials from Keychain, encrypts them with the per-process
@@ -270,6 +297,8 @@ final class BackendProcessSupervisor {
                         capabilities.contains("broker.connect"),
                         capabilities.contains("broker.status"),
                         capabilities.contains("broker.marketSearch"),
+                        capabilities.contains("broker.stream.start"),
+                        capabilities.contains("broker.stream.stop"),
                         let keyAgreement = response["keyAgreement"] as? [String: Any],
                         keyAgreement["algorithm"] as? String == "X25519-HKDF-SHA256-AES-256-GCM",
                         let serverPublicKey = keyAgreement["publicKey"] as? String,
@@ -354,6 +383,15 @@ final class BackendProcessSupervisor {
         do {
             let frames = try decoder.append(data)
             for frame in frames {
+                if
+                    let envelope = try JSONSerialization.jsonObject(with: frame) as? [String: Any],
+                    envelope["kind"] as? String == "event"
+                {
+                    let event = try LocalIPCProtocol.event(from: frame)
+                    eventHandler?(event.name, event.payload)
+                    continue
+                }
+
                 let response = try LocalIPCProtocol.response(from: frame)
                 guard let pendingRequest = pending.removeValue(forKey: response.id) else {
                     throw LocalIPCError.invalidResponse
