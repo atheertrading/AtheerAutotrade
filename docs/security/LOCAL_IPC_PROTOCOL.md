@@ -135,7 +135,8 @@ Never include stack traces, file paths, raw provider responses, credentials, ses
 | `system.hello` | Negotiate protocol and establish ephemeral secret channel | Implemented in source |
 | `system.ping` | Confirm local IPC process responds | Implemented in source |
 | `broker.credentials.submit` | Submit exactly one encrypted credential envelope per child session; backend retains it in memory only | Implemented in source |
-| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |\n| `broker.status` | Read current broker session state | Implemented in source |
+| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |
+| `broker.status` | Read current broker session state | Implemented in source |
 | `broker.disconnect` | Invalidate session and clear backend credential/session state | Implemented in source |
 | `broker.marketSearch` | Search Capital.com instruments | Implemented in source |
 | `broker.historicalPrices` | Retrieve validated historical OHLC snapshots | Implemented in source |
