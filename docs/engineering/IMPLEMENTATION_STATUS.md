@@ -39,3 +39,22 @@
 - Universal arm64 app execution on Apple Silicon hardware or CI.
 - Distribution, signing, notarization, deployment, threat modeling, and service authentication before any external exposure.
 - Architecture and operational controls before any trading-related capability.
+
+
+## Latest local Xcode configuration activity — 2026-11-12
+
+A user-provided Codex transcript reports local (not yet confirmed committed/pushed) changes to:
+- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj`: automatic Apple Development signing and related configuration.
+- `apps/macos/AtheerAutotrade.entitlements`: App Sandbox plus outgoing network client entitlement.
+- `apps/macos/AtheerAutotrade.xcodeproj/xcshareddata/xcschemes/AtheerAutotrade.xcscheme`: existing XCTest target added to the shared Test action.
+
+Codex reported no Swift source or workspace feature changes.
+
+### Verification reported in the transcript
+
+- Xcode project resolution/effective settings inspection: reported successful.
+- Normal Debug build: failed at code signing because Xcode had no configured Developer account/Team and the machine had zero signing identities.
+- XCTest: command reported `TEST SUCCEEDED`, 4 passed, 0 failed, using a command-line-only signing override.
+- No signed app, embedded signed entitlements, Developer Portal capability, or runtime network verification was established.
+
+These are transcript-reported results, not independently inspected artifacts. The local configuration changes remain pending exact diff review before acceptance or publication.
