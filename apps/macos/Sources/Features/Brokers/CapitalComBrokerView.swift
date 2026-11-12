@@ -71,6 +71,9 @@ struct CapitalComBrokerView: View {
         }
         .onDisappear {
             BackendProcessSupervisor.shared.setEventHandler(nil)
+            if isStreaming {
+                BackendProcessSupervisor.shared.stopCapitalComMarketData { _ in }
+            }
         }
         .alert("Remove saved credentials?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
