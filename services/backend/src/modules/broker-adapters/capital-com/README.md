@@ -10,7 +10,8 @@ This module contains the first read-only Capital.com connectivity implementation
 - Market search and historical price retrieval.
 - WebSocket quote subscriptions through `marketData.subscribe`.
 - WebSocket OHLC subscriptions through `OHLCMarketData.subscribe`.
-- WebSocket keepalive, REST session keepalive, bounded reconnect backoff, and re-subscription.
+- WebSocket keepalive, optional REST session keepalive (enabled by the provided client/stream factory), bounded reconnect backoff, and re-subscription.
+- Separate transport-connected and subscription-confirmed states; the stream reports fully connected only after both quote and OHLC subscriptions are acknowledged.
 - Runtime validation of incoming quote and OHLC messages.
 - A hard limit of 40 unique epics per streaming subscription.
 
