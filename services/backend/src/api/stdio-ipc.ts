@@ -164,7 +164,9 @@ export async function serveStdioIpc(
               "broker.status",
               "broker.disconnect",
               "broker.marketSearch",
-              "broker.historicalPrices"
+              "broker.historicalPrices",
+              "broker.stream.start",
+              "broker.stream.stop"
             ],
             keyAgreement: {
               algorithm: "X25519-HKDF-SHA256-AES-256-GCM",
@@ -227,6 +229,37 @@ export async function serveStdioIpc(
               }
               const result = await broker.searchMarkets(request.payload.searchTerm);
               await writeResponse(output, success(request.id, { markets: result.markets }));
+              break;
+            }
+            case "broker.stream.start": {
+              if (!hasExactKeys(request.payload, ["epics", "resolutions", "candleType"])
+                || !Array.isArray(request.payload.epics)
+                || !request.payload.epics.every((epic) => typeof epic === "string")
+                || !Array.isArray(request.payload.resolutions)
+                || !request.payload.resolutions.every((resolution) => typeof resolution === "string")
+                || (request.payload.candleType !== "classic" && request.payload.candleType !== "heikin-ashi")) {
+                throw new TypeError("epics, resolutions, and a supported candleType are required.");
+              }
+              await broker.startMarketDataStream({
+                epics: request.payload.epics as string[],
+                resolutions: request.payload.resolutions as import("../modules/broker-adapters/capital-com/capital-com-client.js").CapitalComResolution[],
+                candleType: request.payload.candleType
+              }, (event, payload) => {
+                void writeResponse(output, {
+                  protocol: LOCAL_IPC_PROTOCOL,
+                  version: LOCAL_IPC_VERSION,
+                  kind: "event",
+                  event,
+                  payload
+                }).catch(() => undefined);
+              });
+              await writeResponse(output, success(request.id, { started: true }));
+              break;
+            }
+            case "broker.stream.stop": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.stream.stop does not accept payload fields.");
+              broker.stopMarketDataStream();
+              await writeResponse(output, success(request.id, { stopped: true }));
               break;
             }
             case "broker.historicalPrices": {
