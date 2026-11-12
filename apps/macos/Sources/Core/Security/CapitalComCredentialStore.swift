@@ -58,20 +58,18 @@ enum CapitalComCredentialStore {
         ]
 
         let updateStatus = SecItemUpdate(query as CFDictionary, attributes as CFDictionary)
-        if updateStatus == errSecSuccess {
-            return
-        }
 
-        guard updateStatus == errSecItemNotFound else {
+        if updateStatus == errSecItemNotFound {
+            var insertion = query
+            insertion[kSecValueData as String] = data
+            insertion[kSecAttrAccessible as String] = kSecAttrAccessibleWhenUnlockedThisDeviceOnly
+
+            let addStatus = SecItemAdd(insertion as CFDictionary, nil)
+            guard addStatus == errSecSuccess else {
+                throw CapitalComCredentialStoreError.keychainStatus(addStatus)
+            }
+        } else if updateStatus != errSecSuccess {
             throw CapitalComCredentialStoreError.keychainStatus(updateStatus)
-        }
-
-        var insertion = query
-        insertion[kSecValueData as String] = data
-        let addStatus = SecItemAdd(insertion as CFDictionary, nil)
-
-        guard addStatus == errSecSuccess else {
-            throw CapitalComCredentialStoreError.keychainStatus(addStatus)
         }
 
         guard try load() == credentials else {
@@ -97,11 +95,17 @@ enum CapitalComCredentialStore {
 
 enum CapitalComCredentialStoreError: LocalizedError {
     case keychainStatus(OSStatus)
+    case invalidStoredData
+    case verificationFailed
 
     var errorDescription: String? {
         switch self {
         case .keychainStatus(let status):
-            return "Keychain operation failed (OSStatus \(status))."
+            return "Keychain operation failed (OSStatus \\(status))."
+        case .invalidStoredData:
+            return "The saved Capital.com credential record could not be decoded."
+        case .verificationFailed:
+            return "Keychain save verification failed."
         }
     }
 }
