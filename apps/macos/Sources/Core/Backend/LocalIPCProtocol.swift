@@ -48,8 +48,12 @@ enum LocalIPCProtocol {
             envelope["version"] as? Int == version,
             envelope["kind"] as? String == "event",
             let name = envelope["event"] as? String,
-            !name.isEmpty,
-            name.count <= 64,
+            Set([
+                "broker.marketData.status",
+                "broker.marketData.quote",
+                "broker.marketData.ohlc",
+                "broker.marketData.error"
+            ]).contains(name),
             let payload = envelope["payload"] as? [String: Any]
         else {
             throw LocalIPCError.invalidResponse
