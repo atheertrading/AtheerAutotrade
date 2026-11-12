@@ -244,6 +244,7 @@
 			buildPhases = (
 				A40000000000000000000001 /* Frameworks */,
 				A80000000000000000000001 /* Sources */,
+				A90000000000000000000001 /* Package Backend Runtime */,
 			);
 			buildRules = (
 			);
@@ -324,7 +325,28 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-	/* Begin PBXContainerItemProxy section */
+	/* Begin PBXShellScriptBuildPhase section */
+		A90000000000000000000001 /* Package Backend Runtime */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"$(SRCROOT)/Scripts/package-backend.sh",
+				"$(SRCROOT)/../../services/backend/package-lock.json",
+				"$(SRCROOT)/../../services/backend/src/server.ts",
+			);
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/$(CONTENTS_FOLDER_PATH)/Helpers/AtheerNodeRuntime/bin/node",
+				"$(TARGET_BUILD_DIR)/$(UNLOCALIZED_RESOURCES_FOLDER_PATH)/Backend/dist/server.js",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/bash;
+			shellScript = "\"$(SRCROOT)/Scripts/package-backend.sh\"\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXContainerItemProxy section */
 		T800000000000000000000001 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = A5000000000000000000000A /* Project object */;
