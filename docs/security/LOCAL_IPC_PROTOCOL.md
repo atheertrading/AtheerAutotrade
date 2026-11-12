@@ -210,7 +210,7 @@ Incompatible handshake, framing, required-field, method, or error-semantic chang
 
 ## 10. Verification status
 
-Backend TypeScript compilation and 31/31 Node tests passed in GitHub Actions on Node.js 24.22.2 (run 43332525299). Xcode build, CryptoKit/Node cross-language interoperability, packaged runtime launch, and actual Capital.com Demo authentication remain unverified on the target Mac.
+Backend TypeScript compilation and 31/31 Node tests passed in GitHub Actions on Node.js 24.22.2 (run 43332767979). Xcode build, CryptoKit/Node cross-language interoperability, packaged runtime launch, and actual Capital.com Demo authentication remain unverified on the target Mac.
 
 ## 11. References
 
