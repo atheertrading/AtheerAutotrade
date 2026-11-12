@@ -33,14 +33,14 @@ The native supervisor resolves only these fixed paths:
 - Xcode app target includes the Package Backend Runtime shell-script build phase.
 - The phase invokes apps/macos/Scripts/package-backend.sh.
 - The script requires Node.js 24 and a universal x86_64 + arm64 executable at build time.
-- The script runs npm ci when the lockfile marker is absent/stale, runs the strict TypeScript build, copies the Node executable and compiled backend into the bundle, and signs the nested Node executable when Xcode code signing is enabled with a signing identity.
+- The script runs npm ci when the lockfile marker is absent/stale, runs the strict TypeScript build, copies the Node executable, package.json ESM metadata, and compiled backend into the bundle, and signs the nested Node executable when Xcode code signing is enabled. The Node helper is signed with the minimal AtheerNodeRuntime.entitlements profile (com.apple.security.cs.allow-jit) required for V8 JIT under Hardened Runtime.
 - ATHEER_NODE_BINARY may be supplied as a build setting/environment override for the exact Node executable. The normal runtime does not use that path; it launches the bundled copy.
 
 ## Remaining release requirements
 
 1. Pin and record an exact Node.js 24 patch version and checksum rather than relying only on the major-version check.
 2. Verify the Node runtime's source and universal architecture before release.
-3. Verify nested Node and outer app signatures with the intended Developer ID/Apple Development identity.
+3. Verify the Node helper signature and embedded JIT entitlement, then verify the outer app signature with the intended Developer ID/Apple Development identity.
 4. Verify hardened-runtime, library-validation, Gatekeeper, and notarization behavior.
 5. Verify that the final app contains no credentials, development configuration, node_modules, or unnecessary build artifacts.
 6. Verify launch, protocol v2 handshake, X25519/HKDF/AES-GCM interoperability, timeout, child crash, shutdown, and restart on the target Mac.
