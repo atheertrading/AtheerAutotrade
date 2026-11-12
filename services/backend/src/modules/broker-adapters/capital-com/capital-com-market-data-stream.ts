@@ -40,6 +40,7 @@ type SocketFactory = (url: string) => WebSocket;
 const MAX_EPICS = 40;
 const KEEPALIVE_INTERVAL_MS = 8 * 60 * 1000;
 const INITIAL_CONNECT_TIMEOUT_MS = 15_000;
+const STABLE_CONNECTION_RESET_MS = 30_000;
 const INITIAL_RECONNECT_DELAY_MS = 1_000;
 const MAX_RECONNECT_DELAY_MS = 30_000;
 
@@ -132,6 +133,7 @@ export class CapitalComMarketDataStream {
   private stopped = true;
   private keepaliveTimer: ReturnType<typeof setInterval> | undefined;
   private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  private connectionStableTimer: ReturnType<typeof setTimeout> | undefined;
   private reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
   private options: CapitalComStreamOptions | undefined;
   private readonly confirmedSubscriptions = new Set<string>();
@@ -196,7 +198,11 @@ export class CapitalComMarketDataStream {
 
       socket.addEventListener("open", () => {
         if (this.stopped || this.socket !== socket) return;
-        this.reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
+        this.clearStableConnectionTimer();
+        this.connectionStableTimer = setTimeout(() => {
+          this.reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
+          this.connectionStableTimer = undefined;
+        }, STABLE_CONNECTION_RESET_MS);
         this.confirmedSubscriptions.clear();
         this.sendSubscriptions(socket, session);
         this.startKeepalive(socket, session);
@@ -214,6 +220,7 @@ export class CapitalComMarketDataStream {
 
       socket.addEventListener("close", () => {
         if (this.socket === socket) this.socket = undefined;
+        this.clearStableConnectionTimer();
         this.confirmedSubscriptions.clear();
         this.clearKeepalive();
         if (!this.stopped) this.scheduleReconnect();
@@ -371,8 +378,16 @@ export class CapitalComMarketDataStream {
     }
   }
 
+  private clearStableConnectionTimer(): void {
+    if (this.connectionStableTimer !== undefined) {
+      clearTimeout(this.connectionStableTimer);
+      this.connectionStableTimer = undefined;
+    }
+  }
+
   private clearTimers(): void {
     this.clearKeepalive();
+    this.clearStableConnectionTimer();
     if (this.reconnectTimer !== undefined) {
       clearTimeout(this.reconnectTimer);
       this.reconnectTimer = undefined;
