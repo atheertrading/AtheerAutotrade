@@ -1,7 +1,7 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `f13ce0e3f8157a4901c99b8d928f2540cd213adc`  
+**Latest observed main baseline:** `9297f28fd2079dc5801cd89baf2b4723ed625a75`  
 **Active branch:** `fix/atp-cap-credentials-restore`
 
 ## Status definitions
@@ -36,7 +36,8 @@
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Select transport, define threat model and protocol, implement bounded backend stdio protocol, then integrate native app process/client and Keychain ownership | IN PROGRESS — native Swift IPC source and Xcode membership authored; compile/runtime verification and packaging pending |
+| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Select transport, define threat model and protocol, implement bounded backend stdio protocol, then integrate native app process/client and Keychain ownership | IN PROGRESS — native Swift IPC source merged; compile/runtime verification and packaging pending |
+| ATP-CAP-UI-002 | Restore and verify Capital.com Keychain credentials | Add Keychain load/read-back verification and restore saved values in the broker view | IN PROGRESS — draft PR #18; Xcode/Keychain verification pending |
 
 Merged backend foundation: PR #15, commit `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
 
@@ -68,7 +69,7 @@ Current implementation branch: `fix/atp-cap-credentials-restore` (ATP-CAP-UI-002
 - `apps/macos/Tests/LocalIPCProtocolTests.swift` — framing, envelope, size-limit, and protocol-version tests authored.
 - `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` — both source files and the XCTest file registered in their targets.
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — expected signed runtime/backend layout and packaging gates.
-- No Xcode build/test, Node build/test, runtime packaging, or child-process execution has been performed for this batch. No Keychain provider, credential handoff, or Capital.com credential UI has been added.
+- No Xcode build/test, Node build/test, runtime packaging, or child-process execution has been performed for this batch. The Capital.com screen and local Keychain store were added later and merged via PR #17; Keychain-to-backend credential handoff remains unimplemented.
 
 ### ATP-CAP-UI-001 — Capital.com broker screen (merged in PR #17; verification pending)
 
