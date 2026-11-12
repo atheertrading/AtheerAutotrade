@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #14 merge: `9445a749d78c63030e9125041a6103dca0eabafc`.
+- Latest observed `main` baseline after PR #15 merge: `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -42,10 +42,10 @@ Repository records are authoritative over conversation summaries. When documents
 ## 4. Current implementation baseline
 
 - Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
-- On main, backend exposes process health and structured 404 handling. The active IPC branch adds a stdio protocol handler module, not yet wired into process startup.
+- On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). The current feature branch adds the first native Swift IPC client/supervisor source and Xcode project membership; it has not been compiled or runtime-tested.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- No concrete macOS Keychain credential provider or integrated desktop/backend process client is verified. ADR-0005 selects parent-owned anonymous stdio pipes; the backend protocol handler is not yet wired into runtime.
+- No concrete macOS Keychain credential provider is implemented. ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode is merged, and native Swift client/supervisor source is authored on the current feature branch but not yet verified. Capital.com credential-entry UI remains absent.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
 - Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
@@ -107,7 +107,9 @@ PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dc
 
 ### ATP-SEC-IPC-001 — IN PROGRESS
 
-Active branch: `security/atp-sec-ipc-001-stdio-boundary`, created from the merged architecture baseline.
+PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
+
+Current branch: `security/atp-sec-ipc-001-swift-supervisor`.
 
 Batch 1 authored:
 - `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
@@ -116,15 +118,25 @@ Batch 1 authored:
 - `services/backend/tests/stdio-ipc.test.mjs` — focused protocol tests authored but not executed.
 - Updated security baseline, system overview, architecture diagrams, backend README, ADR index, task register, and implementation status.
 
-No Swift source or Xcode project file changed. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was added. No bundled Node runtime, native Swift Process supervisor/client, Keychain provider, or credential-transfer method exists yet. No broker/account/order/execution method is exposed. No build or test result has been observed for this batch.
+Batch 1–2 backend work is merged. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was authored, but the merged backend build/test result is not confirmed in this work session.
+
+Batch 3 authored on the current branch:
+- `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict request/response envelope handling and bounded NDJSON framing.
+- `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — fixed-path child launch, stdio pipes, handshake, request IDs/timeouts, stderr drain, and termination handling.
+- `apps/macos/Tests/LocalIPCProtocolTests.swift` — focused XCTest source.
+- Xcode project membership for the two production Swift files and the test file.
+- `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
+
+No Xcode build/test, backend build/test, runtime package, or child process execution has been performed for this batch. No Keychain provider or credential-transfer method exists; no Capital.com credential UI exists. No broker/account/order/execution method is exposed.
 
 ### Next batch
 
-1. Run Node 24 backend build/tests for the stdio production mode in an actual supported environment.
-2. Define the signed app bundle layout and Node runtime packaging approach.
-3. Implement native Swift child-process supervision and a strict NDJSON client; update Xcode project membership.
-4. Verify code signing, hardened-runtime behavior, process termination, and restart.
-5. Design a separate one-shot Keychain credential-transfer contract before adding broker session methods.
+1. Compile and test the native Swift IPC source and XCTest target on the user's actual Mac.
+2. Run the merged backend Node 24 build/tests in a supported environment.
+3. Add packaging copy phases for a pinned Node runtime and compiled backend output.
+4. Verify nested code signatures, hardened-runtime behavior, process launch, timeout, child crash, and explicit restart.
+5. Connect the supervisor to application lifecycle and expose process readiness.
+6. Design one-shot Keychain credential transfer, then implement the Capital.com credential UI and native Keychain provider before broker session methods.
 
 ### Local repository preservation
 
