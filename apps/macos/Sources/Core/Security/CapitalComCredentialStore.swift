@@ -101,7 +101,7 @@ enum CapitalComCredentialStoreError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .keychainStatus(let status):
-            return "Keychain operation failed (OSStatus \\(status))."
+            return "Keychain operation failed (OSStatus \(status))."
         case .invalidStoredData:
             return "The saved Capital.com credential record could not be decoded."
         case .verificationFailed:
