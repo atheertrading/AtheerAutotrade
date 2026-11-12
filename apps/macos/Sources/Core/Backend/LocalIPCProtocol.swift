@@ -102,6 +102,7 @@ enum LocalIPCError: LocalizedError {
     case processLaunchFailed(String)
     case processNotReady
     case processTerminated
+    case credentialsNotFound
     case requestTimedOut
     case frameTooLarge
     case invalidFrame
@@ -122,6 +123,8 @@ enum LocalIPCError: LocalizedError {
             return "The local backend has not completed its IPC handshake."
         case .processTerminated:
             return "The local backend process terminated."
+        case .credentialsNotFound:
+            return "No saved Capital.com credentials were found in macOS Keychain."
         case .requestTimedOut:
             return "The local backend request timed out."
         case .frameTooLarge:
