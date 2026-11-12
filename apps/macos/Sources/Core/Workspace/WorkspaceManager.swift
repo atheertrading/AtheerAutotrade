@@ -98,7 +98,7 @@ final class WorkspaceManager: ObservableObject {
         let destination = region ?? defaultRegion(for: kind)
         let order = (workspace.panels
             .filter { $0.region == destination }
-            .map(\\.sortOrder)
+            .map(\.sortOrder)
             .max() ?? -1) + 1
         let panel = WorkspacePanel(kind: kind, region: destination, sortOrder: order)
         updateActiveWorkspace { $0.panels.append(panel) }
