@@ -15,6 +15,19 @@ struct WorkspaceLayoutView: View {
         workspaceManager.activeWorkspace
     }
 
+    private var restorablePanels: [WorkspacePanel] {
+        guard let workspace = activeWorkspace else { return [] }
+
+        return workspace.panels
+            .filter { $0.visibility != .visible }
+            .sorted {
+                if $0.region == $1.region {
+                    return $0.sortOrder < $1.sortOrder
+                }
+                return regionOrder($0.region) < regionOrder($1.region)
+            }
+    }
+
     var body: some View {
         GeometryReader { geometry in
             Group {
@@ -231,7 +244,7 @@ struct WorkspaceLayoutView: View {
         )
     }
 
-    // MARK: - Header
+    // MARK: - Header and Panel Management
 
     private func workspaceHeader(
         _ workspace: AtheerWorkspace
@@ -249,6 +262,42 @@ struct WorkspaceLayoutView: View {
             }
 
             Spacer()
+
+            Menu {
+                panelRegionMenu(.left)
+                panelRegionMenu(.center)
+                panelRegionMenu(.right)
+                panelRegionMenu(.bottom)
+            } label: {
+                Label("Add Panel", systemImage: "plus")
+                    .font(.system(size: 11, weight: .semibold))
+            }
+            .menuStyle(.borderlessButton)
+            .help("Add a panel to the selected workspace region")
+
+            Menu {
+                if restorablePanels.isEmpty {
+                    Button("No Hidden or Closed Panels") {}
+                        .disabled(true)
+                } else {
+                    ForEach(restorablePanels) { panel in
+                        Button {
+                            workspaceManager.showPanel(panel.id)
+                        } label: {
+                            Label(
+                                "\(panel.title) — \(regionTitle(panel.region))",
+                                systemImage: panel.kind.symbol
+                            )
+                        }
+                    }
+                }
+            } label: {
+                Label("Restore Panels", systemImage: "arrow.uturn.backward")
+                    .font(.system(size: 11, weight: .medium))
+            }
+            .menuStyle(.borderlessButton)
+            .disabled(restorablePanels.isEmpty)
+            .help("Restore hidden or closed panels")
 
             HStack(spacing: 7) {
                 Circle()
@@ -270,6 +319,39 @@ struct WorkspaceLayoutView: View {
         }
         .padding(.horizontal, 5)
         .padding(.vertical, 4)
+    }
+
+    @ViewBuilder
+    private func panelRegionMenu(_ region: WorkspacePanelRegion) -> some View {
+        Menu(regionTitle(region)) {
+            ForEach(WorkspacePanelKind.allCases) { kind in
+                Button {
+                    workspaceManager.addPanel(kind, region: region)
+                } label: {
+                    Label(kind.title, systemImage: kind.symbol)
+                }
+            }
+        }
+    }
+
+    private func regionTitle(_ region: WorkspacePanelRegion) -> String {
+        switch region {
+        case .left: return "Left Sidebar"
+        case .center: return "Main Workspace"
+        case .right: return "Right Sidebar"
+        case .bottom: return "Bottom Workspace"
+        case .floating: return "Floating"
+        }
+    }
+
+    private func regionOrder(_ region: WorkspacePanelRegion) -> Int {
+        switch region {
+        case .left: return 0
+        case .center: return 1
+        case .right: return 2
+        case .bottom: return 3
+        case .floating: return 4
+        }
     }
 
     // MARK: - Empty State
