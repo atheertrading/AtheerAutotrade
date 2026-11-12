@@ -4,6 +4,7 @@ import Foundation
 /// This type contains presentation metadata only; it does not own trading behavior.
 enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
     case dashboard = "Dashboard"
+    case tradingWorkspace = "Trading Workspace"
     case markets = "Markets"
     case strategies = "Strategies"
     case positions = "Positions"
@@ -21,6 +22,8 @@ enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .dashboard:
             return "square.grid.2x2"
+        case .tradingWorkspace:
+            return "rectangle.split.3x1"
         case .markets:
             return "chart.xyaxis.line"
         case .strategies:
@@ -48,6 +51,8 @@ enum WorkspaceSection: String, CaseIterable, Identifiable, Hashable {
         switch self {
         case .dashboard:
             return "The application overview and service status."
+        case .tradingWorkspace:
+            return "A configurable trading workspace with resizable panels."
         case .markets:
             return "Market data and instrument monitoring."
         case .strategies:
