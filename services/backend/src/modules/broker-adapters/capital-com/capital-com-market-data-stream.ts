@@ -90,7 +90,7 @@ function parseOhlc(payload: Record<string, unknown>): CapitalComOhlcUpdate {
   if (
     typeof payload.epic !== "string" ||
     typeof resolution !== "string" ||
-    !["MINUTE", "MINUTE_5", "MINUTE_15", "MINUTE_30", "HOUR", "HOUR_4", "DAY", "WEEK"].includes(resolution) ||
+    !new Set<string>(["MINUTE", "MINUTE_5", "MINUTE_15", "MINUTE_30", "HOUR", "HOUR_4", "DAY", "WEEK"]).has(resolution) ||
     (candleType !== "classic" && candleType !== "heikin-ashi") ||
     (priceType !== "bid" && priceType !== "ask")
   ) {
