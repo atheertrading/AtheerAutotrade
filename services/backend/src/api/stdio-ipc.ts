@@ -130,6 +130,14 @@ export async function serveStdioIpc(
         frame = [];
       }
 
+      if (isObject(parsed)
+        && parsed.protocol === LOCAL_IPC_PROTOCOL
+        && parsed.version !== LOCAL_IPC_VERSION
+        && isUuid(parsed.id)) {
+        await respondAndStop(parsed.id, "PROTOCOL_VERSION_UNSUPPORTED", "The IPC protocol version is not supported.");
+        return;
+      }
+
       const request = parseRequest(parsed);
       if (!request) {
         await respondAndStop(null, "INVALID_ENVELOPE", "The IPC request envelope is invalid or unsupported.");
