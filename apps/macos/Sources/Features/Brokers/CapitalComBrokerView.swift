@@ -677,7 +677,6 @@ struct CapitalComBrokerView: View {
                     latestCandleSummary = "\(resolution) close: \(close)"
                 case "broker.marketData.error":
                     streamingStatus = "error"
-                    isStreaming = false
                     feedback = .error(payload["message"] as? String ?? "Market data stream error.")
                 default:
                     break
