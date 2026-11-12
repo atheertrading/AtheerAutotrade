@@ -282,7 +282,7 @@ struct WorkspaceLayoutView: View {
                 } else {
                     ForEach(restorablePanels) { panel in
                         Button {
-                            workspaceManager.showPanel(panel.id)
+                            restorePanel(panel)
                         } label: {
                             Label(
                                 "\(panel.title) — \(regionTitle(panel.region))",
@@ -326,12 +326,26 @@ struct WorkspaceLayoutView: View {
         Menu(regionTitle(region)) {
             ForEach(WorkspacePanelKind.allCases) { kind in
                 Button {
-                    workspaceManager.addPanel(kind, region: region)
+                    addPanel(kind, to: region)
                 } label: {
                     Label(kind.title, systemImage: kind.symbol)
                 }
             }
         }
+    }
+
+    private func addPanel(_ kind: WorkspacePanelKind, to region: WorkspacePanelRegion) {
+        if region == .left, activeWorkspace?.layout.sidebarVisible == false {
+            workspaceManager.setSidebarVisible(true)
+        }
+        workspaceManager.addPanel(kind, region: region)
+    }
+
+    private func restorePanel(_ panel: WorkspacePanel) {
+        if panel.region == .left, activeWorkspace?.layout.sidebarVisible == false {
+            workspaceManager.setSidebarVisible(true)
+        }
+        workspaceManager.showPanel(panel.id)
     }
 
     private func regionTitle(_ region: WorkspacePanelRegion) -> String {
