@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
+import { spawn } from "node:child_process";
 import {
   LOCAL_IPC_MAX_FRAME_BYTES,
   serveStdioIpc
@@ -127,3 +128,43 @@ test("rejects unsupported protocol versions explicitly", async () => {
   assert.equal(responses.length, 1);
   assert.equal(responses[0].error.code, "PROTOCOL_VERSION_UNSUPPORTED");
 });
+
+function collectText(stream) {
+  return new Promise((resolve, reject) => {
+    let value = "";
+    stream.setEncoding("utf8");
+    stream.on("data", (chunk) => { value += chunk; });
+    stream.on("error", reject);
+    stream.on("end", () => resolve(value));
+  });
+}
+
+test("production stdio transport starts without an HTTP listener or stdout diagnostics", { timeout: 5000 }, async () => {
+  const child = spawn(process.execPath, ["dist/server.js", "--transport=stdio"], {
+    stdio: ["pipe", "pipe", "pipe"]
+  });
+
+  const stdout = collectText(child.stdout);
+  const stderr = collectText(child.stderr);
+  const closed = new Promise((resolve) => {
+    child.once("close", (code, signal) => resolve({ code, signal }));
+  });
+
+  child.stdin.end(
+    request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133", "system.hello", {
+      clientVersion: "0.1.0"
+    }) + request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52", "system.ping")
+  );
+
+  const result = await closed;
+  const output = await stdout;
+  const diagnostics = await stderr;
+
+  assert.deepEqual(result, { code: 0, signal: null });
+  assert.equal(diagnostics, "");
+  const responses = output.split("\\n").filter(Boolean).map((line) => JSON.parse(line));
+  assert.equal(responses.length, 2);
+  assert.equal(responses[0].result.protocolVersion, 1);
+  assert.deepEqual(responses[1].result, { status: "alive" });
+});
+
