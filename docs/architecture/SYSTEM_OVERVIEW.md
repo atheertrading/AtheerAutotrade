@@ -59,9 +59,9 @@ The system distinguishes:
 
 ## Security and execution governance
 
-- Loopback binding alone is not client authentication.
-- A secure local application/backend transport and credential-provider design must be selected through a dedicated threat-modeled ADR before broker operations are exposed to the desktop.
-- macOS Keychain is the intended desktop secret store; secrets and broker session tokens must not enter source control, logs, process arguments, or ChatGPT.
+- Production desktop IPC uses parent-owned anonymous standard-I/O pipes per ADR-0005; it opens no TCP listener or filesystem socket. Loopback HTTP remains development/diagnostic-only.
+- The native macOS application owns Keychain access. Any future credential handoff to the backend requires a separate, narrowly scoped contract and verification.
+- Secrets and broker session tokens must not enter source control, logs, process arguments, environment variables, or ChatGPT.
 - Every exposure-increasing order intent passes through the centralized Risk Engine.
 - LIVE dealing remains disabled until all required safety controls and explicit user authorization are implemented and verified.
 
