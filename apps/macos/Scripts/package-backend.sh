@@ -44,8 +44,10 @@ rm -rf "${BACKEND_DEST}/dist"
 mkdir -p "${BACKEND_DEST}/dist"
 cp -R "${BACKEND_ROOT}/dist/." "${BACKEND_DEST}/dist/"
 
-if [[ "${CODE_SIGNING_ALLOWED:-NO}" == "YES" && -n "${EXPANDED_CODE_SIGN_IDENTITY:-}" && "${EXPANDED_CODE_SIGN_IDENTITY}" != "-" ]]; then
-  codesign --force --options runtime --timestamp=none --sign "${EXPANDED_CODE_SIGN_IDENTITY}" "${NODE_DEST}"
+if [[ "${CODE_SIGNING_ALLOWED:-NO}" == "YES" ]]; then
+  SIGNING_IDENTITY="${EXPANDED_CODE_SIGN_IDENTITY:--}"
+  codesign --force --options runtime --timestamp=none --sign "${SIGNING_IDENTITY}" "${NODE_DEST}"
+  codesign --verify --strict "${NODE_DEST}"
 fi
 
 echo "Packaged Node.js $("${NODE_DEST}" --version) and ATHEER backend into the application bundle."
