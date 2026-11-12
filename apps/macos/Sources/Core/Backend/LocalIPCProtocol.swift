@@ -2,7 +2,7 @@ import Foundation
 
 enum LocalIPCProtocol {
     static let identifier = "atheer.local-ipc"
-    static let version = 1
+    static let version = 2
     static let maximumFrameBytes = 65_536
     static let clientVersion = "0.1.0"
 
