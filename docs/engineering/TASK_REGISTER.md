@@ -70,7 +70,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift — active Connect/Disconnect state, authenticated market search, and layered data-protection explanation.
 - apps/macos/Scripts/package-backend.sh and Xcode project build phase — Node.js 24 universal runtime and compiled backend packaging into fixed app-bundle paths.
 - Added backend Node 24 CI workflow and encrypted-channel interoperability test source.
-- Node 24 CI run 43332525299 passed TypeScript compilation and 31/31 backend tests. Xcode, CryptoKit/Node interoperability, packaged runtime, and real Capital.com Demo results remain pending.
+- Node 24 CI run 43332767979 passed TypeScript compilation and 31/31 backend tests. Xcode, CryptoKit/Node interoperability, packaged runtime, and real Capital.com Demo results remain pending.
 
 ### Remaining scope and safety boundaries
 
