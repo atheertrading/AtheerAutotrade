@@ -146,7 +146,28 @@ Never include stack traces, file paths, raw provider responses, credentials, ses
 
 All broker methods are read-only. The backend rejects Live environment selection. No generic method invocation, shell command, filesystem access, arbitrary URL fetch, or dealing operation is permitted.
 
-## 6. Protocol errors and session termination
+## 6. Backend event frames
+
+The backend may send unsolicited event envelopes on stdout while a request/response session is active. Events do not carry request IDs and are never interpreted as request completions.
+
+```json
+{
+  "protocol": "atheer.local-ipc",
+  "version": 2,
+  "kind": "event",
+  "event": "broker.marketData.quote",
+  "payload": {
+    "epic": "MARKET_EPIC",
+    "bid": 1.2345,
+    "ask": 1.2347,
+    "timestamp": 1790000000000
+  }
+}
+```
+
+Event names are bounded strings and payloads must be JSON objects. Event frames obey the same 65,536-byte limit as request and response frames. The current event set is broker.marketData.status, broker.marketData.quote, broker.marketData.ohlc, and broker.marketData.error. Stream status is transport-connected only after the WebSocket opens and connected only after both quote and OHLC subscriptions are acknowledged.
+
+## 7. Protocol errors and session termination
 
 Safe error codes include:
 - `INVALID_FRAME`
@@ -170,7 +191,7 @@ Invalid UTF-8, oversized frames, unsupported protocol versions, invalid envelope
 
 The initial implementation limits a session to 4,096 unique requests. The parent uses request timeouts and terminates a child that stops responding. No automatic replay is permitted after timeout or process restart.
 
-## 7. Security rules
+## 8. Security rules
 
 1. Stdout is protocol-only; diagnostics use sanitized stderr.
 2. Never log serialized request/response frames or payloads.
@@ -183,15 +204,15 @@ The initial implementation limits a session to 4,096 unique requests. The parent
 9. No broker account mutation, dealing, risk bypass, order, or execution capability is exposed.
 10. Demo and Live environments remain separate; Live is disabled.
 
-## 8. Versioning policy
+## 9. Versioning policy
 
 Incompatible handshake, framing, required-field, method, or error-semantic changes require a protocol version increment. Parent and child fail closed on unsupported versions. Capability negotiation is mandatory; a client must not call a method absent from the handshake response.
 
-## 9. Verification status
+## 10. Verification status
 
 The implementation source is present in the repository branch, but the backend TypeScript build/tests, Xcode build, packaged runtime launch, X25519/AES-GCM cross-language interoperability, and actual Capital.com Demo authentication have not yet been verified on the target environment.
 
-## 10. References
+## 11. References
 
 - [ADR-0005 — Secure macOS IPC](../decisions/ADR-0005-SECURE-MACOS-IPC.md)
 - [ADR-0004 — Production Architecture Baseline](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
