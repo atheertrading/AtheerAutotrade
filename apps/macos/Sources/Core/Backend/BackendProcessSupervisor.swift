@@ -112,13 +112,13 @@ final class BackendProcessSupervisor {
             guard !data.isEmpty else {
                 handle.readabilityHandler = nil
                 self?.queue.async {
-                    self?.handleOutputClosed()
+                    self?.handleOutputClosed(for: child)
                 }
                 return
             }
 
             self?.queue.async {
-                self?.consume(data)
+                self?.consume(data, from: child)
             }
         }
 
@@ -132,7 +132,7 @@ final class BackendProcessSupervisor {
 
         child.terminationHandler = { [weak self] terminatedProcess in
             self?.queue.async {
-                self?.handleTermination(status: terminatedProcess.terminationStatus)
+                self?.handleTermination(terminatedProcess, status: terminatedProcess.terminationStatus)
             }
         }
 
@@ -218,7 +218,8 @@ final class BackendProcessSupervisor {
         }
     }
 
-    private func consume(_ data: Data) {
+    private func consume(_ data: Data, from child: Process) {
+        guard process === child else { return }
         do {
             let frames = try decoder.append(data)
             for frame in frames {
@@ -245,12 +246,13 @@ final class BackendProcessSupervisor {
         }
     }
 
-    private func handleOutputClosed() {
-        guard !isStopping else { return }
+    private func handleOutputClosed(for child: Process) {
+        guard process === child, !isStopping else { return }
         terminateChild(with: LocalIPCError.processTerminated)
     }
 
-    private func handleTermination(status: Int32) {
+    private func handleTermination(_ child: Process, status: Int32) {
+        guard process === child else { return }
         isStopping = true
         isReady = false
         failAll(with: LocalIPCError.processTerminated)
