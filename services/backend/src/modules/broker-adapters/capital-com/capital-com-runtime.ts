@@ -53,6 +53,14 @@ export class CapitalComRuntime {
     });
   }
 
+  status(): Record<string, unknown> {
+    return Object.freeze({
+      connected: this.isConnected,
+      environment: this.isConnected ? "demo" : null,
+      authenticatedAt: this.connectedAt ?? null
+    });
+  }
+
   async searchMarkets(searchTerm: string): Promise<CapitalComMarketSearchResult> {
     return this.requireClient().searchMarkets(searchTerm);
   }
