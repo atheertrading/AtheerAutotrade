@@ -75,7 +75,7 @@ Current implementation branch: `fix/atp-cap-credentials-restore` (ATP-CAP-UI-002
 ### ATP-CAP-UI-001 — Capital.com broker screen (merged in PR #17; verification pending)
 
 - `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — Capital.com screen with broker status, DEMO environment, LIVE lock state, API key/identifier/password fields, save/remove controls, restoration of saved credentials on appearance, retention of values after Save, connection readiness, and disabled Connect control until IPC credential handoff is verified.
-- `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; supports typed `load()`, device-only unlocked accessibility for new items, and read-back verification after both insert and update; does not persist secrets in preferences or files.
+- `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; supports typed `load()`, the native macOS Keychain accessibility policy, and read-back verification after both insert and update; does not persist secrets in preferences or files.
 - `WorkspaceSection.swift`, `SidebarView.swift`, and `ApplicationShellView.swift` — expose the screen in the application sidebar under **BROKER CONNECTIONS → Brokers**.
 - `project.pbxproj` — registers both Swift files and their groups in the app target.
 - The UI baseline is merged into `main` via PR #17. It has not been built or run on the target Mac in this verification cycle. Credential transfer and actual broker authentication remain disabled.
