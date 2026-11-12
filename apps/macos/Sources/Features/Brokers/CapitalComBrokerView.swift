@@ -714,7 +714,7 @@ struct CapitalComBrokerView: View {
                 DispatchQueue.main.async {
                     switch result {
                     case .failure(let error):
-                        feedback = .error("Disconnect before removing credentials: \\(error.localizedDescription)")
+                        feedback = .error("Disconnect before removing credentials: \(error.localizedDescription)")
                     case .success:
                         isConnected = false
                         marketResults = []
