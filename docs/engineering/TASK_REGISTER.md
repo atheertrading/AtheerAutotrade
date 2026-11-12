@@ -1,8 +1,8 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-12  
-**Latest observed main baseline:** `9445a749d78c63030e9125041a6103dca0eabafc`  
-**Active branch:** `security/atp-sec-ipc-001-stdio-boundary`
+**Latest observed main baseline:** `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`  
+**Active branch:** `security/atp-sec-ipc-001-swift-supervisor`
 
 ## Status definitions
 
@@ -30,14 +30,17 @@
 | ATP-DOM-001 | Provider-neutral instrument domain model | PR #11 squash-merged as `fa68db5`; user reported TypeScript build and 10 backend tests passed | DONE — MERGED AND USER-VERIFIED |
 | ATA-DOC-001 | Preserve adapted Mermaid architecture catalogue | PR #13 merged as `58766938`; ten editable diagrams with provenance and target-architecture caveats | DONE — MERGED |
 | ATP-ARCH-REBASE-001 | Establish ATHEER Trading Pro product identity and modular-monolith architecture baseline | ADR-0004 and aligned architecture/security/engineering docs; PR #14 squash-merged as `9445a749d78c63030e9125041a6103dca0eabafc` | DONE — MERGED; no runtime build required |
+| ATP-SEC-IPC-001-B1B2 | Backend stdio protocol and production transport mode | PR #15 merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`; backend build/tests remain unverified | DONE — MERGED; PENDING VERIFICATION |
 
 ## Active milestone
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Select transport, define threat model and protocol, implement bounded backend stdio protocol, then integrate native app process/client and Keychain ownership | IN PROGRESS — Batch 1 protocol and ADR authored; runtime integration pending |
+| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Select transport, define threat model and protocol, implement bounded backend stdio protocol, then integrate native app process/client and Keychain ownership | IN PROGRESS — native Swift IPC source and Xcode membership authored; compile/runtime verification and packaging pending |
 
-Branch: `security/atp-sec-ipc-001-stdio-boundary`.
+Merged backend foundation: PR #15, commit `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
+
+Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor`.
 
 ### Batch 1 changes on active branch
 
@@ -55,6 +58,15 @@ Branch: `security/atp-sec-ipc-001-stdio-boundary`.
 - No Keychain provider or credential-transfer method exists.
 - No broker, account, risk, order, or execution method is exposed.
 - A child-process integration test exercises the stdio startup path; no build or test result has been observed for the new IPC code yet.
+
+### Batch 3 — native Swift IPC client (source authored; verification pending)
+
+- `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict NDJSON request encoder, response-envelope validation, and incremental bounded frame decoder.
+- `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — child-process launch from a fixed app-bundle path, anonymous stdio pipes, handshake/capability validation, request correlation, timeout handling, stdout parsing, stderr draining, and termination handling.
+- `apps/macos/Tests/LocalIPCProtocolTests.swift` — framing, envelope, size-limit, and protocol-version tests authored.
+- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` — both source files and the XCTest file registered in their targets.
+- `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — expected signed runtime/backend layout and packaging gates.
+- No Xcode build/test, Node build/test, runtime packaging, or child-process execution has been performed for this batch. No Keychain provider, credential handoff, or Capital.com credential UI has been added.
 
 ### ATP-SEC-IPC-001 acceptance criteria
 
@@ -102,9 +114,10 @@ Branch: `security/atp-sec-ipc-001-stdio-boundary`.
 
 ## Current next action
 
-Implement Batch 2: wire the stdio transport into a dedicated backend production mode, preserve HTTP health only as a development diagnostic mode, add process-level stream tests, then implement the native Swift process supervisor and NDJSON client. Verify Node 24 build/tests and the macOS build on the user's actual development Mac.
+Verify the new Swift sources/XCTest on the user's actual Mac, execute the merged backend Node 24 build/tests, then add signed runtime/backend copy phases and packaged-process integration tests. Keep Keychain credential transfer and Capital.com credential UI gated until the IPC and packaging boundary is verified.
 
 ## Change log
 
 - 2026-11-12: PR #14 merged as `9445a749d78c63030e9125041a6103dca0eabafc`; ATP-ARCH-REBASE-001 completed.
-- 2026-11-12: Started ATP-SEC-IPC-001 on `security/atp-sec-ipc-001-stdio-boundary`; ADR-0005, protocol contract, backend handler, and focused tests authored.
+- 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
+- 2026-11-12: Started `security/atp-sec-ipc-001-swift-supervisor`; native Swift IPC source, XCTest source, Xcode membership, and signed bundle layout contract authored. Verification pending.
