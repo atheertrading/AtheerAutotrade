@@ -67,13 +67,13 @@
 
 - ATP-DOM-001: user reported `npm ci --include=dev` succeeded and all 10 backend tests passed after TypeScript compilation.
 - XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
-- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001.
+- No local Xcode build, backend build, adapter test, broker login, or live data observation was executed during ATP-ARCH-REBASE-001. Draft PR #14 is open and unmerged; GitHub reported mergeable=false at creation.
 - No source runtime code or dependencies changed during this architecture documentation work.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next verification and implementation gates
 
-1. Complete architecture document/diagram consistency review and open a draft PR for ATP-ARCH-REBASE-001.
+1. Complete architecture document/diagram consistency review and resolve the mergeability/review state of draft PR #14.
 2. Design and threat-model secure local IPC and Keychain credential-provider ownership; record the selected mechanism in a dedicated ADR before implementation.
 3. Implement backend runtime/composition and distinct readiness states.
 4. Integrate Capital.com read-only session lifecycle only after the secure boundary exists.
