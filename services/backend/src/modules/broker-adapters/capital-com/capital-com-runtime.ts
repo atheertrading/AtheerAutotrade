@@ -5,6 +5,10 @@ import {
   type CapitalComHistoricalPrices,
   type CapitalComMarketSearchResult
 } from "./capital-com-client.js";
+import {
+  createCapitalComMarketDataStream,
+  type CapitalComStreamOptions
+} from "./capital-com-market-data-stream.js";
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -15,6 +19,7 @@ export class CapitalComRuntime {
   private credentials: CapitalComCredentials | undefined;
   private client: CapitalComClient | undefined;
   private connectedAt: string | undefined;
+  private marketDataStream: ReturnType<typeof createCapitalComMarketDataStream> | undefined;
 
   setCredentials(value: unknown): void {
     if (!isObject(value)
@@ -61,6 +66,33 @@ export class CapitalComRuntime {
     });
   }
 
+  async startMarketDataStream(
+    options: CapitalComStreamOptions,
+    emit: (event: string, payload: Record<string, unknown>) => void
+  ): Promise<void> {
+    if (this.marketDataStream) throw new Error("Capital.com market data stream is already running.");
+    const client = this.requireClient();
+    const stream = createCapitalComMarketDataStream(client, {
+      onQuote: (quote) => emit("broker.marketData.quote", { ...quote }),
+      onOhlc: (bar) => emit("broker.marketData.ohlc", { ...bar }),
+      onStatus: (status) => emit("broker.marketData.status", { status }),
+      onError: () => emit("broker.marketData.error", { message: "Capital.com market data stream reported an error." })
+    });
+    this.marketDataStream = stream;
+    try {
+      await stream.start(options);
+    } catch (error) {
+      stream.stop();
+      this.marketDataStream = undefined;
+      throw error;
+    }
+  }
+
+  stopMarketDataStream(): void {
+    this.marketDataStream?.stop();
+    this.marketDataStream = undefined;
+  }
+
   async searchMarkets(searchTerm: string): Promise<CapitalComMarketSearchResult> {
     return this.requireClient().searchMarkets(searchTerm);
   }
@@ -77,6 +109,7 @@ export class CapitalComRuntime {
   }
 
   disconnect(): void {
+    this.stopMarketDataStream();
     this.client?.invalidateSession();
     this.client = undefined;
     this.connectedAt = undefined;
