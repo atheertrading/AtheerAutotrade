@@ -114,9 +114,15 @@ final class BackendProcessSupervisor {
                                 self.send(
                                     method: "broker.connect",
                                     payload: ["environment": "demo"],
-                                    timeout: 30,
-                                    completion: completion
-                                )
+                                    timeout: 30
+                                ) { connectResult in
+                                    if case .failure(let error) = connectResult {
+                                        completion(.failure(error))
+                                        self.stop()
+                                    } else {
+                                        completion(connectResult)
+                                    }
+                                }
                             }
                         }
                     } catch {
@@ -128,7 +134,10 @@ final class BackendProcessSupervisor {
     }
 
     func disconnectCapitalCom(completion: @escaping Completion) {
-        request(method: "broker.disconnect", payload: [:], timeout: 10, completion: completion)
+        request(method: "broker.disconnect", payload: [:], timeout: 10) { result in
+            completion(result)
+            self.stop()
+        }
     }
 
     func capitalComStatus(completion: @escaping Completion) {
