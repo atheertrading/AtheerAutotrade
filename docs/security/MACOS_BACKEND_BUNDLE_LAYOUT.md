@@ -16,6 +16,7 @@ The native supervisor resolves only these fixed paths:
         │           └── node
         └── Resources/
             └── Backend/
+                ├── package.json
                 └── dist/
                     ├── server.js
                     └── ...
