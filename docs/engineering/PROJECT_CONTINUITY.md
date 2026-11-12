@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #16 merge: `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
+- Latest observed `main` baseline after PR #17 merge: `9297f28fd2079dc5801cd89baf2b4723ed625a75`.
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -45,7 +45,7 @@ Repository records are authoritative over conversation summaries. When documents
 - On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). The current feature branch adds the first native Swift IPC client/supervisor source and Xcode project membership; it has not been compiled or runtime-tested.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode is merged, and native Swift client/supervisor source is authored on the current feature branch but not yet verified. The same feature branch now adds `CapitalComCredentialStore.swift` (macOS Keychain storage) and `CapitalComBrokerView.swift` (professional Capital.com credentials screen), with navigation through **Broker Connections → Brokers**. These UI/Keychain files are not merged or Xcode-verified. The Connect action is intentionally disabled until signed runtime packaging and one-shot credential handoff are verified.
+- ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode and native Swift client/supervisor source are merged through PR #16 but not yet build/runtime-verified. PR #17 merged `CapitalComCredentialStore.swift` and `CapitalComBrokerView.swift`, with navigation through **Broker Connections → Brokers**. PR #18 contains the Keychain read-back/save verification and view restoration correction; it remains draft and unmerged. The Connect action remains disabled until signed runtime packaging and one-shot credential handoff are verified.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
 - Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
@@ -99,7 +99,7 @@ Reassess the toolchain only when the development environment changes or a task r
 6. Verify only affected behavior; do not repeat completed tests without a technical reason.
 7. Record actual changed files, results, and next action in the task register and implementation status.
 
-## 9. Latest handoff — 2026-11-12
+## 9. Latest handoff — 2026-11-13
 
 ### ATP-ARCH-REBASE-001 — DONE / MERGED
 
@@ -109,7 +109,7 @@ PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dc
 
 PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. PR #16 merged native Swift IPC protocol/supervisor source as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 
-Current branch: `security/atp-sec-ipc-001-swift-supervisor`; the branch now carries the separate ATP-CAP-UI-001 implementation for review.
+PR #17 (`feat(macOS): add Capital.com broker screen and Keychain credentials`) was merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`. Current correction branch: `fix/atp-cap-credentials-restore`, with draft PR #18 (`fix(macOS): restore and verify Capital.com Keychain credentials`).
 
 Batch 1 authored:
 - `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
@@ -127,7 +127,7 @@ Batch 3 authored on the current branch:
 - Xcode project membership for the two production Swift files and the test file.
 - `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
 
-PR #16 is merged, but Xcode build/test, backend build/test, runtime package, or child process execution has not been performed for that IPC implementation. The current branch adds ATP-CAP-UI-001: a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
+PR #16 is merged, but Xcode build/test, backend build/test, runtime package, or child process execution has not been performed for that IPC implementation. PR #17 merged ATP-CAP-UI-001: a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. PR #18 corrects credential persistence by adding Keychain load/read-back verification and restoring saved fields on screen appearance. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
 
 ### Next batch
 
@@ -136,7 +136,7 @@ PR #16 is merged, but Xcode build/test, backend build/test, runtime package, or 
 3. Add packaging copy phases for a pinned Node runtime and compiled backend output.
 4. Verify nested code signatures, hardened-runtime behavior, process launch, timeout, child crash, and explicit restart.
 5. Connect the supervisor to application lifecycle and expose process readiness.
-6. Build and test the new Capital.com screen/Keychain store on the target Mac; then design one-shot Keychain credential transfer before enabling connection or broker session methods.
+6. Build and test PR #18's Capital.com screen/Keychain persistence correction on the target Mac; then design one-shot Keychain credential transfer before enabling connection or broker session methods.
 
 ### Local repository preservation
 
