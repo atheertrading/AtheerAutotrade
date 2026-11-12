@@ -53,7 +53,7 @@ The native supervisor resolves only these fixed paths:
 - The Xcode packaging phase and script are present but have not been executed in the target environment.
 - The Node runtime is not committed to Git; it is copied from a locally installed Node.js 24 universal executable during build.
 - No target-Mac build, nested signature verification, packaged child launch, or actual Capital.com Demo authentication has been verified.
-- WebSocket streaming is implemented in the adapter but is not yet exposed through IPC or consumed by the macOS UI.
+- WebSocket streaming is exposed through IPC v2 event frames and consumed by the macOS UI; actual broker-originated event delivery remains unverified.
 - No account mutation, orders, dealing, execution, or LIVE capability is exposed.
 
 Do not treat the existence of the build phase or Swift supervisor as proof that the packaged broker connection works. Build, cryptographic interoperability, runtime launch, and broker authentication are separate acceptance gates.
