@@ -19,7 +19,7 @@
 - Protocol v2 supports bounded NDJSON framing, strict envelopes, UUID request IDs, duplicate detection, request limits, and safe errors.
 - IpcSecretChannel implements per-child-session X25519/HKDF-SHA256/AES-256-GCM decryption. Credential submission is one-shot per child session; mutable plaintext buffers are cleared after parsing where feasible.
 - CapitalComRuntime owns the read-only broker session lifecycle. It accepts validated credentials in memory, establishes a Capital.com Demo REST session, verifies it with authenticated ping, reports status, and exposes market search and historical prices.
-- CapitalComClient source supports session creation, authenticated ping, market search, and historical prices. CapitalComMarketDataStream source supports quote/OHLC WebSocket subscriptions, keepalive, reconnect, and re-subscription.
+- CapitalComClient source supports session creation, authenticated ping, market search, and historical prices. CapitalComMarketDataStream is now wired through IPC v2 event frames and the macOS UI for quote/OHLC subscriptions, keepalive, reconnect, and re-subscription.
 - The backend stores CST and X-SECURITY-TOKEN only in process memory. Capital.com REST uses HTTPS/TLS.
 - No broker dealing, order, position mutation, account mutation, or LIVE method is exposed.
 
@@ -39,7 +39,7 @@
 
 ## Not implemented or not operationally integrated
 
-- Capital.com WebSocket quote/OHLC stream is adapter source only; it is not yet exposed through IPC v2 or consumed by the macOS UI.
+- Capital.com WebSocket quote/OHLC stream is wired through IPC v2 events and macOS UI controls, but actual broker-originated quote/OHLC delivery has not been verified.
 - Market Data ingestion quality lifecycle: quote freshness, stale/unknown states, ordering, deduplication, gap detection, candle integrity, and recovery.
 - Broker account and position snapshots/reconciliation.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
@@ -82,6 +82,6 @@
 3. Verify CryptoKit/Node X25519-HKDF-AES-GCM interoperability and invalid-tag rejection.
 4. Verify Xcode packaging, universal Node runtime, nested code signatures, and bundled child launch.
 5. Verify encrypted credential submission, actual Capital.com Demo authentication, authenticated ping, market search, and historical prices using the user's own Demo account. Never request credentials in ChatGPT.
-6. Add IPC events and integrate WebSocket quotes/OHLC, then implement market-data freshness/gap controls.
+6. Verify WebSocket subscription acknowledgements and live quote/OHLC event delivery; then implement market-data freshness, stale-state, and gap-recovery controls.
 7. Add broker account/position read-only snapshots and reconciliation only after the relevant official API contracts are confirmed.
 8. Keep account mutation, dealing, order execution, and LIVE disabled until Risk Engine, OMS, Execution Gateway, reconciliation, and explicit user-authorization gates are implemented and verified.
