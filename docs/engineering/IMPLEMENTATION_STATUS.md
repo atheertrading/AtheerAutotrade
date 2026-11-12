@@ -14,7 +14,7 @@
 - Trading Domain now contains a provider-neutral `Instrument` model on branch `feature/trading-domain-instrument-models`. It validates instrument identity, asset class, status, optional currency codes, and optional contract increments/minimum quantity.
 - Contract increments and minimum quantity are represented as exact decimal strings, not JavaScript floating-point numbers.
 - Missing broker-provided specifications remain absent; the model does not invent defaults.
-- Instrument unit tests have been authored but are pending execution.
+- Instrument unit tests passed on the user's development Mac on 2026-11-12: 8 instrument tests plus 2 existing route tests, 10 total, 0 failures.
 
 ## Not implemented
 
@@ -43,13 +43,16 @@
 - Verification destination: macOS x86_64. Apple Silicon arm64 runtime remains unverified.
 - The local signing correction has not been confirmed committed/pushed to GitHub. Do not overwrite the local project file with the repository version.
 
-### ATP-DOM-001 current branch verification
-- Instrument domain model and eight Node.js test cases are authored.
-- No backend compile or test execution has yet been performed for this branch. Do not claim this milestone is verified until `npm test` passes.
+### ATP-DOM-001 branch verification — 2026-11-12
+- User ran `npm ci --include=dev` successfully in the isolated `AtheerAutotrade-ATP-DOM-001` worktree.
+- `npm test` completed `tsc -p tsconfig.json` successfully and ran all tests.
+- Result: 10 tests, 10 passed, 0 failed, 0 cancelled, 0 skipped.
+- The first attempt before dependency installation reported `tsc: command not found`; this was an environment setup issue, resolved by `npm ci --include=dev`.
+- Verification is user-reported from the supplied Terminal output. PR #11 remains open and unmerged pending final review.
 
 ## Known limitations and future validation
 
-- Validate the new instrument model and tests on the user's Node.js 24 / TypeScript 7.0.2 environment.
+- Preserve the supplied Terminal output as the verification evidence; Node.js runtime version was not included in that output.
 - Validate native app runtime on Apple Silicon hardware or CI.
 - Distribution, notarization, external API exposure, threat modeling, service authentication, and operational controls require separate design and validation.
 - Provider integrations remain out of scope until the relevant contracts and security controls are established.
