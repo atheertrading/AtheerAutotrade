@@ -38,13 +38,14 @@
 - XCTest source for NDJSON framing and response validation has been added and registered; test execution is pending.
 - The expected signed bundle layout is documented in docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md. The Xcode project does not yet copy a Node runtime or compiled backend into the app bundle.
 - No Node runtime binary or signature verification is included. The supervisor is not yet connected to the SwiftUI application lifecycle.
-- Native macOS app remains the intended Keychain owner; credential provider and secret transfer are not implemented. The Capital.com credential-entry UI is also not present in the current main branch.
+- Native macOS app owns credential entry and Keychain storage. On the active feature branch, `CapitalComCredentialStore.swift` stores the API key, identifier, and password as one generic-password item; `CapitalComBrokerView.swift` provides the Capital.com credential screen. These changes are not yet merged into main and have not been compiled or runtime-tested.
+- The broker screen is exposed through the sidebar's **Broker Connections → Brokers** destination. It presents DEMO as the only selectable environment, LIVE as locked, credential save/remove actions, connection status, and explicit integration-readiness gates. The Connect control remains disabled until packaged IPC and secure credential handoff are verified.
 
 ## Not implemented or not operationally integrated
 
 - Backend runtime composition root and module lifecycle orchestration.
 - Integrated local application-to-backend IPC: protocol handler exists, but backend runtime and native Swift client are not connected.
-- Concrete macOS Keychain-backed credential provider and secure credential handoff.
+- Secure credential handoff to the backend; the current feature-branch Keychain store only persists credentials locally.
 - Broker session orchestration integrated into backend runtime and desktop application.
 - Actual Capital.com Demo authentication, market search, historical bars, live quotes, and OHLC events verified from this code.
 - Market Data ingestion quality lifecycle: quote age, stale/unknown states, ordering, deduplication, gap detection, candle integrity, and recovery.
@@ -87,5 +88,5 @@
 3. Add Xcode build phases that package a pinned, architecture-compatible Node runtime and compiled backend into the documented app bundle layout.
 4. Verify nested code signatures, hardened-runtime behavior, child launch, timeout, crash, shutdown, and explicit restart using the packaged app.
 5. Connect the supervisor to application lifecycle and expose only process readiness/diagnostics.
-6. Design a separate one-shot Keychain credential-transfer contract; then implement the Capital.com credential-entry UI and Keychain provider before broker session methods.
+6. Verify the new Capital.com screen and Keychain store with an Xcode build and focused tests; then design a separate one-shot Keychain credential-transfer contract before enabling the Connect action or broker session methods.
 7. Keep LIVE disabled; no broker account, order, risk, or execution method is exposed by the current IPC protocol.
