@@ -39,6 +39,7 @@ type SocketFactory = (url: string) => WebSocket;
 
 const MAX_EPICS = 40;
 const KEEPALIVE_INTERVAL_MS = 8 * 60 * 1000;
+const INITIAL_CONNECT_TIMEOUT_MS = 15_000;
 const INITIAL_RECONNECT_DELAY_MS = 1_000;
 const MAX_RECONNECT_DELAY_MS = 30_000;
 
@@ -158,7 +159,7 @@ export class CapitalComMarketDataStream {
       candleType: options.candleType ?? "classic"
     });
     this.stopped = false;
-    await this.openConnection();
+    await this.openConnection(true);
   }
 
   stop(): void {
@@ -172,7 +173,7 @@ export class CapitalComMarketDataStream {
     this.callbacks.onStatus?.("stopped");
   }
 
-  private async openConnection(): Promise<void> {
+  private async openConnection(waitUntilOpen = false): Promise<void> {
     if (this.stopped || !this.options) return;
 
     this.callbacks.onStatus?.(this.reconnectDelay === INITIAL_RECONNECT_DELAY_MS
@@ -214,11 +215,40 @@ export class CapitalComMarketDataStream {
         this.clearKeepalive();
         if (!this.stopped) this.scheduleReconnect();
       });
+
+      if (waitUntilOpen) {
+        await new Promise<void>((resolve, reject) => {
+          let settled = false;
+          const timeout = setTimeout(() => {
+            if (settled) return;
+            settled = true;
+            socket.close();
+            reject(new Error("Capital.com WebSocket connection timed out."));
+          }, INITIAL_CONNECT_TIMEOUT_MS);
+
+          const finish = (error?: Error) => {
+            if (settled) return;
+            settled = true;
+            clearTimeout(timeout);
+            if (error) reject(error);
+            else resolve();
+          };
+
+          socket.addEventListener("open", () => finish(), { once: true });
+          socket.addEventListener("error", () => {
+            finish(new Error("Capital.com WebSocket connection failed."));
+          }, { once: true });
+          socket.addEventListener("close", () => {
+            finish(new Error("Capital.com WebSocket closed before opening."));
+          }, { once: true });
+        });
+      }
     } catch (error) {
       this.callbacks.onError?.(
         error instanceof Error ? error : new Error("Capital.com stream connection failed.")
       );
       this.scheduleReconnect();
+      if (waitUntilOpen) throw error;
     }
   }
 
