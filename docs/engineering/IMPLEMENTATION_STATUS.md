@@ -31,7 +31,7 @@
 ## Not yet verified
 
 - Current branch has not been built with Xcode 14.3.1 / Swift 5.8.1 on the target Intel Mac.
-- GitHub Actions Backend CI run 43332525299 on Node.js 24.22.2 completed successfully: TypeScript build passed and 31/31 backend tests passed. The run predates a later UI-only screen-lifecycle change; backend source was unchanged after the passing run. The workflow was then updated to Node-24-native action releases.
+- GitHub Actions Backend CI run 43332767979 on Node.js 24.22.2 completed successfully: TypeScript build passed and 31/31 backend tests passed. The run predates a later UI-only screen-lifecycle change; backend source was unchanged after the passing run. The workflow was then updated to Node-24-native action releases.
 - Node.js X25519/HKDF/AES-GCM decryption has backend test source but no executed result. CryptoKit-to-Node cross-language interoperability has not yet been tested.
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
 - Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
