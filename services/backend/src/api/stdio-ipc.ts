@@ -38,7 +38,11 @@ function hasExactKeys(value: JsonObject, expected: readonly string[]): boolean {
 }
 
 async function writeResponse(output: IpcWritable, response: JsonObject): Promise<void> {
-  const frame = `${JSON.stringify(response)}\n`;
+  const serialized = JSON.stringify(response);
+  if (new TextEncoder().encode(serialized).byteLength > LOCAL_IPC_MAX_FRAME_BYTES) {
+    throw new RangeError("IPC response exceeds the permitted frame size.");
+  }
+  const frame = `${serialized}\n`;
   if (output.write(frame)) return;
   await new Promise<void>((resolve) => output.once("drain", resolve));
 }
