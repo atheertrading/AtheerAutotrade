@@ -44,17 +44,17 @@ Branch: `security/atp-sec-ipc-001-stdio-boundary`.
 - `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe design and threat model.
 - `docs/security/LOCAL_IPC_PROTOCOL.md` — versioned NDJSON protocol contract.
 - `services/backend/src/api/stdio-ipc.ts` — bounded protocol handler with handshake, ping, strict envelope validation, UUID and duplicate checks, 65,536-byte frame cap, 4,096-request session limit, allowlist, and safe errors.
-- `services/backend/tests/stdio-ipc.test.mjs` — focused framing, handshake, duplicate, payload, malformed-frame, version, and size tests.
+- `services/backend/tests/stdio-ipc.test.mjs` — focused framing, handshake, duplicate, payload, malformed-frame, version, size, and child-process startup tests.
 - Updated security baseline, architecture overview/diagrams, decision index, backend README, and implementation status.
 
 ### Explicitly not implemented in Batch 1
 
-- The stdio protocol handler is not wired into `server.ts`.
+- The stdio protocol handler is wired into `server.ts` through explicit `--transport=stdio` mode; HTTP remains the default development/diagnostic mode.
 - No Swift `Process` launcher, pipe client, or Xcode project integration exists.
 - No bundled Node.js runtime or signed backend packaging exists.
 - No Keychain provider or credential-transfer method exists.
 - No broker, account, risk, order, or execution method is exposed.
-- No build or test result has been observed for the new IPC code yet.
+- A child-process integration test exercises the stdio startup path; no build or test result has been observed for the new IPC code yet.
 
 ### ATP-SEC-IPC-001 acceptance criteria
 
