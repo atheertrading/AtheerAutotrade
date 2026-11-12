@@ -140,8 +140,8 @@ Never include stack traces, file paths, raw provider responses, credentials, ses
 | `broker.disconnect` | Invalidate session and clear backend credential/session state | Implemented in source |
 | `broker.marketSearch` | Search Capital.com instruments | Implemented in source |
 | `broker.historicalPrices` | Retrieve validated historical OHLC snapshots | Implemented in source |
-| `broker.stream.start` | Start real-time quote/OHLC subscriptions | Not yet exposed through IPC |
-| `broker.stream.stop` | Stop real-time subscriptions | Not yet exposed through IPC |
+| `broker.stream.start` | Start real-time quote/OHLC subscriptions | Implemented in source |
+| `broker.stream.stop` | Stop real-time subscriptions | Implemented in source |
 | Account, order, position, dealing, and execution methods | No capability is exposed | Prohibited in this milestone |
 
 All broker methods are read-only. The backend rejects Live environment selection. No generic method invocation, shell command, filesystem access, arbitrary URL fetch, or dealing operation is permitted.
