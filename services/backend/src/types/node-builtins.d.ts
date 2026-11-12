@@ -93,6 +93,7 @@ declare module "node:crypto" {
 
 interface Buffer extends Uint8Array {
   toString(encoding?: "utf8" | "base64" | "hex"): string;
+  subarray(begin?: number, end?: number): Buffer;
 }
 
 declare const Buffer: {
