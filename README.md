@@ -42,4 +42,11 @@ npm start
 
 The backend listens on `127.0.0.1:3000` by default. Set `HOST` or `PORT` to override those local-development defaults. `GET /health` reports the API process health only; it does not assert trading readiness or broker connectivity.
 
-See [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md) for implemented, planned, and unvalidated scope, and [System Overview](docs/architecture/SYSTEM_OVERVIEW.md) for architectural boundaries.
+## Engineering continuity
+
+- [Project Continuity Record](docs/engineering/PROJECT_CONTINUITY.md) — authoritative cross-session handoff and durable project constraints.
+- [Engineering Task Register](docs/engineering/TASK_REGISTER.md) — completed milestones, pending verification, and the next authorized action.
+- [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md) — implemented, planned, and unvalidated product scope.
+- [Repository Agent Instructions](AGENTS.md) — mandatory context-loading and implementation protocol for coding agents, including Codex.
+
+See [System Overview](docs/architecture/SYSTEM_OVERVIEW.md) for architectural boundaries.
