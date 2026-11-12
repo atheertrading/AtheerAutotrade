@@ -39,7 +39,7 @@ The user confirmed that the earlier Git issue was resolved and files were pushed
 - Native SwiftUI macOS application shell, dashboard, navigation destinations, and Trading Workspace are present.
 - Workspace persistence, panel management, resizing, and drag/drop are present.
 - Node.js/TypeScript backend exposes a local process health endpoint and structured 404 handling.
-- The first provider-neutral Trading Domain instrument model is now authored on branch `feature/trading-domain-instrument-models`; see ATP-DOM-001 in the task register. Its tests are authored but remain pending execution.
+- The provider-neutral Trading Domain instrument model is implemented on branch `feature/trading-domain-instrument-models`; see ATP-DOM-001 in the task register. On 2026-11-12, the user ran `npm ci --include=dev` successfully and `npm test` completed the TypeScript build plus all 10 backend tests with 10 passed and 0 failed.
 - Broker connectivity, live market data, account/portfolio integration, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading are not implemented.
 
 ## 5. XCTest, signing, and Codex boundaries
@@ -109,6 +109,8 @@ The branch contains:
 - `services/backend/tests/instrument.test.mjs`
 - Updated Trading Domain README.
 
-The implementation uses exact decimal strings for price/quantity increments and minimum quantity, keeps absent provider specifications absent, and freezes validated instrument objects. Tests have been authored but have not yet been executed in the user's local environment.
+The implementation uses exact decimal strings for price/quantity increments and minimum quantity, keeps absent provider specifications absent, and freezes validated instrument objects.
 
-The next action is to validate the backend test suite on the development Mac, review the resulting PR, and merge only after successful verification. Do not repeat the completed signing repair.
+**Verification — user-run on 2026-11-12:** `npm ci --include=dev` completed successfully; `npm test` completed the TypeScript build and all 10 Node.js tests passed (10 passed, 0 failed, 0 skipped). The initial `tsc: command not found` was resolved by installing the lockfile dependencies in the isolated worktree; no global TypeScript installation or package-manifest change was required.
+
+The next action is final PR review and merge, followed by synchronizing the local project without overwriting unrelated local changes. Do not repeat the completed signing repair.
