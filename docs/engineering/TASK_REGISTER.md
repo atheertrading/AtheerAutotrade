@@ -72,8 +72,8 @@ Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now 
 
 ### ATP-CAP-UI-001 — Capital.com broker screen (implemented on active branch; verification pending)
 
-- `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — professional Capital.com screen with broker status, DEMO environment, LIVE lock state, API key/identifier/password fields, save/remove controls, connection readiness, and disabled Connect control until IPC credential handoff is verified.
-- `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; does not persist secrets in preferences or files.
+- `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — Capital.com screen with broker status, DEMO environment, LIVE lock state, API key/identifier/password fields, save/remove controls, restoration of saved credentials on appearance, retention of values after Save, connection readiness, and disabled Connect control until IPC credential handoff is verified.
+- `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; supports typed `load()`, device-only unlocked accessibility for new items, and read-back verification after both insert and update; does not persist secrets in preferences or files.
 - `WorkspaceSection.swift`, `SidebarView.swift`, and `ApplicationShellView.swift` — expose the screen in the application sidebar under **BROKER CONNECTIONS → Brokers**.
 - `project.pbxproj` — registers both Swift files and their groups in the app target.
 - This is an active-branch implementation only; not merged into `main`, not built, and not run on the target Mac. Credential transfer and actual broker authentication remain disabled.
@@ -127,6 +127,8 @@ Current implementation branch: `security/atp-sec-ipc-001-swift-supervisor` (now 
 First compile and verify the Capital.com broker screen and Keychain store on the user's actual Mac. Then finish signed runtime/backend packaging, packaged IPC verification, and the one-shot credential-transfer contract. Enable broker connection only after those gates pass.
 
 ## Change log
+
+- 2026-11-13: Corrected ATP-CAP-UI-001 credential persistence: Keychain read-back/load, insert/update verification, saved-field restoration, and no longer clearing fields after Save. Xcode verification remains pending.
 
 - 2026-11-12: PR #14 merged as `9445a749d78c63030e9125041a6103dca0eabafc`; ATP-ARCH-REBASE-001 completed.
 - 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
