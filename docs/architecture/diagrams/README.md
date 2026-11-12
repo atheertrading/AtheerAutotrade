@@ -20,6 +20,8 @@ These diagrams describe the intended architecture and control flows. They do not
 - [Task Register](../../engineering/TASK_REGISTER.md)
 - [ADR-0003 — Capital.com Read-Only Market Connectivity](../../decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md)
 - [ADR-0004 — ATHEER Production Architecture Baseline](../../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
+- [ADR-0005 — Secure macOS IPC](../../decisions/ADR-0005-SECURE-MACOS-IPC.md)
+- [Local IPC Protocol](../../security/LOCAL_IPC_PROTOCOL.md)
 
 ## 2. Diagram index
 
@@ -42,7 +44,7 @@ These diagrams describe the intended architecture and control flows. They do not
 
 **Intent:** Show the intended end-to-end component topology and enforce the separation between presentation, domain decisions, risk, order management, broker protocol, and broker-confirmed state.
 
-**Current status:** The macOS shell, minimal backend, provider-neutral Instrument model, and read-only Capital.com adapter source exist at different verification levels. The complete flow below is a target architecture, not a claim of operational integration.
+**Current status:** The macOS shell, minimal backend, provider-neutral Instrument model, and read-only Capital.com adapter source exist at different verification levels. ADR-0005 selects parent-owned stdio pipes for desktop/backend IPC; the backend protocol handler exists but process integration is pending. The complete flow below remains target architecture, not a claim of operational integration.
 
 ```mermaid
 flowchart TB
@@ -55,7 +57,7 @@ flowchart TB
     end
 
     subgraph BACKEND["Node.js / TypeScript Backend — Modular Monolith"]
-        API["Authenticated Backend API"]
+        IPC["Versioned stdio IPC Protocol"]
         AUTH["Identity and Authorization"]
         DOMAIN["Trading Domain"]
         MARKET["Market Data Ingestion"]
@@ -67,11 +69,11 @@ flowchart TB
         INTEL["Intelligence Services"]
         STORE[("Persistence and Audit Store")]
 
-        API --> AUTH
-        API --> DOMAIN
-        API --> MARKET
-        API --> STRATEGY
-        API --> PORTFOLIO
+        IPC --> AUTH
+        IPC --> DOMAIN
+        IPC --> MARKET
+        IPC --> STRATEGY
+        IPC --> PORTFOLIO
         STRATEGY --> DOMAIN
         DOMAIN --> RISK
         RISK --> OMS
@@ -93,7 +95,7 @@ flowchart TB
         REST --> BROKER_STATE
     end
 
-    UI <--> API
+    UI <-->|Parent-owned anonymous stdio pipes| IPC
     MARKET <--> ADAPTER
     GATEWAY --> ADAPTER
     ADAPTER --> PORTFOLIO
@@ -282,13 +284,13 @@ Internal projections must not overwrite broker-confirmed facts. Unmatched or con
 ```mermaid
 flowchart TB
     OP["Human Operator"] -->|OS-authenticated session| APP["macOS Application"]
-    APP -->|Authenticated local channel| API["Local Backend API"]
+    APP -->|Parent-owned anonymous stdio pipes| IPC["Local Backend API"]
     API --> AUTHZ["Identity, Authorization and Policy"]
     KEYCHAIN[("macOS Keychain")] -->|Credential retrieval by authorized component| PROVIDER["Backend Credential Provider"]
     PROVIDER --> ADAPTER["Capital.com Adapter"]
     ADAPTER -->|TLS + in-memory session headers| BROKER["Capital.com API"]
     AUTHZ --> AUDIT[("Append-Only Security and Decision Audit")]
-    API --> AUDIT
+    IPC --> AUDIT
     ADAPTER --> AUDIT
     AUTHZ --> RISK["Central Risk Engine"]
     RISK -->|Approved intent only| OMS["OMS"]
@@ -301,7 +303,7 @@ flowchart TB
 
 Security controls:
 - Never place credentials, API keys, CST, or X-SECURITY-TOKEN in Git, source, logs, crash reports, or ChatGPT.
-- The local API must authenticate its client; loopback binding alone is not authentication.
+- Production desktop IPC uses parent-owned anonymous standard-I/O pipes; no TCP listener or filesystem socket is opened in desktop mode. The development HTTP health endpoint is not an application control channel.
 - Enforce least privilege, environment separation, request validation, rate limits where appropriate, and auditable authorization decisions.
 - LIVE remains disabled until separately approved safety controls and explicit operator authorization are in place.
 
@@ -341,7 +343,7 @@ flowchart TB
             APP["AtheerAutotrade SwiftUI App"]
         end
         subgraph SERVICE["Local Backend Process Boundary"]
-            HTTP["Backend API and Health"]
+            IPC["Versioned stdio IPC Protocol"]
             MODULES["Domain Modules"]
             ADAPTER["Capital.com Adapter"]
         end
@@ -349,7 +351,7 @@ flowchart TB
             DB[("Application State and Audit Store")]
             SECRETS[("macOS Keychain")]
         end
-        APP <-->|Authenticated local API| HTTP
+        APP <-->|Parent-owned anonymous stdio pipes| IPC
         HTTP --> MODULES
         MODULES --> ADAPTER
         MODULES <--> DB
