@@ -38,7 +38,7 @@
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, Xcode runtime packaging, functional UI | IN PROGRESS — source implementation on active branch; Node/Xcode/crypto interoperability/real Demo verification pending |
+| ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — source implementation on active branch; Node/Xcode/crypto interoperability/real Demo verification pending |
 
 Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
 
@@ -113,7 +113,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-First run Node 24 CI and correct all build/test failures. Then build the macOS target and verify the packaged child, cross-language crypto channel, and actual Capital.com Demo session. Keep WebSocket streaming and account reconciliation as explicit subsequent milestones.
+First run Node 24 CI and correct all build/test failures. Then build the macOS target and verify the packaged child, CryptoKit/Node crypto channel, actual Capital.com Demo session, and WebSocket quote/OHLC delivery. Account reconciliation remains a subsequent milestone.
 
 ## Change log
 
