@@ -1,10 +1,10 @@
 # macOS Backend Bundle Layout
 
-**Status:** Packaging contract only; copy phases, runtime artifact, and signature verification are not implemented.
+**Status:** Xcode packaging phase and script are implemented in source; build and signature verification pending.
 
 ## Required application bundle paths
 
-The native supervisor resolves these fixed paths relative to the signed application bundle:
+The native supervisor resolves only these fixed paths:
 
     AtheerAutotrade.app/
     └── Contents/
@@ -18,36 +18,41 @@ The native supervisor resolves these fixed paths relative to the signed applicat
             └── Backend/
                 └── dist/
                     ├── server.js
-                    └── api/
-                        └── ...
+                    └── ...
 
 - Node executable: Contents/Helpers/AtheerNodeRuntime/bin/node
 - Backend entry point: Contents/Resources/Backend/dist/server.js
-- Launch arguments: the absolute backend entry-point path and --transport=stdio.
-- The child working directory is the backend dist directory.
-- The child environment is explicitly reduced to NODE_ENV=production.
-- No shell is invoked, no executable is resolved through PATH, and no credentials are supplied in arguments or environment variables.
+- Launch arguments: absolute backend entry-point path and --transport=stdio.
+- Child working directory: backend dist directory.
+- Child environment: explicitly reduced to NODE_ENV=production.
+- No shell is invoked at application runtime. No PATH lookup occurs at application runtime. No credentials are supplied in arguments or environment variables.
 
-The compiled backend directory must preserve the relative module layout emitted by the backend TypeScript compiler. The current Node backend uses Node.js 24 and emits ESM into services/backend/dist.
+## Build integration
 
-## Signing and packaging requirements
+- Xcode app target includes the Package Backend Runtime shell-script build phase.
+- The phase invokes apps/macos/Scripts/package-backend.sh.
+- The script requires Node.js 24 and a universal x86_64 + arm64 executable at build time.
+- The script runs npm ci when the lockfile marker is absent/stale, runs the strict TypeScript build, copies the Node executable and compiled backend into the bundle, and signs the nested Node executable when Xcode code signing is enabled with a signing identity.
+- ATHEER_NODE_BINARY may be supplied as a build setting/environment override for the exact Node executable. The normal runtime does not use that path; it launches the bundled copy.
 
-1. Pin and record the exact Node.js 24 patch release and source checksum.
-2. Package only the required runtime files; do not download or resolve a runtime during application launch.
-3. Sign the Node executable and any nested native runtime components before signing the containing application.
-4. Sign the outer application after all helper and resource files have been copied.
-5. Verify the final app signature and nested-code signatures on the target macOS release.
-6. Verify the executable architecture matches the app process architecture. Intel x86_64 is the first required runtime target; arm64 remains unverified until tested.
-7. Verify launch, handshake, clean EOF, child crash, timeout, and relaunch using the packaged artifact.
-8. Ensure release packaging does not introduce broker credentials, tokens, or development configuration.
+## Remaining release requirements
+
+1. Pin and record an exact Node.js 24 patch version and checksum rather than relying only on the major-version check.
+2. Verify the Node runtime's source and universal architecture before release.
+3. Verify nested Node and outer app signatures with the intended Developer ID/Apple Development identity.
+4. Verify hardened-runtime, library-validation, Gatekeeper, and notarization behavior.
+5. Verify that the final app contains no credentials, development configuration, node_modules, or unnecessary build artifacts.
+6. Verify launch, protocol v2 handshake, X25519/HKDF/AES-GCM interoperability, timeout, child crash, shutdown, and restart on the target Mac.
+7. Test x86_64 on Intel and arm64 on Apple Silicon; do not infer one architecture's result from the other.
 
 ## Current implementation boundary
 
-- The Swift supervisor has been authored to resolve only the fixed paths above and launch the child with anonymous stdio pipes.
-- The Xcode project includes the Swift source files, but no build phase currently copies Node.js or backend output into the bundle.
-- No Node runtime binary has been committed or downloaded by this work.
-- No code-signature verification has been implemented in the supervisor.
-- The supervisor is not yet connected to the SwiftUI application lifecycle.
-- Keychain ownership and credential transfer remain out of scope. The current IPC capability set remains limited to system.hello and system.ping.
+- The Swift supervisor resolves only the fixed paths and launches the child using anonymous stdio pipes.
+- Protocol v2 implements encrypted one-shot credential handoff, read-only Capital.com Demo session creation/ping, session status, market search, and historical prices.
+- The Xcode packaging phase and script are present but have not been executed in the target environment.
+- The Node runtime is not committed to Git; it is copied from a locally installed Node.js 24 universal executable during build.
+- No target-Mac build, nested signature verification, packaged child launch, or actual Capital.com Demo authentication has been verified.
+- WebSocket streaming is implemented in the adapter but is not yet exposed through IPC or consumed by the macOS UI.
+- No account mutation, orders, dealing, execution, or LIVE capability is exposed.
 
-Do not treat the presence of the Swift source as proof that the packaged backend can launch. Packaging and runtime verification are separate acceptance gates.
+Do not treat the existence of the build phase or Swift supervisor as proof that the packaged broker connection works. Build, cryptographic interoperability, runtime launch, and broker authentication are separate acceptance gates.
