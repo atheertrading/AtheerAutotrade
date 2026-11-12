@@ -68,3 +68,12 @@ No new dependencies were added. The adapter exposes no order, position, dealing,
 - Historical snapshots and streaming OHLC events must be reconciled by timestamp without fabricating missing observations.
 - Distribution, notarization, external API exposure, threat modeling, and operational controls require separate design and validation.
 - Validate native app runtime on Apple Silicon hardware or CI before claiming arm64 runtime support.
+
+### ATP-CAP-002 — macOS Capital.com credential and REST connection UI (implementation in progress)
+- Added `apps/macos/Sources/Features/Settings/CapitalComSettingsView.swift`.
+- Added a Settings destination in `ApplicationShellView.swift` and registered the new source in the Xcode project file.
+- The view provides Demo/Live selection, account identifier, masked API key and API password entry, Keychain persistence separated by environment, credential removal, and a REST session-authentication test.
+- Credentials are saved to macOS Keychain only after the selected environment returns a successful session response with both CST and X-SECURITY-TOKEN headers. Session tokens are not persisted.
+- **Important limitation:** this initial UI slice calls the Capital.com REST session endpoint directly using URLSession. It is not yet routed through the Node.js backend adapter, and therefore does not complete the intended secured application-to-backend boundary.
+- WebSocket connection lifecycle, market search, historical candles, live feed monitoring, backend credential-provider integration, and order execution remain out of scope for this initial slice.
+- Verification: source changes are committed on `feature/atp-cap-002-broker-connection-experience`; no Xcode build, XCTest run, backend test, or real Capital.com Demo authentication has been executed or observed for this change. Do not claim the feature is verified.
