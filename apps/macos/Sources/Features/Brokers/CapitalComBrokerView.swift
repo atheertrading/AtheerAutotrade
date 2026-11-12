@@ -587,6 +587,7 @@ struct CapitalComBrokerView: View {
                     connectionDetail = isConnected
                         ? "Demo API session authenticated"
                         : "No active broker session"
+                    if !isConnected { marketResults = [] }
                 } else {
                     isConnected = false
                     connectionDetail = "Backend unavailable"
@@ -611,6 +612,7 @@ struct CapitalComBrokerView: View {
                 case .failure(let error):
                     isConnected = false
                     connectionDetail = "Connection failed"
+                    marketResults = []
                     feedback = .error(error.localizedDescription)
                 }
             }
