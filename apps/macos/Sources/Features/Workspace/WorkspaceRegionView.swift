@@ -1,15 +1,14 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 /// Displays the visible panels belonging to one workspace region.
-///
 /// Panel heights are allocated proportionally using each panel's sizeFraction.
-/// When minimum usable panel heights cannot fit, the region scrolls instead of
-/// forcing its content outside the available workspace bounds.
 struct WorkspaceRegionView: View {
 
     @ObservedObject var workspaceManager: WorkspaceManager
 
     let region: WorkspacePanelRegion
+    let isPanelArrangementEnabled: Bool
 
     private let panelSpacing: CGFloat = 8
     private let regionInset: CGFloat = 8
@@ -52,26 +51,15 @@ struct WorkspaceRegionView: View {
                     ScrollView(.vertical) {
                         VStack(spacing: panelSpacing) {
                             ForEach(panels) { panel in
-                                WorkspacePanelView(
-                                    panel: panel,
-                                    onHide: {
-                                        workspaceManager.hidePanel(panel.id)
-                                    },
-                                    onClose: {
-                                        workspaceManager.closePanel(panel.id)
-                                    },
-                                    onToggleMaximize: {
-                                        workspaceManager.toggleMaximize(panel.id)
-                                    }
-                                )
-                                .frame(maxWidth: .infinity)
-                                .frame(
-                                    height: allocatedHeight(
-                                        for: panel,
-                                        availableHeight: availableHeight,
-                                        totalWeight: totalWeight
+                                panelCard(panel)
+                                    .frame(maxWidth: .infinity)
+                                    .frame(
+                                        height: allocatedHeight(
+                                            for: panel,
+                                            availableHeight: availableHeight,
+                                            totalWeight: totalWeight
+                                        )
                                     )
-                                )
                             }
                         }
                         .padding(regionInset)
@@ -81,9 +69,105 @@ struct WorkspaceRegionView: View {
             }
             .frame(width: geometry.size.width, height: geometry.size.height)
             .background(AtheerColors.canvas)
+            .onDrop(of: [UTType.plainText], isTargeted: nil) { providers in
+                guard isPanelArrangementEnabled else { return false }
+                return receiveDrop(providers, before: nil)
+            }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AtheerColors.canvas)
+    }
+
+    // MARK: - Panel Card and Drag-and-Drop
+
+    @ViewBuilder
+    private func panelCard(_ panel: WorkspacePanel) -> some View {
+        let card = WorkspacePanelView(
+            panel: panel,
+            onHide: {
+                workspaceManager.hidePanel(panel.id)
+            },
+            onClose: {
+                workspaceManager.closePanel(panel.id)
+            },
+            onToggleMaximize: {
+                workspaceManager.toggleMaximize(panel.id)
+            }
+        )
+
+        if isPanelArrangementEnabled {
+            card
+                .overlay {
+                    RoundedRectangle(cornerRadius: 9, style: .continuous)
+                        .stroke(
+                            AtheerColors.accent.opacity(0.65),
+                            style: StrokeStyle(lineWidth: 1, dash: [5, 3])
+                        )
+                }
+                .onDrag {
+                    NSItemProvider(object: panel.id.uuidString as NSString)
+                }
+                .onDrop(of: [UTType.plainText], isTargeted: nil) { providers in
+                    receiveDrop(providers, before: panel)
+                }
+                .help("Drag this panel to another workspace region or panel position")
+        } else {
+            card
+        }
+    }
+
+    private func receiveDrop(
+        _ providers: [NSItemProvider],
+        before targetPanel: WorkspacePanel?
+    ) -> Bool {
+        guard isPanelArrangementEnabled,
+              let provider = providers.first,
+              provider.canLoadObject(ofClass: NSString.self) else {
+            return false
+        }
+
+        _ = provider.loadObject(ofClass: NSString.self) { object, _ in
+            guard let identifier = object as? String,
+                  let draggedPanelID = UUID(uuidString: identifier) else {
+                return
+            }
+
+            DispatchQueue.main.async {
+                guard draggedPanelID != targetPanel?.id else { return }
+
+                let insertionIndex: Int?
+
+                if let targetPanel,
+                   let workspace = workspaceManager.activeWorkspace {
+                    let targetPanels = workspace.panels
+                        .filter {
+                            $0.region == region &&
+                            $0.id != draggedPanelID
+                        }
+                        .sorted {
+                            if $0.sortOrder == $1.sortOrder {
+                                return $0.id.uuidString < $1.id.uuidString
+                            }
+
+                            return $0.sortOrder < $1.sortOrder
+                        }
+
+                    insertionIndex = targetPanels.firstIndex {
+                        $0.id == targetPanel.id
+                    } ?? targetPanels.count
+                } else {
+                    insertionIndex = nil
+                }
+
+                workspaceManager.movePanel(
+                    draggedPanelID,
+                    to: region,
+                    at: insertionIndex
+                )
+            }
+        }
+
+        return true
     }
 
     // MARK: - Panel Allocation
@@ -101,7 +185,7 @@ struct WorkspaceRegionView: View {
         return max(minimumHeight, proportionalHeight)
     }
 
-    // MARK: - Empty Region
+    // MARK: - Empty State
 
     private var emptyRegion: some View {
         VStack(spacing: 8) {
@@ -113,9 +197,13 @@ struct WorkspaceRegionView: View {
                 .font(.system(size: 11, weight: .medium))
                 .foregroundColor(AtheerColors.textSecondary)
 
-            Text("Add a panel to this region to begin.")
-                .font(.system(size: 10))
-                .foregroundColor(AtheerColors.textSecondary.opacity(0.75))
+            Text(
+                isPanelArrangementEnabled
+                    ? "Drop a panel here to move it into this region."
+                    : "Add a panel to this region to begin."
+            )
+            .font(.system(size: 10))
+            .foregroundColor(AtheerColors.textSecondary.opacity(0.75))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AtheerColors.surface.opacity(0.35))

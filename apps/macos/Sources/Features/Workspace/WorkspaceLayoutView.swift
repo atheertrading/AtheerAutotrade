@@ -7,7 +7,10 @@ struct WorkspaceLayoutView: View {
     @ObservedObject var workspaceManager: WorkspaceManager
 
     @State private var sidebarDragStartWidth: CGFloat?
+    @State private var sidebarWidthPreview: CGFloat?
     @State private var bottomDragStartHeight: CGFloat?
+    @State private var bottomPanelHeightPreview: CGFloat?
+    @State private var isPanelArrangementEnabled = false
 
     private let spacing: CGFloat = 8
 
@@ -68,8 +71,10 @@ struct WorkspaceLayoutView: View {
         availableSize: CGSize
     ) -> some View {
         let layout = workspace.layout
+        let requestedSidebarWidth = sidebarWidthPreview
+            ?? CGFloat(layout.sidebarWidth)
         let sidebarWidth = min(
-            CGFloat(layout.sidebarWidth),
+            requestedSidebarWidth,
             max(180, availableSize.width * 0.34)
         )
         let leftRegionHeight = min(
@@ -86,19 +91,28 @@ struct WorkspaceLayoutView: View {
                     WorkspaceResizeHandle(
                         axis: .horizontal,
                         onDragChanged: { translation in
-                            let initialWidth = sidebarDragStartWidth
-                                ?? CGFloat(workspace.layout.sidebarWidth)
+                            let initialWidth = sidebarDragStartWidth ?? sidebarWidth
 
                             if sidebarDragStartWidth == nil {
                                 sidebarDragStartWidth = initialWidth
                             }
 
-                            workspaceManager.setSidebarWidth(
-                                Double(initialWidth + translation)
+                            let maximumSidebarWidth = min(
+                                360,
+                                max(180, availableSize.width * 0.34)
+                            )
+                            sidebarWidthPreview = min(
+                                max(initialWidth + translation, 180),
+                                maximumSidebarWidth
                             )
                         },
                         onDragEnded: {
+                            if let finalWidth = sidebarWidthPreview {
+                                workspaceManager.setSidebarWidth(Double(finalWidth))
+                            }
+
                             sidebarDragStartWidth = nil
+                            sidebarWidthPreview = nil
                         }
                     )
                     .frame(maxHeight: .infinity)
@@ -138,8 +152,10 @@ struct WorkspaceLayoutView: View {
         _ workspace: AtheerWorkspace,
         availableSize: CGSize
     ) -> some View {
+        let requestedBottomHeight = bottomPanelHeightPreview
+            ?? CGFloat(workspace.layout.bottomPanelHeight)
         let bottomPanelHeight = min(
-            max(CGFloat(workspace.layout.bottomPanelHeight), 120),
+            max(requestedBottomHeight, 120),
             max(140, availableSize.height * 0.36)
         )
         let upperRegionHeight = max(
@@ -160,26 +176,36 @@ struct WorkspaceLayoutView: View {
             WorkspaceResizeHandle(
                 axis: .vertical,
                 onDragChanged: { translation in
-                    let initialHeight = bottomDragStartHeight
-                        ?? CGFloat(workspace.layout.bottomPanelHeight)
+                    let initialHeight = bottomDragStartHeight ?? bottomPanelHeight
 
                     if bottomDragStartHeight == nil {
                         bottomDragStartHeight = initialHeight
                     }
 
-                    workspaceManager.setBottomPanelHeight(
-                        Double(initialHeight + translation)
+                    let maximumBottomHeight = min(
+                        520,
+                        max(140, availableSize.height * 0.36)
+                    )
+                    bottomPanelHeightPreview = min(
+                        max(initialHeight + translation, 120),
+                        maximumBottomHeight
                     )
                 },
                 onDragEnded: {
+                    if let finalHeight = bottomPanelHeightPreview {
+                        workspaceManager.setBottomPanelHeight(Double(finalHeight))
+                    }
+
                     bottomDragStartHeight = nil
+                    bottomPanelHeightPreview = nil
                 }
             )
             .frame(maxWidth: .infinity)
 
             WorkspaceRegionView(
                 workspaceManager: workspaceManager,
-                region: .bottom
+                region: .bottom,
+                isPanelArrangementEnabled: isPanelArrangementEnabled
             )
             .frame(height: bottomPanelHeight)
         }
@@ -226,21 +252,24 @@ struct WorkspaceLayoutView: View {
     private var leftRegion: some View {
         WorkspaceRegionView(
             workspaceManager: workspaceManager,
-            region: .left
+            region: .left,
+            isPanelArrangementEnabled: isPanelArrangementEnabled
         )
     }
 
     private var centerRegion: some View {
         WorkspaceRegionView(
             workspaceManager: workspaceManager,
-            region: .center
+            region: .center,
+            isPanelArrangementEnabled: isPanelArrangementEnabled
         )
     }
 
     private var rightRegion: some View {
         WorkspaceRegionView(
             workspaceManager: workspaceManager,
-            region: .right
+            region: .right,
+            isPanelArrangementEnabled: isPanelArrangementEnabled
         )
     }
 
@@ -262,6 +291,36 @@ struct WorkspaceLayoutView: View {
             }
 
             Spacer()
+
+            Button {
+                isPanelArrangementEnabled.toggle()
+            } label: {
+                Label(
+                    isPanelArrangementEnabled ? "Done Arranging" : "Arrange Panels",
+                    systemImage: isPanelArrangementEnabled
+                        ? "checkmark"
+                        : "arrow.up.arrow.down"
+                )
+                .font(.system(size: 11, weight: .semibold))
+                .foregroundColor(
+                    isPanelArrangementEnabled
+                        ? AtheerColors.accent
+                        : AtheerColors.textPrimary
+                )
+            }
+            .buttonStyle(.borderless)
+            .help(
+                isPanelArrangementEnabled
+                    ? "Finish panel arrangement and disable drag-and-drop"
+                    : "Enable drag-and-drop to move and reorder workspace panels"
+            )
+
+            if isPanelArrangementEnabled {
+                Text("DRAG PANELS TO MOVE")
+                    .font(.system(size: 9, weight: .semibold))
+                    .tracking(0.6)
+                    .foregroundColor(AtheerColors.accent)
+            }
 
             Menu {
                 panelRegionMenu(.left)
