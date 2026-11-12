@@ -1,5 +1,3 @@
-import type { Instrument } from "../../trading-domain/instrument.js";
-
 export type CapitalComEnvironment = "demo" | "live";
 
 export type CapitalComResolution =
@@ -265,18 +263,6 @@ export class CapitalComClient {
         ? { instrumentType: result.instrumentType }
         : {})
     });
-  }
-
-  /**
-   * Maps provider instrument metadata only when the caller has already
-   * established a valid provider-to-domain mapping. No contract defaults
-   * are inferred here.
-   */
-  assertInstrumentMapping(instrument: Instrument, providerEpic: string): void {
-    validateEpic(providerEpic);
-    if (!instrument.id.trim()) {
-      throw new TypeError("A mapped instrument must have a stable domain id.");
-    }
   }
 
   invalidateSession(): void {
