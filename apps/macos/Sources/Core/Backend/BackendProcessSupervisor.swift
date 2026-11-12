@@ -7,8 +7,8 @@ import Foundation
 /// - Contents/Resources/Backend/dist/server.js
 ///
 /// The runtime is resolved only from the app bundle. PATH lookup and shell
-/// invocation are deliberately prohibited. The credential provider is not
-/// part of this component.
+/// invocation are deliberately prohibited. Keychain credentials are encrypted
+/// with a per-process ephemeral key before crossing the supervised IPC pipe.
 final class BackendProcessSupervisor {
     static let shared = BackendProcessSupervisor()
 
@@ -264,6 +264,8 @@ final class BackendProcessSupervisor {
             detachHandlers()
             closePipes()
             process = nil
+            secretChannel?.reset()
+            secretChannel = nil
             finishStart(.failure(LocalIPCError.processLaunchFailed(error.localizedDescription)))
         }
     }
