@@ -139,7 +139,7 @@ function collectText(stream) {
   });
 }
 
-test("production stdio transport starts without an HTTP listener or stdout diagnostics", { timeout: 5000 }, async () => {
+test("production stdio transport serves child-process requests with protocol-only stdout", { timeout: 5000 }, async () => {
   const child = spawn(process.execPath, ["dist/server.js", "--transport=stdio"], {
     stdio: ["pipe", "pipe", "pipe"]
   });
