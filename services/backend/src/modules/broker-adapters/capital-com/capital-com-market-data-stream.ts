@@ -343,13 +343,24 @@ export class CapitalComMarketDataStream {
         parsed.destination === "OHLCMarketData.subscribe"
       ) {
         const subscriptions = parsed.payload.subscriptions;
+        const options = this.options;
+        const expectedKeys = options
+          ? parsed.destination === "marketData.subscribe"
+            ? [...options.epics]
+            : options.epics.flatMap((epic) =>
+                options.resolutions.map((resolution) =>
+                  `${epic}:${resolution}:${options.candleType}`
+                )
+              )
+          : [];
+
         if (
           parsed.status !== "OK" ||
           !isRecord(subscriptions) ||
-          Object.keys(subscriptions).length === 0 ||
-          Object.values(subscriptions).some((status) => status !== "PROCESSED")
+          expectedKeys.length === 0 ||
+          expectedKeys.some((key) => subscriptions[key] !== "PROCESSED")
         ) {
-          this.callbacks.onError?.(new Error("Capital.com did not confirm all market data subscriptions."));
+          this.callbacks.onError?.(new Error("Capital.com did not confirm all requested market data subscriptions."));
           return;
         }
 
