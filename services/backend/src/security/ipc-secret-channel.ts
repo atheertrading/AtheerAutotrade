@@ -31,11 +31,16 @@ function decodeBase64(value: unknown, expectedLength: number, field: string): Bu
  * The private key and derived key remain in process memory only.
  */
 export class IpcSecretChannel {
-  private readonly privateKey = generateKeyPairSync("x25519").privateKey;
-  private readonly publicKey = generateKeyPairSync("x25519").publicKey;
+  private readonly privateKey;
   private readonly salt = randomBytes(32);
-  private readonly rawPublicKey = this.publicKey.export({ format: "der", type: "spki" }).subarray(-32);
+  private readonly rawPublicKey;
   private sessionKey: Buffer | undefined;
+
+  constructor() {
+    const pair = generateKeyPairSync("x25519");
+    this.privateKey = pair.privateKey;
+    this.rawPublicKey = pair.publicKey.export({ format: "der", type: "spki" }).subarray(-32);
+  }
 
   get handshakeParameters(): { readonly publicKey: string; readonly salt: string } {
     return Object.freeze({
