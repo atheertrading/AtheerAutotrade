@@ -77,8 +77,9 @@
 - XCTest/signing: user confirmed Xcode Build Succeeded; Codex reported four tests passed, zero failed and signature checks passed on x86_64.
 - PR #14 (ATP-ARCH-REBASE-001) was merged on 2026-11-12 as `9445a749d78c63030e9125041a6103dca0eabafc`.
 - PR #15 (ATP-SEC-IPC-001 Batches 1–2) was merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. The backend stdio handler and startup mode are present, but its added build/tests have not been executed in this work session.
+- PR #16 (native stdio IPC supervisor) was subsequently merged into `main` as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`; no Xcode build/test or packaged runtime execution has been performed for it.
 - The current feature branch adds native Swift IPC protocol/supervisor source, an XCTest source file, Xcode project membership, and a bundle-layout document. No Xcode build/test or packaged runtime execution has been performed.
-- Native runtime packaging/signing, app lifecycle integration, Keychain credential transfer, and Capital.com credential-entry UI remain unimplemented.
+- Native runtime packaging/signing, app lifecycle integration, and Keychain credential transfer remain unimplemented. ATP-CAP-UI-001 is implemented on the active feature branch but is not yet merged or Xcode-verified.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next verification and implementation gates
