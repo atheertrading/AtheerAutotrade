@@ -50,8 +50,8 @@ struct WorkspaceRegionView: View {
                 } else {
                     ScrollView(.vertical) {
                         VStack(spacing: panelSpacing) {
-                            ForEach(Array(panels.enumerated()), id: \.element.id) { index, panel in
-                                panelCard(panel, visibleIndex: index)
+                            ForEach(panels) { panel in
+                                panelCard(panel)
                                     .frame(maxWidth: .infinity)
                                     .frame(
                                         height: allocatedHeight(
@@ -81,10 +81,7 @@ struct WorkspaceRegionView: View {
     // MARK: - Panel Card and Drag-and-Drop
 
     @ViewBuilder
-    private func panelCard(
-        _ panel: WorkspacePanel,
-        visibleIndex: Int
-    ) -> some View {
+    private func panelCard(_ panel: WorkspacePanel) -> some View {
         let card = WorkspacePanelView(
             panel: panel,
             onHide: {
