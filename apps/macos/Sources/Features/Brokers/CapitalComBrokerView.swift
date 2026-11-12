@@ -416,8 +416,8 @@ struct CapitalComBrokerView: View {
             )
             readinessRow(
                 title: "Secure desktop-to-backend session handoff",
-                detail: "Ephemeral X25519 + AES-256-GCM channel implemented; bundled runtime verification pending",
-                complete: true
+                detail: "Ephemeral X25519 + AES-256-GCM channel and runtime packaging phase added; build verification pending",
+                complete: false
             )
             readinessRow(
                 title: "Capital.com Demo API session",
