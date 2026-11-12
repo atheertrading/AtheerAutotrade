@@ -8,7 +8,7 @@
 - Backend binds to `127.0.0.1` by default and exposes process health only; it does not expose broker/account operations.
 - The Capital.com adapter source accepts an injected credentials provider and keeps CST/X-SECURITY-TOKEN in process memory only.
 - The adapter source does not read credentials from environment variables, files, source-controlled configuration, or logs.
-- ADR-0005 selects parent-owned anonymous standard-I/O pipes for the production desktop/backend process boundary. The backend protocol handler is implemented as a module, but process startup and the native Swift client are not yet integrated.
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for the production desktop/backend process boundary. The backend protocol handler is wired to the explicit `--transport=stdio` startup mode; the native Swift client and bundled runtime are not yet integrated.
 - No concrete broker credential provider or broker-secret transfer method is implemented.
 - `.gitignore` excludes environment files, common secret files, build output, and test artifacts.
 - Health responses use `Cache-Control: no-store` and disclose process health only.
