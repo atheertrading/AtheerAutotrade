@@ -83,6 +83,7 @@ export async function serveStdioIpc(
   const seenRequestIds = new Set<string>();
   const secretChannel = new IpcSecretChannel();
   let handshakeComplete = false;
+  let credentialsSubmitted = false;
   let frame: number[] = [];
 
   const respondAndStop = async (id: string | null, code: string, message: string): Promise<void> => {
@@ -186,11 +187,16 @@ export async function serveStdioIpc(
               break;
             }
             case "broker.credentials.submit": {
+              if (credentialsSubmitted) {
+                await writeResponse(output, failure(request.id, "CREDENTIALS_ALREADY_SUBMITTED", "Credential transfer is one-shot for each backend process session."));
+                break;
+              }
               if (!hasExactKeys(request.payload, ["envelope"])) throw new TypeError("Encrypted credentials envelope is required.");
               const plaintext = secretChannel.decrypt(request.payload.envelope);
               try {
                 const credentials = JSON.parse(plaintext.toString("utf8")) as unknown;
                 broker.setCredentials(credentials);
+                credentialsSubmitted = true;
               } finally {
                 plaintext.fill(0);
               }
