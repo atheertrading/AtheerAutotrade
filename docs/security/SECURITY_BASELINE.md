@@ -16,7 +16,7 @@
 - The Xcode project includes a packaging phase that compiles the backend and copies a Node.js 24 universal runtime, ESM package metadata, and compiled backend into fixed app-bundle paths. When code signing is enabled, the Node helper is signed with the minimal JIT entitlement needed for V8.
 - The native app requests child-process termination when the application exits.
 
-The Node backend TypeScript build and 31/31 tests passed in GitHub Actions on Node.js 24.22.2 (run 43332525299). The Xcode build, CryptoKit/Node interoperability, packaged runtime launch, signature verification, and real Capital.com Demo session remain unverified.
+The Node backend TypeScript build and 31/31 tests passed in GitHub Actions on Node.js 24.22.2 (run 43332767979). The Xcode build, CryptoKit/Node interoperability, packaged runtime launch, signature verification, and real Capital.com Demo session remain unverified.
 
 ## Data encryption versus application integrity
 
