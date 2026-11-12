@@ -133,6 +133,7 @@ export class CapitalComMarketDataStream {
   private stopped = true;
   private keepaliveTimer: ReturnType<typeof setInterval> | undefined;
   private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
+  private connectionTimeoutTimer: ReturnType<typeof setTimeout> | undefined;
   private connectionStableTimer: ReturnType<typeof setTimeout> | undefined;
   private reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
   private options: CapitalComStreamOptions | undefined;
@@ -210,8 +211,15 @@ export class CapitalComMarketDataStream {
       const socket = this.socketFactory(url.toString());
       this.socket = socket;
 
+      this.connectionTimeoutTimer = setTimeout(() => {
+        if (this.socket === socket && socket.readyState < WebSocket.OPEN) {
+          socket.close(4002, "Capital.com WebSocket connection timed out");
+        }
+      }, INITIAL_CONNECT_TIMEOUT_MS);
+
       socket.addEventListener("open", () => {
         if (this.stopped || this.socket !== socket) return;
+        this.clearConnectionTimeoutTimer();
         this.clearStableConnectionTimer();
         this.connectionStableTimer = setTimeout(() => {
           this.reconnectDelay = INITIAL_RECONNECT_DELAY_MS;
@@ -234,6 +242,7 @@ export class CapitalComMarketDataStream {
 
       socket.addEventListener("close", () => {
         if (this.socket === socket) this.socket = undefined;
+        this.clearConnectionTimeoutTimer();
         this.clearStableConnectionTimer();
         this.confirmedSubscriptions.clear();
         this.clearKeepalive();
@@ -243,17 +252,9 @@ export class CapitalComMarketDataStream {
       if (waitUntilOpen) {
         await new Promise<void>((resolve, reject) => {
           let settled = false;
-          const timeout = setTimeout(() => {
-            if (settled) return;
-            settled = true;
-            socket.close();
-            reject(new Error("Capital.com WebSocket connection timed out."));
-          }, INITIAL_CONNECT_TIMEOUT_MS);
-
           const finish = (error?: Error) => {
             if (settled) return;
             settled = true;
-            clearTimeout(timeout);
             if (error) reject(error);
             else resolve();
           };
@@ -392,6 +393,13 @@ export class CapitalComMarketDataStream {
     }
   }
 
+  private clearConnectionTimeoutTimer(): void {
+    if (this.connectionTimeoutTimer !== undefined) {
+      clearTimeout(this.connectionTimeoutTimer);
+      this.connectionTimeoutTimer = undefined;
+    }
+  }
+
   private clearStableConnectionTimer(): void {
     if (this.connectionStableTimer !== undefined) {
       clearTimeout(this.connectionStableTimer);
@@ -401,6 +409,7 @@ export class CapitalComMarketDataStream {
 
   private clearTimers(): void {
     this.clearKeepalive();
+    this.clearConnectionTimeoutTimer();
     this.clearStableConnectionTimer();
     if (this.reconnectTimer !== undefined) {
       clearTimeout(this.reconnectTimer);
