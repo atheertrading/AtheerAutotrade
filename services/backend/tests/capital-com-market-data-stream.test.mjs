@@ -57,11 +57,13 @@ test("stream subscribes to quotes and OHLC after WebSocket opens", async () => {
     }
   );
 
-  await stream.start({
+  const startPromise = stream.start({
     epics: ["OIL_CRUDE", "EURUSD"],
     resolutions: ["MINUTE", "MINUTE_5"]
   });
+  await Promise.resolve();
   socket.open();
+  await startPromise;
 
   assert.equal(socket.sent.length, 2);
   assert.equal(socket.sent[0].destination, "marketData.subscribe");
@@ -86,8 +88,10 @@ test("stream normalizes live quote and OHLC updates", async () => {
     () => socket
   );
 
-  await stream.start({ epics: ["OIL_CRUDE"], resolutions: ["MINUTE_5"] });
+  const startPromise = stream.start({ epics: ["OIL_CRUDE"], resolutions: ["MINUTE_5"] });
+  await Promise.resolve();
   socket.open();
+  await startPromise;
   socket.message({
     status: "OK",
     destination: "quote",
@@ -163,8 +167,10 @@ test("stream reports malformed market data without forwarding it", async () => {
     () => socket
   );
 
-  await stream.start({ epics: ["OIL_CRUDE"], resolutions: ["MINUTE"] });
+  const startPromise = stream.start({ epics: ["OIL_CRUDE"], resolutions: ["MINUTE"] });
+  await Promise.resolve();
   socket.open();
+  await startPromise;
   socket.message({
     destination: "quote",
     payload: { epic: "OIL_CRUDE", bid: "75.1", ofr: 75.2, timestamp: 1 }
