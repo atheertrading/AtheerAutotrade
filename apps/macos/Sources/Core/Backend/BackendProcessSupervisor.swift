@@ -131,6 +131,31 @@ final class BackendProcessSupervisor {
         request(method: "broker.disconnect", payload: [:], timeout: 10, completion: completion)
     }
 
+    func capitalComStatus(completion: @escaping Completion) {
+        start { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success:
+                self.request(method: "broker.status", payload: [:], timeout: 10, completion: completion)
+            }
+        }
+    }
+
+    func getCapitalComHistoricalPrices(
+        epic: String,
+        resolution: String = "MINUTE",
+        max: Int = 100,
+        completion: @escaping Completion
+    ) {
+        request(
+            method: "broker.historicalPrices",
+            payload: ["epic": epic, "resolution": resolution, "max": max],
+            timeout: 20,
+            completion: completion
+        )
+    }
+
     func searchCapitalComMarkets(
         _ searchTerm: String,
         completion: @escaping Completion
@@ -234,6 +259,8 @@ final class BackendProcessSupervisor {
                         capabilities.contains("system.ping"),
                         capabilities.contains("broker.credentials.submit"),
                         capabilities.contains("broker.connect"),
+                        capabilities.contains("broker.status"),
+                        capabilities.contains("broker.marketSearch"),
                         let keyAgreement = response["keyAgreement"] as? [String: Any],
                         keyAgreement["algorithm"] as? String == "X25519-HKDF-SHA256-AES-256-GCM",
                         let serverPublicKey = keyAgreement["publicKey"] as? String,
