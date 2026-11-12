@@ -1,71 +1,70 @@
 # Project Continuity Record
 
-**Purpose:** Preserve the authoritative handoff state between engineering sessions and prevent repeated work, lost decisions, and unsupported claims.
+**Purpose:** Preserve the authoritative engineering handoff between sessions and prevent repeated work, lost decisions, and unsupported claims.
 
-**Repository:** `atheertrading/AtheerAutotrade`  
-**Permanent local project root (user-confirmed):** `/Users/enghossamalfahad/Developer/AtheerAutotrade`  
+**Product identity:** ATHEER Trading Pro  
+**Repository / temporary technical project identifier:** `atheertrading/AtheerAutotrade` / `AtheerAutotrade`  
+**User-confirmed local project root:** `/Users/enghossamalfahad/Developer/AtheerAutotrade`  
 **Xcode project:** `apps/macos/AtheerAutotrade.xcodeproj`  
-**Bundle identifier:** `com.atheerautotrade.desktop`
+**Current bundle identifier:** `com.atheerautotrade.desktop`
 
-## 1. Project identity
+## 1. Product identity and scope
 
-AtheerAutotrade is an independent, professional automated multi-asset trading project. It is informed by applicable prior Atheer Trading Pro architecture, but it is a distinct project. Legacy assumptions must be reconciled rather than copied blindly.
+ATHEER Trading Pro is the product identity: a professional, production-oriented, automated multi-asset trading system. AtheerAutotrade is a temporary technical repository/project identifier, not a separate product identity. Retain repository, Xcode, bundle, package, and Keychain identifiers until a controlled migration plan is approved.
 
-The intended system separates the native macOS client, backend services, market data, broker adapters, strategies, risk management, order management, execution, portfolio, and intelligence.
+Prior ATHEER Trading Pro architecture and engineering material is source material to reconcile. Preserve applicable requirements, but do not copy contradictory, obsolete, provisional, or unverified implementation assumptions.
 
 ## 2. Authoritative sources
 
-| Concern | Authoritative source |
+| Concern | Source |
 |---|---|
-| Current engineering handoff and constraints | This document |
-| Task status and next action | [Task Register](TASK_REGISTER.md) |
+| Cross-session handoff and constraints | This document |
+| Task state and next action | [Task Register](TASK_REGISTER.md) |
 | Implemented, planned, and unvalidated functionality | [Implementation Status](IMPLEMENTATION_STATUS.md) |
 | Accepted architecture decisions | `docs/decisions/` |
-| Module responsibilities and safety boundaries | `docs/architecture/MODULE_BOUNDARIES.md` |
-| System architecture | `docs/architecture/SYSTEM_OVERVIEW.md` |
-| Security baseline | `docs/security/SECURITY_BASELINE.md` |
-| Agent and Codex working rules | Repository-root `AGENTS.md` |
+| Module ownership | [Module Boundaries](../architecture/MODULE_BOUNDARIES.md) |
+| Target topology | [System Overview](../architecture/SYSTEM_OVERVIEW.md) |
+| Security baseline | [Security Baseline](../security/SECURITY_BASELINE.md) |
+| Agent working rules | Repository-root `AGENTS.md` |
 
-If documents conflict, identify the conflict, prefer newer directly verified evidence, and record the resolution.
+Repository records are authoritative over conversation summaries. When documents conflict, prefer newer directly verified evidence and record the reconciliation.
 
-## 3. Repository baseline
+## 3. Repository baseline and active branches
 
-- PR #11 (ATP-DOM-001) was squash-merged on 2026-11-12 as `fa68db5635042b43cda16e687eeffa4f138c5cbe`.
-- ATP-DOM-001 was verified by the user in an isolated worktree: TypeScript build succeeded and all 10 backend tests passed.
-- The earlier local Git status showed the user's `main` branch behind origin and containing local changes. The user safely saved tracked and untracked changes in `stash@{0}`; the working tree then reported clean and `main...origin/main [behind 33]`.
-- Do not pop, drop, apply, or overwrite that stash until the local synchronization plan is explicitly reviewed. Do not reset, clean, force-push, or change branches destructively.
-- The current broker implementation is being authored on `feature/atp-cap-001-capital-market-connectivity`; it is not yet merged into main.
+- Latest observed `main` baseline before this milestone: `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
+- PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
+- PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
+- PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
+- The current architecture rebase work is on `architecture/atp-arch-rebase-001`, created from the then-current `main` baseline. It is documentation/architecture work only at this stage.
+- The Capital.com UI feature branch `feature/atp-cap-002-broker-connection-experience` was previously reviewed and found to make direct REST calls from SwiftUI. It is not an approved architecture pattern and must not be merged as-is.
+- The user's local working copy previously contained local changes and a stash. Do not pop, drop, apply, reset, clean, force-push, or overwrite local work without a reviewed reconciliation plan.
 
 ## 4. Current implementation baseline
 
-- Native SwiftUI macOS application shell, dashboard, navigation destinations, and Trading Workspace are present.
-- Workspace persistence, panel management, resizing, and drag/drop are present.
-- Node.js/TypeScript backend exposes a local process health endpoint and structured 404 handling.
-- Provider-neutral Trading Domain Instrument model is merged in PR #11.
-- The new Capital.com branch contains a read-only REST client (session creation, ping, market search, historical prices) and WebSocket market-data stream (quotes and OHLC), with reconnect and keepalive behavior plus mock-based tests.
-- The Capital.com adapter is not yet wired into the HTTP server or macOS application. No Keychain-backed credentials provider exists. No real Demo or Live account has been authenticated from this implementation. No real quote or candle has yet been received and verified. Therefore broker connectivity and operational market data remain **NOT VERIFIED**.
-- Account/portfolio integration, strategy runtime, risk evaluation, order management, execution gateway, AI services, and LIVE trading are not implemented.
+- Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
+- Backend currently exposes process health and structured 404 handling.
+- Provider-neutral Trading Domain Instrument model is merged.
+- Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
+- No concrete macOS Keychain credential provider or authenticated desktop/backend boundary is verified.
+- No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
+- Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
+- No live order path is implemented or authorized.
 
-## 5. XCTest, signing, and Codex boundaries
+## 5. Architecture baseline accepted in ADR-0004
 
-The XCTest foundation and corrections were merged through PRs #6–#8. The user-provided Codex transcript reports four XCTest cases passed with zero failures.
+- Native SwiftUI macOS client remains the presentation/operator-control surface.
+- Backend remains a Node.js/TypeScript modular monolith with explicit module ownership and typed boundaries.
+- Backend owns broker lifecycle, market-data ingestion, domain orchestration, persistence, Risk, OMS, execution, and reconciliation.
+- Capital.com is the primary broker target; initial broker integration remains read-only.
+- Loopback binding alone is not authentication. The desktop/backend transport and credential handoff require a focused threat-modeled design ADR before broker operations are exposed.
+- The Execution Gateway is the only dealing path. It accepts dispatch only from OMS with a Risk decision bound to the exact immutable intent.
+- Every exposure-increasing intent passes through centralized Risk Engine.
+- Broker-confirmed account and execution state is authoritative. Unknown submission outcomes require reconciliation; never blind retry.
+- LIVE remains disabled until all safety controls and explicit user authorization are implemented and verified.
+- Process health, backend readiness, broker REST session, WebSocket state, market-data quality, persistence, trading readiness, and LIVE authorization are distinct states.
 
-On 2026-11-12, Codex also reported:
-- the local Apple Development certificate TeamIdentifier matched the configured team `94W645Z9FP`;
-- a one-line `TargetAttributes` correction was made in `project.pbxproj` for the test target;
-- Debug build succeeded and both app and embedded XCTest bundle signatures verified;
-- four XCTest cases passed, zero failures;
-- verification destination was macOS x86_64; arm64 remains unverified.
+## 6. Development environment (last user-provided; not live-inspected)
 
-The user subsequently confirmed that Xcode displayed `Build Succeeded`. The informational XCTest framework messages about skipping strip on Apple-signed binaries are not errors.
-
-**Publication status:** The local Xcode signing correction has not been confirmed as committed/pushed to GitHub. Preserve the user's working copy and stash. Do not overwrite the local project file with the repository version.
-
-Codex is a task-bounded implementation/test tool, not the default project architect or executor. The original authorized Codex task was the XCTest problem. Do not silently expand future Codex tasks into broad audits or unrelated implementation.
-
-## 6. Development environment
-
-Last user-provided environment:
 - Hardware: iMac18,3 (Intel).
 - macOS: Ventura 13.7.8.
 - Xcode: 14.3.1.
@@ -74,73 +73,51 @@ Last user-provided environment:
 - Deployment target: macOS 13.0.
 - Intended architectures: x86_64 and arm64.
 
-These are recorded environment details, not a live machine inspection. Re-check only when the toolchain changes or a task requires it.
+Reassess the toolchain only when the development environment changes or a task requires it. Do not claim arm64 runtime support without runtime validation.
 
-## 7. Non-negotiable engineering constraints
+## 7. Non-negotiable constraints
 
-- Preserve completed workspace work and unrelated local files.
-- Inspect current source and project configuration before changes.
-- Keep macOS deployment target at 13.0 unless a documented technical requirement justifies a change.
+- Preserve existing local changes, stashes, workspace work, and unrelated files.
+- Inspect exact current files before editing.
+- Keep deployment target macOS 13.0 unless a documented requirement justifies change.
 - Do not introduce unverified dependencies.
 - Keep UI, backend, broker connectivity, risk, and execution responsibilities separate.
-- Every exposure-increasing order intent must pass through the centralized Risk Engine.
-- AI and UI must never bypass Risk Engine.
-- Broker-confirmed data is authoritative for actual account and execution state.
-- Never store broker or Apple account credentials in source code, Git, logs, or ChatGPT.
-- LIVE trading remains disabled until all required safety gates and explicit user authorization are satisfied.
-- Missing broker specifications or market observations must remain unknown; never fabricate defaults.
-- Capital.com adapter must remain read-only until separate execution and Risk Engine milestones are accepted.
+- All exposure-increasing intents pass through centralized Risk Engine.
+- UI, strategies, and AI cannot bypass Risk or call broker dealing APIs.
+- Never place credentials/tokens/private keys in source, Git, logs, process arguments, or ChatGPT.
+- Use platform-appropriate secure storage; broker session tokens remain memory-only.
+- Missing broker specifications or market observations remain unknown; never fabricate defaults.
+- No real trade without explicit user approval.
 
 ## 8. Working protocol
 
-1. Read `AGENTS.md`, this record, the task register, and relevant implementation/architecture documents.
-2. Identify the exact requested task and confirm whether it is already complete.
-3. Inspect relevant current files before editing.
+1. Read `AGENTS.md`, this record, task register, implementation status, and relevant ADR/security/architecture documents.
+2. Confirm the requested milestone is not already complete.
+3. Inspect exact source and project configuration before edits.
 4. Define scope, dependencies, acceptance criteria, and verification.
 5. Implement one milestone without unrelated refactoring.
-6. Verify affected behavior only; do not repeat completed checks without a technical reason.
-7. Record actual results and the next action in the task register and implementation status.
+6. Verify only affected behavior; do not repeat completed tests without a technical reason.
+7. Record actual changed files, results, and next action in the task register and implementation status.
 
 ## 9. Latest handoff — 2026-11-12
 
-### Completed: ATP-DOM-001
+### ATP-ARCH-REBASE-001 — IN PROGRESS
 
-PR #11 merged at `fa68db5635042b43cda16e687eeffa4f138c5cbe`. The immutable provider-neutral Instrument model and its tests are present on main. User-run verification in the isolated worktree: `npm ci --include=dev` succeeded; `npm test` compiled TypeScript and passed 10/10 tests.
+Branch: `architecture/atp-arch-rebase-001`.
 
-### Active: ATP-CAP-001 — Capital.com read-only market connectivity
+Created and committed:
+- `docs/decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md` — product identity, modular-monolith topology, module ownership, mandatory risk/OMS/execution invariants, broker/data lifecycle, deferred local IPC decision, and distinct health/readiness states.
+- Updated system overview, module boundaries, and repository README to align with ADR-0004 and ATHEER Trading Pro product identity.
 
-Branch: `feature/atp-cap-001-capital-market-connectivity`.
+No runtime source code changed. No build or tests were run because this is a documentation/architecture milestone.
 
-Current branch additions:
-- `services/backend/src/modules/broker-adapters/capital-com/capital-com-client.ts`
-- `services/backend/src/modules/broker-adapters/capital-com/capital-com-market-data-stream.ts`
-- `services/backend/src/modules/broker-adapters/capital-com/README.md`
-- `services/backend/tests/capital-com-client.test.mjs`
-- `services/backend/tests/capital-com-market-data-stream.test.mjs`
-- `docs/decisions/ADR-0003-CAPITAL-COM-MARKET-CONNECTIVITY.md`
+### Remaining within ATP-ARCH-REBASE-001
 
-The implementation is based on the official Capital.com Public API contracts. It has not yet been compiled or run in the user's environment. It has not authenticated to a real Demo account. Do not report broker connectivity, streaming stability, or candle integrity as achieved.
+1. Reconcile the remaining engineering status documents with the accepted product identity and current branch/PR evidence.
+2. Review the architecture catalogue against ADR-0004 and update only material mismatches.
+3. Open a draft PR for technical review; do not merge until architecture consistency is checked.
+4. After this milestone is reviewed, begin a focused secure local IPC/credential-provider architecture spike and record its decision before coding the broker app integration.
 
-### Required next actions
+### Local repository preservation
 
-1. Review the new TypeScript adapter and tests for compile/runtime defects; run the backend build and focused tests in an isolated worktree based on this branch.
-2. Implement a Keychain-backed credential provider and a secured local app-to-backend boundary. Do not expose credentials through unauthenticated HTTP.
-3. Wire a controlled read-only connection lifecycle into the application.
-4. Verify Demo authentication, market discovery, historical bars, real-time quotes, and OHLC updates using an actual Capital.com account.
-5. Add quote-age monitoring, stale-data states, reconnect recovery, timestamp/gap detection, and sustained-feed evidence.
-6. Only then consider the broker-connectivity milestone operationally verified.
-
-No local stash changes have been applied or discarded. The user's local repository synchronization remains pending.
-
-
-## 10. Architecture diagram preservation — 2026-11-12
-
-### ATA-DOC-001 — Mermaid architecture suite
-
-- Recovered prior conversation references to the ATP-GAI-02 / ATP-GAI-02-R1.1 ten-diagram suite defined on 2026-11-11: system architecture, OMS lifecycle, centralized risk, broker reconnection, market-data freshness, strategy execution, portfolio reconciliation, security, telemetry, and deployment/failure isolation.
-- The conversation archive returned titles and scope, but not the original Mermaid source blocks. An additional retrieval confirmed that the historical R1 material included ASCII System A/System B boundaries, not verbatim Mermaid for the ten diagrams.
-- A reconstructed and AtheerAutotrade-adapted catalogue was committed on branch `docs/atp-mermaid-architecture-suite` at `f70493bc05eaa55069d42ec85492b70c621bcc53`; subsequent documentation commits are recorded on that branch.
-- Canonical document: `docs/architecture/diagrams/README.md` (ATA-ARCH-DIAG-001). The system overview links to it.
-- The inherited System A Engineering Workbench / System B ATHEER Production separation is recorded as a design-lineage principle only, not as a claim about the current AtheerAutotrade deployment.
-- These are target architecture diagrams, not implementation evidence. Mermaid rendering review and PR review remain pending.
-- Do not describe the new source as verbatim recovery. If original source files or archive are later located, compare them and preserve provenance.
+The user's local project and stash must remain untouched by GitHub-side work. No local filesystem or Xcode build was accessed in this session.
