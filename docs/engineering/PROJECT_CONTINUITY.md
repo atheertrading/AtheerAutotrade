@@ -106,3 +106,28 @@ For every new task:
 ## 9. Update discipline
 
 Update this document only when a durable project fact, current milestone, environment, constraint, or handoff changes. Keep dated evidence and clearly label its source as user-confirmed, repository-observed, or tool-verified. Do not turn transient conversation details into permanent project requirements.
+
+
+## 10. Latest user-reported Codex session — 2026-11-12
+
+**Scope correction:** The user clarified that Codex was originally introduced for one bounded purpose: resolving the XCTest problem. It is not the default implementation agent for broad project setup, Apple Developer configuration, or general engineering tasks. The prior instruction that expanded Codex into a full Apple/Xcode configuration task was an assistant scope error. The repository's Codex usage boundary remains mandatory.
+
+The user subsequently ran that broader instruction. The pasted Codex transcript reports the following local working-copy changes (not yet confirmed as committed or pushed):
+- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj`: changed signing from explicitly disabled to Automatic / Apple Development and configured related project settings.
+- `apps/macos/AtheerAutotrade.entitlements`: created with App Sandbox and outgoing network client entitlement.
+- `apps/macos/AtheerAutotrade.xcodeproj/xcshareddata/xcschemes/AtheerAutotrade.xcscheme`: added the existing XCTest target to the shared Test action.
+- Codex reported no Swift source or Workspace functionality changes.
+
+**Verification evidence supplied by the user (Codex transcript):**
+- Xcode 14.3.1, Swift 5.8.1, macOS 13.7.8, macOS SDK 13.3.
+- Xcode project resolution and effective settings inspection completed.
+- Normal Debug build failed at signing because no Development Team/account or valid signing identity was available on the machine.
+- XCTest command succeeded with a command-line-only code-signing override; Codex reported 4 tests passed and 0 failed.
+- This is transcript-reported evidence, not an independently inspected result bundle. It proves the test invocation reported success, but does not prove signed-app build, embedded signed entitlements, Apple Developer portal capability state, or runtime network behavior.
+- Xcode account configuration was reported empty; local signing identity count was zero; Apple Developer portal was not checked.
+
+**Disposition:** Treat these three project configuration changes as local/unreviewed pending changes until their actual diff and working-tree state are reviewed. Do not tell the user to rerun the tests merely to reconfirm the same reported result. Do not ask the user to troubleshoot Git; the user confirmed the previous Git issue was resolved and files were pushed. The current Apple signing blocker requires the account owner to add/sign in to the intended Apple Developer account in Xcode and select the correct Team; do not invent a Team ID or alter project signing as a workaround.
+
+## 11. Continuity-system implementation rule
+
+The continuity system already exists in this repository. Its authoritative files are `AGENTS.md`, `docs/engineering/PROJECT_CONTINUITY.md`, `docs/engineering/TASK_REGISTER.md`, and `docs/engineering/IMPLEMENTATION_STATUS.md`, with architecture decisions under `docs/decisions/`. Do not create duplicate `PROJECT_STATE.md`, `ARCHITECTURE_DECISIONS.md`, `IMPLEMENTATION_LOG.md`, or `CODEX_PROTOCOL.md` files unless a documented gap proves they are necessary. Update the existing sources of truth.

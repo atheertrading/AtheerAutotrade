@@ -56,3 +56,20 @@ The only clearly identified outstanding verification item from the XCTest work i
 ## Change log
 
 - 2026-11-12: Initial register reconciled against merged PRs #1–#8 and the current repository documentation. PR merge state is repository-observed; build/test outcomes are separately labeled and not inferred from merge status.
+
+
+## Latest update — 2026-11-12, after local Codex session
+
+| ID | Item | Evidence | Status |
+|---|---|---|---|
+| ATP-TEST-004 | Execute the four existing WorkspaceManager XCTest cases | User supplied Codex transcript reports `TEST SUCCEEDED`, 4 passed, 0 failed, using a command-line-only signing override. | DONE — TEST RUN REPORTED SUCCESS; transcript evidence, not independently inspected result bundle. Do not rerun solely for repetition. |
+| ATP-APPLE-001 | Resolve normal Debug code signing on the development Mac | Normal Debug build stopped because no Development Team/account or signing identity is configured in Xcode. | BLOCKED — requires account owner to sign in to Xcode and select the intended Team. No Team ID may be invented. |
+| ATP-APPLE-002 | Review local Xcode configuration changes made during the broader Codex run | Codex reports edits to `project.pbxproj`, a new `AtheerAutotrade.entitlements`, and the shared `AtheerAutotrade.xcscheme`. Their current local diff/commit state has not been inspected in this record. | PENDING REVIEW — do not commit, push, or request another Codex pass until the exact diff is reviewed. |
+
+## Codex scope clarification
+
+The user's original and authorized reason for using Codex in this workflow was the specific XCTest problem. A prior assistant instruction incorrectly expanded the task to broad Apple Developer and Xcode configuration. Do not repeat that scope expansion. Codex is not the default executor for all project tasks; use it only for a specifically assigned, bounded task.
+
+## Continuity source-of-truth rule
+
+The continuity system is already represented by `AGENTS.md`, `PROJECT_CONTINUITY.md`, this task register, and `IMPLEMENTATION_STATUS.md`. Do not create parallel status/decision/protocol documents. Update these authoritative files and relevant ADRs only.
