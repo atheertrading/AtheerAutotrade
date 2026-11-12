@@ -73,6 +73,14 @@ final class BackendProcessSupervisor {
         }
     }
 
+    /// Synchronously requests child termination during NSApplication shutdown.
+    /// The child is never allowed to outlive the owning desktop application by design.
+    func stopForApplicationTermination() {
+        queue.sync {
+            self.terminateChild(with: LocalIPCError.processTerminated)
+        }
+    }
+
     func setEventHandler(_ handler: ((String, [String: Any]) -> Void)?) {
         queue.async {
             self.eventHandler = handler
