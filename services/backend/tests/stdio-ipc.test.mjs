@@ -121,7 +121,7 @@ test("rejects unsupported protocol versions explicitly", async () => {
     id: "f2b66c1b-8c25-4c35-ae80-b0d59d7a9133",
     method: "system.hello",
     payload: { clientVersion: "0.1.0" }
-  }) + "\\n";
+  }) + "\n";
 
   const responses = await runSession([encoder.encode(unsupported)]);
   assert.equal(responses.length, 1);
