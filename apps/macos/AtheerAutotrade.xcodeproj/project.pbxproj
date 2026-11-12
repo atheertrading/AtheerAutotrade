@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		T100000000000000000000001 /* WorkspaceManagerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = T200000000000000000000001 /* WorkspaceManagerTests.swift */; };
+		T100000000000000000000002 /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = T200000000000000000000002 /* XCTest.framework */; };
 		A10000000000000000000001 /* AtheerAutotradeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000001 /* AtheerAutotradeApp.swift */; };
 		A10000000000000000000002 /* ApplicationShellView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000002 /* ApplicationShellView.swift */; };
 		A10000000000000000000003 /* WorkspaceSection.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000003 /* WorkspaceSection.swift */; };
@@ -24,6 +26,9 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		T200000000000000000000001 /* WorkspaceManagerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceManagerTests.swift; sourceTree = "<group>"; };
+		T200000000000000000000002 /* XCTest.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = XCTest.framework; path = System/Library/Frameworks/XCTest.framework; sourceTree = SDKROOT; };
+		A30000000000000000000002 /* AtheerAutotradeTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = AtheerAutotradeTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A20000000000000000000001 /* AtheerAutotradeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AtheerAutotradeApp.swift; sourceTree = "<group>"; };
 		A20000000000000000000002 /* ApplicationShellView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ApplicationShellView.swift; sourceTree = "<group>"; };
 		A20000000000000000000003 /* WorkspaceSection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceSection.swift; sourceTree = "<group>"; };
@@ -49,6 +54,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		T400000000000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				T100000000000000000000002 /* XCTest.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -64,6 +77,7 @@
 			isa = PBXGroup;
 			children = (
 				A30000000000000000000001 /* AtheerAutotrade.app */,
+				A30000000000000000000002 /* AtheerAutotradeTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -74,6 +88,7 @@
 				A50000000000000000000004 /* App */,
 				A50000000000000000000005 /* Core */,
 				A50000000000000000000006 /* Features */,
+				T300000000000000000000001 /* Tests */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -153,9 +168,34 @@
 			path = Workspace;
 			sourceTree = "<group>";
 		};
+		T300000000000000000000001 /* Tests */ = {
+			isa = PBXGroup;
+			children = (
+				T200000000000000000000001 /* WorkspaceManagerTests.swift */,
+			);
+			path = Tests;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		T500000000000000000000001 /* AtheerAutotradeTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B20000000000000000000003 /* Build configuration list for PBXNativeTarget "AtheerAutotradeTests" */;
+			buildPhases = (
+				T400000000000000000000001 /* Frameworks */,
+				T600000000000000000000001 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				T700000000000000000000001 /* PBXTargetDependency */,
+			);
+			name = AtheerAutotradeTests;
+			productName = AtheerAutotradeTests;
+			productReference = A30000000000000000000002 /* AtheerAutotradeTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		A60000000000000000000001 /* AtheerAutotrade */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = B20000000000000000000002 /* Build configuration list for PBXNativeTarget "AtheerAutotrade" */;
@@ -179,6 +219,12 @@
 			isa = PBXProject;
 			attributes = {
 				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					T500000000000000000000001 = {
+						CreatedOnToolsVersion = 14.3.1;
+						TestTargetID = A60000000000000000000001;
+					};
+				};
 			};
 			buildConfigurationList = B20000000000000000000001 /* Build configuration list for PBXProject "AtheerAutotrade" */;
 			compatibilityVersion = "Xcode 14.0";
@@ -194,11 +240,20 @@
 			projectRoot = "";
 			targets = (
 				A60000000000000000000001 /* AtheerAutotrade */,
+				T500000000000000000000001 /* AtheerAutotradeTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		T600000000000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				T100000000000000000000001 /* WorkspaceManagerTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		A80000000000000000000001 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -221,8 +276,64 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+	/* Begin PBXContainerItemProxy section */
+		T800000000000000000000001 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = A5000000000000000000000A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = A60000000000000000000001;
+			remoteInfo = AtheerAutotrade;
+		};
+	/* End PBXContainerItemProxy section */
+	/* Begin PBXTargetDependency section */
+		T700000000000000000000001 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = A60000000000000000000001 /* AtheerAutotrade */;
+			targetProxy = T800000000000000000000001 /* PBXContainerItemProxy */;
+		};
+	/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		B10000000000000000000005 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atheerautotrade.desktop.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AtheerAutotrade.app/Contents/MacOS/AtheerAutotrade";
+			};
+			name = Debug;
+		};
+		B10000000000000000000006 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGNING_ALLOWED = NO;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 13.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.atheerautotrade.desktop.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/AtheerAutotrade.app/Contents/MacOS/AtheerAutotrade";
+			};
+			name = Release;
+		};
 		B10000000000000000000001 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -293,6 +404,15 @@
 			buildConfigurations = (
 				B10000000000000000000003 /* Debug */,
 				B10000000000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		B20000000000000000000003 /* Build configuration list for PBXNativeTarget "AtheerAutotradeTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				B10000000000000000000005 /* Debug */,
+				B10000000000000000000006 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
