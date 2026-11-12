@@ -39,7 +39,7 @@ A future transport change must re-evaluate peer authentication. TCP loopback and
 - The Node.js backend does not call Keychain directly and does not receive Keychain entitlements.
 - Credential transfer is implemented in source for protocol v2 using an ephemeral X25519 key agreement, HKDF-SHA256, and AES-256-GCM encrypted payload. The backend decrypts only in memory, validates the credential object, and keeps it only for the current child-process session.
 - The cryptographic channel is not a substitute for verifying the signed backend executable. Peer integrity, bundle signing, and target-machine verification remain required before production use.
-- JavaScript strings cannot be reliably zeroized. Any future secret-transfer design must document this residual memory exposure, minimize copies and lifetime, avoid diagnostics/telemetry, and clear mutable buffers where feasible. Do not claim guaranteed memory erasure.
+- JavaScript strings cannot be reliably zeroized. The implemented transfer minimizes copies, clears the mutable plaintext buffer after parsing, avoids diagnostics/telemetry, and documents the remaining immutable-string lifetime. Do not claim guaranteed memory erasure.
 
 ### 4. Protocol and method policy
 
