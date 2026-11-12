@@ -1,4 +1,3 @@
-
 import SwiftUI
 
 /// Composes the active workspace into its primary trading regions.
@@ -11,19 +10,22 @@ struct WorkspaceLayoutView: View {
     @State private var bottomDragStartHeight: CGFloat?
 
     private let spacing: CGFloat = 8
-    private let rightPanelWidth: CGFloat = 300
 
     private var activeWorkspace: AtheerWorkspace? {
         workspaceManager.activeWorkspace
     }
 
     var body: some View {
-        Group {
-            if let workspace = activeWorkspace {
-                workspaceContent(workspace)
-            } else {
-                emptyWorkspaceState
+        GeometryReader { geometry in
+            Group {
+                if let workspace = activeWorkspace {
+                    workspaceContent(workspace, availableSize: geometry.size)
+                } else {
+                    emptyWorkspaceState
+                }
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .background(AtheerColors.canvas)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(AtheerColors.canvas)
@@ -32,12 +34,13 @@ struct WorkspaceLayoutView: View {
     // MARK: - Workspace Content
 
     private func workspaceContent(
-        _ workspace: AtheerWorkspace
+        _ workspace: AtheerWorkspace,
+        availableSize: CGSize
     ) -> some View {
         VStack(spacing: spacing) {
             workspaceHeader(workspace)
 
-            primaryLayout(workspace)
+            primaryLayout(workspace, availableSize: availableSize)
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
         .padding(spacing)
@@ -48,15 +51,24 @@ struct WorkspaceLayoutView: View {
 
     @ViewBuilder
     private func primaryLayout(
-        _ workspace: AtheerWorkspace
+        _ workspace: AtheerWorkspace,
+        availableSize: CGSize
     ) -> some View {
         let layout = workspace.layout
+        let sidebarWidth = min(
+            CGFloat(layout.sidebarWidth),
+            max(180, availableSize.width * 0.34)
+        )
+        let leftRegionHeight = min(
+            max(availableSize.height * 0.24, 140),
+            220
+        )
 
         if layout.sidebarVisible {
             if layout.primaryOrientation == .horizontal {
                 HStack(spacing: spacing) {
                     leftRegion
-                        .frame(width: layout.sidebarWidth)
+                        .frame(width: sidebarWidth)
 
                     WorkspaceResizeHandle(
                         axis: .horizontal,
@@ -78,37 +90,59 @@ struct WorkspaceLayoutView: View {
                     )
                     .frame(maxHeight: .infinity)
 
-                    mainLayout(workspace)
-                        .frame(
-                            maxWidth: .infinity,
-                            maxHeight: .infinity
+                    mainLayout(
+                        workspace,
+                        availableSize: CGSize(
+                            width: max(availableSize.width - sidebarWidth - spacing - 8, 0),
+                            height: availableSize.height
                         )
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             } else {
                 VStack(spacing: spacing) {
                     leftRegion
-                        .frame(height: 180)
+                        .frame(height: leftRegionHeight)
 
-                    mainLayout(workspace)
-                        .frame(
-                            maxWidth: .infinity,
-                            maxHeight: .infinity
+                    mainLayout(
+                        workspace,
+                        availableSize: CGSize(
+                            width: availableSize.width,
+                            height: max(availableSize.height - leftRegionHeight - spacing, 0)
                         )
+                    )
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
         } else {
-            mainLayout(workspace)
+            mainLayout(workspace, availableSize: availableSize)
         }
     }
 
     // MARK: - Main Layout
 
     private func mainLayout(
-        _ workspace: AtheerWorkspace
+        _ workspace: AtheerWorkspace,
+        availableSize: CGSize
     ) -> some View {
-        VStack(spacing: spacing) {
-            secondaryLayout(workspace)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        let bottomPanelHeight = min(
+            max(CGFloat(workspace.layout.bottomPanelHeight), 120),
+            max(140, availableSize.height * 0.36)
+        )
+        let upperRegionHeight = max(
+            availableSize.height - bottomPanelHeight - spacing,
+            0
+        )
+
+        return VStack(spacing: spacing) {
+            secondaryLayout(
+                workspace,
+                availableSize: CGSize(
+                    width: availableSize.width,
+                    height: upperRegionHeight
+                )
+            )
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
 
             WorkspaceResizeHandle(
                 axis: .vertical,
@@ -134,7 +168,7 @@ struct WorkspaceLayoutView: View {
                 workspaceManager: workspaceManager,
                 region: .bottom
             )
-            .frame(height: workspace.layout.bottomPanelHeight)
+            .frame(height: bottomPanelHeight)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -143,8 +177,18 @@ struct WorkspaceLayoutView: View {
 
     @ViewBuilder
     private func secondaryLayout(
-        _ workspace: AtheerWorkspace
+        _ workspace: AtheerWorkspace,
+        availableSize: CGSize
     ) -> some View {
+        let rightPanelWidth = min(
+            max(availableSize.width * 0.27, 210),
+            320
+        )
+        let rightRegionHeight = min(
+            max(availableSize.height * 0.32, 150),
+            280
+        )
+
         if workspace.layout.secondaryOrientation == .horizontal {
             HStack(spacing: spacing) {
                 centerRegion
@@ -159,7 +203,7 @@ struct WorkspaceLayoutView: View {
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
 
                 rightRegion
-                    .frame(height: 220)
+                    .frame(height: rightRegionHeight)
             }
         }
     }
@@ -247,4 +291,3 @@ struct WorkspaceLayoutView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
-
