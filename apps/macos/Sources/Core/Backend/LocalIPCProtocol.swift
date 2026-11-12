@@ -33,6 +33,31 @@ enum LocalIPCProtocol {
         return frame
     }
 
+    static func event(from frame: Data) throws -> LocalIPCEvent {
+        let object: Any
+        do {
+            object = try JSONSerialization.jsonObject(with: frame)
+        } catch {
+            throw LocalIPCError.invalidJSON
+        }
+
+        guard
+            let envelope = object as? [String: Any],
+            Set(envelope.keys) == Set(["protocol", "version", "kind", "event", "payload"]),
+            envelope["protocol"] as? String == identifier,
+            envelope["version"] as? Int == version,
+            envelope["kind"] as? String == "event",
+            let name = envelope["event"] as? String,
+            !name.isEmpty,
+            name.count <= 64,
+            let payload = envelope["payload"] as? [String: Any]
+        else {
+            throw LocalIPCError.invalidResponse
+        }
+
+        return LocalIPCEvent(name: name, payload: payload)
+    }
+
     static func response(from frame: Data) throws -> LocalIPCResponse {
         let object: Any
         do {
@@ -83,6 +108,11 @@ enum LocalIPCProtocol {
             remoteError: LocalIPCRemoteError(code: code, message: message)
         )
     }
+}
+
+struct LocalIPCEvent {
+    let name: String
+    let payload: [String: Any]
 }
 
 struct LocalIPCResponse {
