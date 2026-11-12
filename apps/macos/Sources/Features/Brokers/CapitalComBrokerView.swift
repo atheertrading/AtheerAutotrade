@@ -329,8 +329,9 @@ struct CapitalComBrokerView: View {
                     .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                 }
                 .buttonStyle(.plain)
-                .disabled(!canSave)
-                .opacity(canSave ? 1 : 0.48)
+                 .disabled(!canSave || isConnected)
+                .opacity(canSave && !isConnected ? 1 : 0.48)
+                .help(isConnected ? "Disconnect before changing stored credentials." : "Save credentials in macOS Keychain.")
 
                 Button(action: isConnected ? disconnectFromCapitalCom : connectToCapitalCom) {
                     HStack(spacing: 7) {
@@ -654,6 +655,7 @@ struct CapitalComBrokerView: View {
                 case .success:
                     isConnected = false
                     connectionDetail = "No active broker session"
+                    marketResults = []
                     feedback = .success("Capital.com session closed. Keychain credentials remain saved.")
                 case .failure(let error):
                     feedback = .error(error.localizedDescription)
@@ -705,6 +707,25 @@ struct CapitalComBrokerView: View {
     }
 
     private func deleteCredentials() {
+        if isConnected {
+            BackendProcessSupervisor.shared.disconnectCapitalCom { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .failure(let error):
+                        feedback = .error("Disconnect before removing credentials: \\(error.localizedDescription)")
+                    case .success:
+                        isConnected = false
+                        marketResults = []
+                        removeCredentialsFromKeychain()
+                    }
+                }
+            }
+        } else {
+            removeCredentialsFromKeychain()
+        }
+    }
+
+    private func removeCredentialsFromKeychain() {
         do {
             try CapitalComCredentialStore.delete()
             apiKey = ""
