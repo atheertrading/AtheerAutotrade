@@ -38,7 +38,7 @@
 - XCTest source for NDJSON framing and response validation has been added and registered; test execution is pending.
 - The expected signed bundle layout is documented in docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md. The Xcode project does not yet copy a Node runtime or compiled backend into the app bundle.
 - No Node runtime binary or signature verification is included. The supervisor is not yet connected to the SwiftUI application lifecycle.
-- Native macOS app owns credential entry and Keychain storage. On the active feature branch, `CapitalComCredentialStore.swift` stores the API key, identifier, and password as one generic-password item, supports typed read-back, uses `WhenUnlockedThisDeviceOnly` accessibility for newly created items, and verifies both insert/update writes. `CapitalComBrokerView.swift` restores saved values on appearance, retains the values after Save, verifies the saved record, and clears the fields only after credential deletion. These changes are not yet merged into main and have not been compiled or runtime-tested.
+- Native macOS app owns credential entry and Keychain storage. The Capital.com screen and initial Keychain store were merged via PR #17. PR #18 adds typed Keychain read-back, `WhenUnlockedThisDeviceOnly` accessibility for newly created items, read-back verification after both insert/update, restoration of saved values on screen appearance, retention of values after Save, and clearing only after explicit credential deletion. PR #18 is not yet merged; no Xcode build or Keychain runtime test has been performed for the correction.
 - The broker screen is exposed through the sidebar's **Broker Connections → Brokers** destination. It presents DEMO as the only selectable environment, LIVE as locked, credential save/remove actions, connection status, and explicit integration-readiness gates. The Connect control remains disabled until packaged IPC and secure credential handoff are verified.
 
 ## Not implemented or not operationally integrated
@@ -78,8 +78,8 @@
 - PR #14 (ATP-ARCH-REBASE-001) was merged on 2026-11-12 as `9445a749d78c63030e9125041a6103dca0eabafc`.
 - PR #15 (ATP-SEC-IPC-001 Batches 1–2) was merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. The backend stdio handler and startup mode are present, but its added build/tests have not been executed in this work session.
 - PR #16 (native stdio IPC supervisor) was subsequently merged into `main` as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`; no Xcode build/test or packaged runtime execution has been performed for it.
-- The current feature branch adds native Swift IPC protocol/supervisor source, an XCTest source file, Xcode project membership, and a bundle-layout document. The Capital.com Keychain persistence defect was corrected on 2026-11-13. No Xcode build/test or packaged runtime execution has been performed.
-- Native runtime packaging/signing, app lifecycle integration, and Keychain credential transfer remain unimplemented. ATP-CAP-UI-001 is implemented on the active feature branch but is not yet merged or Xcode-verified.
+- PR #16 merged the native Swift IPC protocol/supervisor source and Xcode project membership. PR #17 merged the Capital.com broker screen and Keychain store. PR #18 contains the credential persistence correction. No Xcode build/test or packaged runtime execution has been performed for the IPC or Capital.com UI.
+- Native runtime packaging/signing, app lifecycle integration, and Keychain credential transfer remain unimplemented. ATP-CAP-UI-001 is merged via PR #17; its UI/Keychain runtime behavior remains unverified. ATP-CAP-UI-002 is proposed in PR #18 and remains unmerged/unverified.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next verification and implementation gates
