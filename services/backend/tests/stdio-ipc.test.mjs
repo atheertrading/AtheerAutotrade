@@ -162,7 +162,7 @@ test("production stdio transport starts without an HTTP listener or stdout diagn
 
   assert.deepEqual(result, { code: 0, signal: null });
   assert.equal(diagnostics, "");
-  const responses = output.split("\\n").filter(Boolean).map((line) => JSON.parse(line));
+  const responses = output.split("\n").filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(responses.length, 2);
   assert.equal(responses[0].result.protocolVersion, 1);
   assert.deepEqual(responses[1].result, { status: "alive" });
