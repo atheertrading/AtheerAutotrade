@@ -32,7 +32,9 @@
 - Versioned NDJSON protocol specification added at `docs/security/LOCAL_IPC_PROTOCOL.md`.
 - Backend protocol handler added at `services/backend/src/api/stdio-ipc.ts`; source includes handshake, ping, strict envelope validation, frame limits, UUID/duplicate checks, method allowlist, and safe error responses.
 - Focused test file added at `services/backend/tests/stdio-ipc.test.mjs`; tests have **not yet been executed** in this session.
-- Protocol handler is not wired into backend process startup; no native Swift process launcher/client exists yet.
+- Backend `server.ts` now supports explicit `--transport=stdio` production desktop mode; it serves the IPC protocol on stdin/stdout and does not create the HTTP server in that mode. The default `http` mode remains a development diagnostic endpoint.
+- A child-process integration test was added to exercise handshake/ping and verify stdout contains only protocol frames; tests have not yet been executed.
+- No native Swift process launcher/client or bundled Node runtime exists yet.
 - Native macOS app remains the intended Keychain owner; credential provider and secret transfer are not implemented.
 - Bundled Node runtime, code-signing verification, process supervision, and crash/restart behavior remain pending.
 
