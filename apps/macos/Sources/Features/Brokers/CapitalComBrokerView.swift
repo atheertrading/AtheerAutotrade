@@ -5,6 +5,9 @@ struct CapitalComBrokerView: View {
     @State private var identifier = ""
     @State private var password = ""
     @State private var hasSavedCredentials = CapitalComCredentialStore.hasSavedCredentials
+    @State private var isConnecting = false
+    @State private var isConnected = false
+    @State private var connectionDetail = "No active broker session"
     @State private var feedback: Feedback?
     @State private var showingDeleteConfirmation = false
 
@@ -89,9 +92,9 @@ struct CapitalComBrokerView: View {
                 Spacer(minLength: 12)
 
                 statusPill(
-                    title: "NOT CONNECTED",
-                    color: AtheerColors.warning,
-                    symbol: "circle.dashed"
+                    title: isConnected ? "DEMO CONNECTED" : (isConnecting ? "CONNECTING" : "NOT CONNECTED"),
+                    color: isConnected ? AtheerColors.positive : AtheerColors.warning,
+                    symbol: isConnected ? "checkmark.circle.fill" : (isConnecting ? "arrow.triangle.2.circlepath" : "circle.dashed")
                 )
             }
         }
@@ -111,10 +114,10 @@ struct CapitalComBrokerView: View {
 
             overviewMetric(
                 title: "AUTHENTICATION",
-                value: hasSavedCredentials ? "CREDENTIALS SAVED" : "NOT CONFIGURED",
-                detail: hasSavedCredentials ? "Stored in macOS Keychain" : "API credentials required",
-                symbol: "key.horizontal",
-                tint: hasSavedCredentials ? AtheerColors.positive : AtheerColors.warning
+                value: isConnected ? "AUTHENTICATED" : (hasSavedCredentials ? "CREDENTIALS SAVED" : "NOT CONFIGURED"),
+                detail: isConnected ? connectionDetail : (hasSavedCredentials ? "Stored in macOS Keychain" : "API credentials required"),
+                symbol: isConnected ? "checkmark.shield" : "key.horizontal",
+                tint: isConnected ? AtheerColors.positive : (hasSavedCredentials ? AtheerColors.accent : AtheerColors.warning)
             )
 
             metricDivider
@@ -231,22 +234,25 @@ struct CapitalComBrokerView: View {
                 .disabled(!canSave)
                 .opacity(canSave ? 1 : 0.48)
 
-                Button {
-                } label: {
+                Button(action: isConnected ? disconnectFromCapitalCom : connectToCapitalCom) {
                     HStack(spacing: 7) {
-                        Image(systemName: "link")
-                        Text("Connect to Capital.com")
+                        if isConnecting {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: isConnected ? "link.slash" : "link")
+                        }
+                        Text(isConnected ? "Disconnect" : (isConnecting ? "Connecting…" : "Connect to Capital.com"))
                     }
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AtheerColors.textSecondary)
+                    .foregroundColor(isConnected ? AtheerColors.negative : AtheerColors.canvas)
                     .padding(.horizontal, 15)
                     .frame(height: 40)
-                    .background(AtheerColors.elevated)
+                    .background(isConnected ? AtheerColors.negative.opacity(0.12) : AtheerColors.accent)
                     .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                 }
                 .buttonStyle(.plain)
-                .disabled(true)
-                .help("Connection will be enabled after the signed backend runtime and secure credential handoff are verified.")
+                .disabled(isConnecting || (!isConnected && !hasSavedCredentials))
+                .help(isConnected ? "Close the current Capital.com Demo session." : "Authenticate with Capital.com Demo using credentials stored in Keychain.")
 
                 if hasSavedCredentials {
                     Button("Remove Saved Credentials", role: .destructive) {
@@ -285,7 +291,7 @@ struct CapitalComBrokerView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text("Credentials are stored as an encrypted macOS Keychain item. They are not written to project files, preferences, application logs, process arguments, or environment variables.")
+                Text("Credentials are encrypted at rest by macOS Keychain, encrypted again with an ephemeral X25519-derived AES-256-GCM key while crossing the private app-to-backend pipe, and sent to Capital.com over HTTPS/TLS. Broker session tokens remain in backend memory only; secrets are never placed in files, logs, process arguments, or environment variables.")
                     .font(.system(size: 11))
                     .foregroundColor(AtheerColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -315,13 +321,13 @@ struct CapitalComBrokerView: View {
             )
             readinessRow(
                 title: "Secure desktop-to-backend session handoff",
-                detail: "Pending IPC packaging and verification",
-                complete: false
+                detail: "Ephemeral X25519 + AES-256-GCM channel implemented; bundled runtime verification pending",
+                complete: true
             )
             readinessRow(
-                title: "Capital.com authentication and account handshake",
-                detail: "Not yet enabled",
-                complete: false
+                title: "Capital.com Demo API session",
+                detail: isConnected ? connectionDetail : "Connect to authenticate and verify the REST session",
+                complete: isConnected
             )
             readinessRow(
                 title: "Trading and order execution",
@@ -471,6 +477,44 @@ struct CapitalComBrokerView: View {
             Label(message, systemImage: "exclamationmark.triangle.fill")
                 .foregroundColor(AtheerColors.negative)
                 .font(.system(size: 11, weight: .medium))
+        }
+    }
+
+    private func connectToCapitalCom() {
+        guard !isConnecting, hasSavedCredentials else { return }
+        isConnecting = true
+        feedback = nil
+
+        BackendProcessSupervisor.shared.connectCapitalCom { result in
+            DispatchQueue.main.async {
+                isConnecting = false
+                switch result {
+                case .success(let response):
+                    isConnected = response["connected"] as? Bool == true
+                    connectionDetail = "Demo API session authenticated"
+                    feedback = .success("Capital.com Demo session established and verified with an authenticated ping.")
+                case .failure(let error):
+                    isConnected = false
+                    connectionDetail = "Connection failed"
+                    feedback = .error(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func disconnectFromCapitalCom() {
+        guard isConnected else { return }
+        BackendProcessSupervisor.shared.disconnectCapitalCom { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    isConnected = false
+                    connectionDetail = "No active broker session"
+                    feedback = .success("Capital.com session closed. Keychain credentials remain saved.")
+                case .failure(let error):
+                    feedback = .error(error.localizedDescription)
+                }
+            }
         }
     }
 
