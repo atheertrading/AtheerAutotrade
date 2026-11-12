@@ -67,8 +67,12 @@ enum LocalIPCProtocol {
         guard
             Set(envelope.keys) == Set(["protocol", "version", "kind", "id", "ok", "error"]),
             let errorObject = envelope["error"] as? [String: Any],
+            Set(errorObject.keys) == Set(["code", "message"]),
             let code = errorObject["code"] as? String,
-            let message = errorObject["message"] as? String
+            !code.isEmpty,
+            code.count <= 64,
+            let message = errorObject["message"] as? String,
+            message.count <= 512
         else {
             throw LocalIPCError.invalidResponse
         }
