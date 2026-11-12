@@ -51,7 +51,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - Backend stdio transport and protocol framing are merged through PR #15.
 - Native Swift child-process supervisor and protocol codec are merged through PR #16.
 - Protocol v2 on the active branch adds per-child ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM encrypted credential transfer, and one-shot credential submission.
-- The backend exposes only read-only Demo session connect/disconnect/status, market search, and historical-price methods.
+- The backend exposes only read-only Demo session connect/disconnect/status, market search, historical-price, and quote/OHLC stream start/stop methods.
 - No account mutation, order, dealing, execution, or LIVE method is exposed.
 
 ### ATP-CAP-UI-001 / ATP-CAP-UI-002 — merged baseline
@@ -69,7 +69,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift — Keychain load, encrypted one-shot transfer, Demo connect/disconnect, status, market search/history, WebSocket event consumption, and app-termination child shutdown.
 - apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift — active Connect/Disconnect state, authenticated market search, and layered data-protection explanation.
 - apps/macos/Scripts/package-backend.sh and Xcode project build phase — Node.js 24 universal runtime and compiled backend packaging into fixed app-bundle paths.
-- Added backend Node 24 CI workflow and encrypted-channel interoperability test source.
+- Added backend Node 24 CI workflow and Node-side encrypted-envelope authentication/one-shot transfer test source; CryptoKit-to-Node interoperability remains pending.
 - Node 24 CI run 43332767979 passed TypeScript compilation and 31/31 backend tests. Xcode, CryptoKit/Node interoperability, packaged runtime, and real Capital.com Demo results remain pending.
 
 ### Remaining scope and safety boundaries
