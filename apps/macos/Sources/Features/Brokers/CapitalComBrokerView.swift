@@ -8,6 +8,9 @@ struct CapitalComBrokerView: View {
     @State private var isConnecting = false
     @State private var isConnected = false
     @State private var connectionDetail = "No active broker session"
+    @State private var marketSearchTerm = ""
+    @State private var marketResults: [MarketRow] = []
+    @State private var isSearchingMarkets = false
     @State private var feedback: Feedback?
     @State private var showingDeleteConfirmation = false
 
@@ -16,11 +19,19 @@ struct CapitalComBrokerView: View {
         case error(String)
     }
 
+    private struct MarketRow: Identifiable {
+        let id: String
+        let name: String
+        let instrumentType: String
+        let status: String
+    }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 pageHeader
                 connectionOverview
+                marketDiscoveryCard
                 credentialsCard
                 securityNotice
                 integrationStatus
@@ -132,6 +143,90 @@ struct CapitalComBrokerView: View {
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 22)
+        .background(AtheerColors.surface)
+        .overlay {
+            RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
+                .stroke(AtheerColors.border, lineWidth: 1)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous))
+    }
+
+    private var marketDiscoveryCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("MARKET DISCOVERY")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .tracking(1.1)
+                        .foregroundColor(AtheerColors.textPrimary)
+                    Text("Search instruments directly from Capital.com.")
+                        .font(.system(size: 11))
+                        .foregroundColor(AtheerColors.textSecondary)
+                }
+                Spacer()
+                statusPill(
+                    title: isConnected ? "BROKER API" : "SESSION REQUIRED",
+                    color: isConnected ? AtheerColors.positive : AtheerColors.textTertiary,
+                    symbol: "magnifyingglass"
+                )
+            }
+
+            HStack(spacing: 10) {
+                TextField("Search markets, e.g. EUR/USD or Gold", text: $marketSearchTerm)
+                    .textFieldStyle(.roundedBorder)
+                    .disabled(!isConnected || isSearchingMarkets)
+                    .onSubmit(searchMarkets)
+
+                Button(action: searchMarkets) {
+                    HStack(spacing: 7) {
+                        if isSearchingMarkets {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        Text("Search")
+                    }
+                }
+                .disabled(!isConnected || isSearchingMarkets || marketSearchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+
+            if !marketResults.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(marketResults) { market in
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(market.name)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                                Text(market.id)
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textTertiary)
+                            }
+                            Spacer()
+                            Text(market.instrumentType)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(AtheerColors.textSecondary)
+                            Text(market.status)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(market.status == "TRADEABLE" ? AtheerColors.positive : AtheerColors.textSecondary)
+                        }
+                        .padding(.vertical, 9)
+                        if market.id != marketResults.last?.id {
+                            Divider().overlay(AtheerColors.border)
+                        }
+                    }
+                }
+            } else if isConnected {
+                Text("No instruments loaded. Enter a market name or symbol to search.")
+                    .font(.system(size: 10))
+                    .foregroundColor(AtheerColors.textTertiary)
+            } else {
+                Text("Market discovery becomes available after the Demo API session is authenticated.")
+                    .font(.system(size: 10))
+                    .foregroundColor(AtheerColors.textTertiary)
+            }
+        }
+        .padding(22)
         .background(AtheerColors.surface)
         .overlay {
             RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
@@ -496,6 +591,36 @@ struct CapitalComBrokerView: View {
                 case .failure(let error):
                     isConnected = false
                     connectionDetail = "Connection failed"
+                    feedback = .error(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func searchMarkets() {
+        guard isConnected, !isSearchingMarkets else { return }
+        let term = marketSearchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty else { return }
+        isSearchingMarkets = true
+
+        BackendProcessSupervisor.shared.searchCapitalComMarkets(term) { result in
+            DispatchQueue.main.async {
+                isSearchingMarkets = false
+                switch result {
+                case .success(let response):
+                    let records = response["markets"] as? [[String: Any]] ?? []
+                    marketResults = records.compactMap { item in
+                        guard let epic = item["epic"] as? String, !epic.isEmpty else { return nil }
+                        return MarketRow(
+                            id: epic,
+                            name: (item["instrumentName"] as? String) ?? epic,
+                            instrumentType: (item["instrumentType"] as? String) ?? "MARKET",
+                            status: (item["marketStatus"] as? String) ?? "UNKNOWN"
+                        )
+                    }
+                    feedback = .success("Capital.com returned \(marketResults.count) matching instruments.")
+                case .failure(let error):
+                    marketResults = []
                     feedback = .error(error.localizedDescription)
                 }
             }
