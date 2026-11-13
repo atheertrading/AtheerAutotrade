@@ -28,6 +28,7 @@ export interface CapitalComSession {
   readonly cst: string;
   readonly securityToken: string;
   readonly streamingHost?: string;
+  readonly activeAccountId?: string;
   readonly createdAt: number;
 }
 
@@ -56,7 +57,11 @@ export interface CapitalComAccount {
   readonly symbol: string;
   readonly balance: { readonly balance: number; readonly deposit: number; readonly profitLoss: number; readonly available: number };
 }
-export interface CapitalComAccountsSnapshot { readonly observedAt: string; readonly accounts: readonly CapitalComAccount[]; }
+export interface CapitalComAccountsSnapshot {
+  readonly observedAt: string;
+  readonly activeAccountId?: string;
+  readonly accounts: readonly CapitalComAccount[];
+}
 export interface CapitalComPosition {
   readonly position: {
     readonly dealId: string; readonly dealReference?: string; readonly size: number;
@@ -122,6 +127,8 @@ type FetchFunction = typeof fetch;
 
 interface SessionResponse {
   readonly streamingHost?: string;
+  readonly currentAccountId?: string;
+  readonly accountId?: string;
 }
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -371,7 +378,18 @@ export class CapitalComClient {
             : typeof parsed.streamEndpoint === "string"
               ? parsed.streamEndpoint
               : undefined;
-        if (streamingHost) payload = { streamingHost };
+        const currentAccountId =
+          typeof parsed.currentAccountId === "string"
+            ? parsed.currentAccountId
+            : typeof parsed.accountId === "string"
+              ? parsed.accountId
+              : undefined;
+        if (streamingHost || currentAccountId) {
+          payload = {
+            ...(streamingHost ? { streamingHost } : {}),
+            ...(currentAccountId ? { currentAccountId } : {})
+          };
+        }
       }
     } catch {
       // Session tokens are returned in response headers; an empty body is valid.
@@ -381,6 +399,7 @@ export class CapitalComClient {
       cst: requiredHeader(response.headers, "CST"),
       securityToken: requiredHeader(response.headers, "X-SECURITY-TOKEN"),
       ...(payload.streamingHost ? { streamingHost: payload.streamingHost } : {}),
+      ...(payload.currentAccountId ? { activeAccountId: payload.currentAccountId } : {}),
       createdAt: Date.now()
     });
 
@@ -467,7 +486,11 @@ export class CapitalComClient {
   async getAccounts(): Promise<CapitalComAccountsSnapshot> {
     const result=await this.authenticatedJson<unknown>("/api/v1/accounts","accounts");
     if (!isRecord(result)||!Array.isArray(result.accounts)) throw new CapitalComProtocolError("Capital.com accounts returned an unexpected payload.");
-    return Object.freeze({observedAt:new Date().toISOString(),accounts:Object.freeze(result.accounts.map(parseAccount))});
+    return Object.freeze({
+      observedAt: new Date().toISOString(),
+      ...(this.session?.activeAccountId ? { activeAccountId: this.session.activeAccountId } : {}),
+      accounts: Object.freeze(result.accounts.map(parseAccount))
+    });
   }
 
   async getAccountPreferences(): Promise<CapitalComAccountPreferences> {
