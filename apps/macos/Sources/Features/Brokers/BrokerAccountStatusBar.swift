@@ -11,7 +11,7 @@ struct BrokerAccountStatusBar: View {
 
                 Spacer(minLength: 12)
 
-                if let account = brokerAccountStore.accountSnapshot {
+                if let account = brokerAccountStore.accountSnapshot, !brokerAccountStore.isStale {
                     metric("BALANCE / FUNDS", value: money(account.funds, account: account), tint: AtheerColors.accent)
                     metric("EQUITY", value: money(account.equity, account: account), tint: AtheerColors.info)
                     metric("AVAILABLE", value: money(account.available, account: account), tint: AtheerColors.info)
@@ -29,6 +29,10 @@ struct BrokerAccountStatusBar: View {
                             .font(.system(size: 8, weight: .medium, design: .monospaced))
                             .foregroundColor(AtheerColors.textTertiary)
                     }
+                } else if brokerAccountStore.accountSnapshot != nil {
+                    Label("STALE · VALUES WITHHELD", systemImage: "exclamationmark.triangle")
+                        .font(.system(size: 9, weight: .bold, design: .monospaced))
+                        .foregroundColor(AtheerColors.negative)
                 } else {
                     Text(brokerAccountStore.lastSyncError ?? "Waiting for the first broker account snapshot")
                         .font(.system(size: 10))
@@ -71,7 +75,7 @@ struct BrokerAccountStatusBar: View {
     }
 
     private var statusColor: Color {
-        if brokerAccountStore.isStale { return AtheerColors.negative }
+        if brokerAccountStore.accountSnapshot != nil && brokerAccountStore.isStale { return AtheerColors.negative }
         switch brokerAccountStore.syncStatus {
         case "connected": return AtheerColors.positive
         case "syncing": return AtheerColors.accent
