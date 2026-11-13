@@ -67,7 +67,9 @@ CREATE TABLE IF NOT EXISTS trading.trade_intents (
     price_constraints         jsonb NOT NULL DEFAULT '{}'::jsonb,
     protective_instructions   jsonb NOT NULL DEFAULT '{}'::jsonb,
     time_in_force             varchar(32),
-    idempotency_record_id      uuid NOT NULL UNIQUE\n        REFERENCES trading.idempotency_records(idempotency_record_id) ON DELETE RESTRICT,\n    idempotency_key            varchar(256) NOT NULL,
+    idempotency_record_id      uuid NOT NULL UNIQUE
+        REFERENCES trading.idempotency_records(idempotency_record_id) ON DELETE RESTRICT,
+    idempotency_key            varchar(256) NOT NULL,
     canonical_payload_sha256  varchar(64) NOT NULL
         CHECK (canonical_payload_sha256 ~ '^[0-9a-f]{64}$'),
     authorization_reference  varchar(256),
