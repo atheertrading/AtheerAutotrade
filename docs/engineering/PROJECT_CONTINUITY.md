@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #19 merge: `b673d639bf5440ddd52085815bf7cf2a4fd54167`.
+- Latest observed `main` baseline at UX branch creation: `b310095a4d8af7701e3c8c89ac7a04efcea1d785`.
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -220,3 +220,42 @@ Not verified:
 
 ### Next implementation step
 After CI passes and the branch is reviewed, implement the durable OMS intent journal/state machine and idempotency boundary. Do not expose a broker dealing method until OMS and Execution Gateway are integrated with the merged RiskEngine and broker-state reconciliation.
+
+
+## 10. UX and clipboard review handoff — 2026-11-13
+
+### Repository baseline
+- Repository: `atheertrading/AtheerAutotrade`, default branch `main`.
+- Main commit at feature-branch creation: `b310095a4d8af7701e3c8c89ac7a04efcea1d785`.
+- Feature branch: `feat/atp-ux-001-clipboard-and-broker-polish`.
+- The branch is seven commits ahead of main at the time of this handoff; no local Mac files or Xcode environment were accessed.
+
+### Owner-confirmed runtime context
+- The owner explicitly reports that Capital.com Demo connection is working through the in-app Brokers screen and broker-originated asset prices are arriving in the local Xcode build.
+- Treat this as owner-confirmed runtime evidence. Do not repeat basic broker connection implementation or state that the connection is nonfunctional.
+- This review inspected source and architecture through GitHub; it did not independently reproduce the session on the target Mac.
+
+### Findings from the source/design review
+- Application shell has 13 navigation destinations, but several remain explicit placeholders. Trading Workspace includes functional shared Market Watch; Chart, Order Entry, Positions, Orders, History, Journal, Performance, News, and System Status panels are not yet implemented as full features.
+- The original Broker screen placed three connection metrics in a fixed 350-point column and used a fixed two-column layout. This compressed status content on the minimum-size app window.
+- Dashboard wording used "LIVE MARKET FEED" for a Demo account and marked a subscription as streaming even when no broker quote had yet arrived.
+- Market Watch static text selection was local to a few labels/price cells; there was no application-wide selectable-text behavior. This was a previously recorded user requirement (ATP-UX-CLIPBOARD-001).
+- Workspace Order Entry placeholder incorrectly implied the broker itself was not configured, despite the working read-only Demo connection.
+- MarketDataStore consumes quote events but does not consume/store OHLC events; no chart candle UI is wired.
+- Static point-sized typography, dark-only palette, incomplete Dynamic Type/accessibility coverage, fixed-column Market Watch, no persistent activity feed, and no continuous broker-session health propagation remain design/UX gaps.
+
+### Implemented on feature branch
+- `ApplicationShellView.swift`: enabled SwiftUI text selection at the application NavigationSplitView root. Standard macOS Copy and native Paste/editing remain available; SecureField credentials are not made selectable/copyable.
+- `MarketWatchView.swift`: added context-menu actions to copy a complete instrument/quote snapshot or epic to the native pasteboard.
+- `CapitalComBrokerView.swift`: moved connection overview to full width, added adaptive two-column/stacked layout with ViewThatFits, increased maximum content width, and prevented action controls from overflowing.
+- Broker readiness now separates encrypted credential handoff, Demo REST authentication, quote stream receipt, and unavailable order execution.
+- `DashboardView.swift`: distinguishes subscription acknowledgement from actual quote arrival and labels the Demo feed explicitly.
+- `SidebarView.swift`: product-facing brand label now reads TRADING PRO.
+- `WorkspacePanelView.swift`: updated Chart/Order Entry/Positions/Orders placeholder descriptions to reflect current broker connectivity and missing functionality accurately.
+- Updated Task Register, Implementation Status, and System Overview to record the current code and owner-reported runtime evidence.
+
+### Verification status
+- GitHub compare: seven commits ahead of main; six Swift source files changed at the first comparison, plus engineering/architecture documentation updates.
+- No Xcode build, XCTest, UI automation, accessibility audit, or target-Mac visual inspection was run from this GitHub-only review.
+- Next: inspect the complete PR diff; build on target Xcode 14.3.1 / Swift 5.8.1; verify Command+C / text selection across all screens, Command+V in editable fields, Market Watch context-menu copy, responsive Broker layout at minimum and wide window sizes, and live feed state transitions.
+- Do not merge until target-Mac build and clipboard/UI acceptance checks pass.
