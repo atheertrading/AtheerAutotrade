@@ -33,7 +33,7 @@ function request(id, method, payload = {}) {
   }) + "\n";
 }
 
-async function runSession(chunks) {
+async function runSession(chunks, broker) {
   const output = {
     value: "",
     write(chunk) {
@@ -49,7 +49,7 @@ async function runSession(chunks) {
     for (const chunk of chunks) yield chunk;
   }
 
-  await serveStdioIpc(input(), output);
+  await serveStdioIpc(input(), output, broker);
   return output.value.split("\n").filter(Boolean).map((line) => JSON.parse(line));
 }
 
@@ -73,6 +73,10 @@ test("handshake and ping work across fragmented UTF-8 input", async () => {
   assert.ok(responses[0].result.capabilities.includes("broker.connect"));
   assert.ok(responses[0].result.capabilities.includes("broker.stream.start"));
   assert.ok(responses[0].result.capabilities.includes("broker.stream.stop"));
+  assert.ok(responses[0].result.capabilities.includes("broker.accounts"));
+  assert.ok(responses[0].result.capabilities.includes("broker.accountPreferences"));
+  assert.ok(responses[0].result.capabilities.includes("broker.positions"));
+  assert.ok(responses[0].result.capabilities.includes("broker.workingOrders"));
   assert.equal(responses[0].result.keyAgreement.algorithm, "X25519-HKDF-SHA256-AES-256-GCM");
   assert.equal(responses[1].ok, true);
   assert.deepEqual(responses[1].result, { status: "alive" });
@@ -245,3 +249,29 @@ test("production stdio transport serves child-process requests with protocol-onl
   assert.deepEqual(responses[1].result, { status: "alive" });
 });
 
+
+
+test("read-only account IPC methods return snapshots and reject mutation payloads", async () => {
+  const broker={
+    async getAccounts(){return {observedAt:"2026-11-13T10:00:00.000Z",accounts:[{accountId:"a1"}]};},
+    async getAccountPreferences(){return {observedAt:"2026-11-13T10:00:00.000Z",hedgingMode:false,leverages:{}};},
+    async getPositions(){return {observedAt:"2026-11-13T10:00:00.000Z",positions:[{position:{dealId:"p1"}}]};},
+    async getWorkingOrders(){return {observedAt:"2026-11-13T10:00:00.000Z",workingOrders:[{workingOrderData:{dealId:"w1"}}]};},
+    disconnect(){}
+  };
+  const input=request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133","system.hello",{clientVersion:"0.1.0"})+
+    request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52","broker.accounts")+
+    request("a2d20bb2-89e6-46a2-8d5f-86a0bde87b53","broker.accountPreferences")+
+    request("b2d20bb2-89e6-46a2-8d5f-86a0bde87b54","broker.positions")+
+    request("c2d20bb2-89e6-46a2-8d5f-86a0bde87b55","broker.workingOrders");
+  const responses=await runSession([encoder.encode(input)],broker);
+  assert.equal(responses.length,5);
+  assert.deepEqual(responses.slice(1).map(x=>x.ok),[true,true,true,true]);
+  assert.equal(responses[1].result.accounts[0].accountId,"a1");
+  assert.equal(responses[2].result.hedgingMode,false);
+  assert.equal(responses[3].result.positions[0].position.dealId,"p1");
+  assert.equal(responses[4].result.workingOrders[0].workingOrderData.dealId,"w1");
+  const invalidBroker={async getAccounts(){throw new Error("must not be called");},disconnect(){}};
+  const invalid=await runSession([encoder.encode(request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133","system.hello",{clientVersion:"0.1.0"})+request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52","broker.accounts",{accountId:"x"}))],invalidBroker);
+  assert.equal(invalid[1].error.code,"INVALID_PAYLOAD");
+});
