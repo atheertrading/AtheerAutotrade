@@ -269,7 +269,7 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 ### Evidence reviewed
 - Inspected all four images in Library folder `Screenshot`, uploaded as `ATHEER TRADING PRO - Screenshot .zip`.
 - Capital.com captures show approximately 21:56:22, 21:56:29, and 21:56:36. The ATHEER Dashboard capture is approximately 21:56:55; the final comparison is separated by about 19 seconds.
-- Capital.com at 21:56:36: Funds $1,000.00; Equity $996.20; P&L -$4.00; Available $985.21; Margin $10.98.
+- Capital.com at 21:56:36: Funds $1,000.20; Equity $996.20; P&L -$4.00; Available $985.21; Margin $10.98.
 - ATHEER at 21:56:55: BALANCE/FUNDS $995.58; EQUITY $990.96; P&L -$4.62; AVAILABLE $984.59; MARGIN $1,000.20.
 - The ATHEER values reveal an exact account-field inversion and double-counted P&L, not merely an unexplained display delay.
 
