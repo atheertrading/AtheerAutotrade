@@ -8,11 +8,11 @@ import SwiftUI
 /// snapshot is connected to this view.
 struct DashboardView: View {
     @EnvironmentObject private var marketDataStore: MarketDataStore
+    @EnvironmentObject private var brokerAccountStore: BrokerAccountStore
 
     private let statusColumns = [
         GridItem(.adaptive(minimum: 220), spacing: 14, alignment: .top)
     ]
-    private let accountRefreshTimer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     private var isStreaming: Bool {
         marketDataStore.streamStatus == "connected"
@@ -49,10 +49,7 @@ struct DashboardView: View {
         .background(AtheerColors.canvas)
         .textSelection(.enabled)
         .onAppear {
-            marketDataStore.refreshAccountSnapshot()
-        }
-        .onReceive(accountRefreshTimer) { _ in
-            marketDataStore.refreshAccountSnapshot()
+            brokerAccountStore.startObserving()
         }
     }
 
@@ -100,53 +97,61 @@ struct DashboardView: View {
                 subtitle: "Capital.com account snapshot · read-only"
             )
 
-            if let account = marketDataStore.accountSnapshot {
+            if let account = brokerAccountStore.accountSnapshot {
                 LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
                     AccountMetricPanel(
-                        title: "FUNDS / BALANCE",
+                        title: "BALANCE / FUNDS",
                         symbol: "creditcard",
                         value: formatMoney(account.funds, account: account),
-                        detail: "Broker field: balance.balance"
+                        detail: "Capital.com account balance"
                     )
                     AccountMetricPanel(
                         title: "AVAILABLE",
-                        symbol: "creditcard",
+                        symbol: "wallet.bifold",
                         value: formatMoney(account.available, account: account),
-                        detail: "Funds currently available for new positions"
+                        detail: "Broker-reported available funds"
                     )
                     AccountMetricPanel(
                         title: "EQUITY",
                         symbol: "chart.line.uptrend.xyaxis",
                         value: formatMoney(account.equity, account: account),
-                        detail: "Calculated as Funds + running P&L"
+                        detail: "Funds + broker-reported running P&L"
                     )
                     AccountMetricPanel(
                         title: "P&L",
                         symbol: "chart.xyaxis.line",
                         value: formatMoney(account.profitLoss, account: account),
-                        detail: "Running profit / loss on open positions"
+                        detail: "Broker-reported account P&L"
                     )
                     AccountMetricPanel(
                         title: "MARGIN",
                         symbol: "speedometer",
                         value: formatMoney(account.margin, account: account),
-                        detail: "Broker field: balance.deposit"
+                        detail: "Broker-reported used margin"
                     )
                     AccountMetricPanel(
                         title: "MARGIN LEVEL",
                         symbol: "speedometer",
-                        value: account.marginLevel.map { String(format: "%.1f%%", $0) } ?? "—",
-                        detail: "Calculated as Equity ÷ Margin"
+                        value: account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—",
+                        detail: "Equity ÷ Margin"
                     )
                 }
 
-                Text("Account: \(account.accountName) · \(account.currency) · \(account.status) · Observed: \(account.observedAt)")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundColor(AtheerColors.textTertiary)
-                    .textSelection(.enabled)
+                HStack(spacing: 10) {
+                    Text("Account: \(account.accountName) · \(account.currency) · \(account.status)")
+                    Text("Updated: \(account.observedAt.formatted(date: .omitted, time: .standard))")
+                    Text("SYNC: \(brokerAccountStore.syncStatus.uppercased())")
+                    if brokerAccountStore.isStale {
+                        Text("STALE")
+                            .foregroundColor(AtheerColors.warning)
+                    }
+                }
+                .font(.system(size: 10, design: .monospaced))
+                .foregroundColor(AtheerColors.textTertiary)
+                .textSelection(.enabled)
 
-                if let refreshError = marketDataStore.accountSnapshotError {
-                    Text("Account refresh failed; figures above are from the last successful snapshot. \(refreshError)")
+                if let syncError = brokerAccountStore.lastSyncError {
+                    Text("Broker synchronization warning: \(syncError)")
                         .font(.system(size: 10))
                         .foregroundColor(AtheerColors.warning)
                         .fixedSize(horizontal: false, vertical: true)
@@ -156,10 +161,10 @@ struct DashboardView: View {
                     title: "ACCOUNT DATA",
                     symbol: "building.columns",
                     value: "—",
-                    detail: marketDataStore.accountSnapshotError
-                        ?? (marketDataStore.isRefreshingAccount
-                            ? "Refreshing broker account snapshot…"
-                            : "Connect Capital.com Demo to load account metrics.")
+                    detail: brokerAccountStore.lastSyncError
+                        ?? (brokerAccountStore.syncStatus == "syncing"
+                            ? "Receiving the first live account snapshot…"
+                            : "Connect Capital.com Demo to receive broker account data.")
                 )
             }
         }
@@ -279,7 +284,7 @@ struct DashboardView: View {
 
     // MARK: - Shared Components
 
-    private func formatMoney(_ value: Double, account: BrokerAccountSnapshot) -> String {
+    private func formatMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
         "\(account.symbol)\(value.formatted(.number.precision(.fractionLength(2))))"
     }
 
