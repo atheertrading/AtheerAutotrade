@@ -23,7 +23,7 @@ struct BrokerAccountStatusBar: View {
                     .lineLimit(1)
             }
 
-            if brokerAccountStore.isStale {
+            if brokerAccountStore.accountSnapshot != nil && brokerAccountStore.isStale {
                 Label("STALE", systemImage: "exclamationmark.triangle")
                     .font(.system(size: 9, weight: .bold, design: .monospaced))
                     .foregroundColor(AtheerColors.warning)
