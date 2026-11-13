@@ -76,7 +76,7 @@ export class CapitalComRuntime {
     if (this.marketDataStream) throw new Error("Capital.com market data stream is already running.");
     const client = this.requireClient();
     const stream = createCapitalComMarketDataStream(client, {
-      onQuote: (quote) => emit("broker.marketData.quote", { ...quote }),
+      onQuote: (quote) => {\n        try {\n          emit("broker.marketData.quote", normalizeMarketQuote(quote));\n        } catch {\n          emit("broker.marketData.error", { message: "Capital.com quote failed market-data validation." });\n        }\n      },
       onOhlc: (bar) => emit("broker.marketData.ohlc", { ...bar }),
       onStatus: (status) => emit("broker.marketData.status", { status }),
       onError: () => emit("broker.marketData.error", { message: "Capital.com market data stream reported an error." })
