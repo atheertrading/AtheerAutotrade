@@ -138,7 +138,7 @@ struct DashboardView: View {
                         title: "MARGIN LEVEL",
                         symbol: "speedometer",
                         value: account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—",
-                        detail: "Equity ÷ Margin",
+                        detail: "Equity ÷ Margin · visual guidance only",
                         tint: marginLevelTint(account.marginLevel)
                     )
                 }
