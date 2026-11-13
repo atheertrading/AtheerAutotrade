@@ -36,7 +36,7 @@
 
 ## Active milestone
 
-| ATP-EXEC-001 | Automated trading execution foundation — Batch 1: centralized pre-trade Risk Engine | Pure BUY/SELL intent risk evaluation; broker quote/account freshness; stop-loss risk, gross exposure, position-count and free-margin checks | DONE — MERGED in PR #27; pure evaluator not yet integrated with OMS/Execution Gateway |
+| ATP-PERSIST-001 | PostgreSQL persistence foundation — Stage 1 schema and migration baseline | Domain-owned PostgreSQL schemas; durable OMS intent, event, idempotency, and outbox records per ATP-ARCH-003 / ATP-ARCH-019 | IN PROGRESS — migration authored on feature branch; not executed against PostgreSQL |\n\n| ATP-EXEC-001 | Automated trading execution foundation — Batch 1: centralized pre-trade Risk Engine | Pure BUY/SELL intent risk evaluation; broker quote/account freshness; stop-loss risk, gross exposure, position-count and free-margin checks | DONE — MERGED in PR #27; pure evaluator not yet integrated with OMS/Execution Gateway |
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
@@ -117,7 +117,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-ATP-CAP-ACCOUNT-001 source and mock tests now pass Backend CI (run 43358303256; Node.js 24.22.2; 46/46 tests). Next: review PR #29, then build the durable OMS intent journal/state machine and idempotency boundary. Keep broker dealing methods absent until OMS, RiskEngine authorization, Execution Gateway, and reconciliation are implemented and verified. Target-Mac Xcode/runtime and real Demo account verification remain separate gates. Application-wide copy/paste remains a separate UI milestone.
+ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript compilation and 46/46 tests. ATP-PERSIST-001 Stage 1 is now active on `feat/atp-persist-001-postgres-foundation`, based on main `794e9c5854bba45c5b007b44de697b030f3b72a8`. Initial PostgreSQL schema and scope documentation are authored but not executed. This follows ATP-ARCH-003's approved sequence: database/migration baseline before OMS persistence. Next: review the schema, add a pinned PostgreSQL client and checksum-verified migration runner, and execute PostgreSQL integration tests. Then implement ATP-OMS-001 durable state transitions and idempotency. No broker dealing or LIVE capability is introduced.
 
 ## Change log
 
