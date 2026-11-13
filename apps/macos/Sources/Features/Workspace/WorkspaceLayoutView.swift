@@ -32,7 +32,7 @@ struct WorkspaceLayoutView: View {
     }
 
     var body: some View {
-        GeometryReader { geometry in
+        GeometryReader { _ in
             Group {
                 if let workspace = activeWorkspace {
                     workspaceContent(workspace)
