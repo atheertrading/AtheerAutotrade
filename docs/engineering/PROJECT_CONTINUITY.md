@@ -251,3 +251,57 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - No order is submitted. LIVE remains disabled.
 - Next: review and validate the schema against ATP-ARCH-003/019; implement the pinned PostgreSQL client and checksum-verified migration runner; add PostgreSQL integration tests for atomic intent/idempotency/event creation, concurrent duplicate requests, payload mismatch, rollback, and restart recovery. Only then proceed to ATP-OMS-001 state-transition handling.
 - Preserve all local Mac work and stashes. This milestone was performed through GitHub only; no local filesystem or Xcode environment was accessed.
+
+
+## Latest handoff — ATP-MD-QUALITY-002 (2026-11-13)
+
+- PR #40: https://github.com/atheertrading/AtheerAutotrade/pull/40 (merged into its realtime feature-branch base; the stacked change is carried forward for review against the broker-sync branch)
+- Branch: `feat/atp-md-quality-002-quote-sides-latency-volume`, based on ATP-REALTIME-001 head commit `992d6c4d91c555307332688a799013d327146ade`.
+- Restored fixed SELL/BID red and BUY/ASK green in the shared Market Watch table; directional movement remains separate in delta columns.
+- Removed the 120 ms row animation and retained 16 ms coalescing.
+- Added native IPC event receipt timestamp capture and distinct model deltas for backend-to-client delivery and broker-timestamp-to-backend receipt. The latter is not calibrated until Capital.com server-time offset is measured.
+- Capital.com WebSocket quote contract includes bidQty/ofrQty, not executed volume. REST historical candles expose optional lastTradedVolume. One-minute volume monitor/IPC/UI is still pending; UI continues to withhold a value rather than misrepresent quote quantities or search results as traded volume.
+- Source/doc changes only through GitHub. No Xcode build, Demo quote-parity test, server-time calibration, or volume monitor verification is claimed. PR #40 is closed/merged into its feature-branch base; this does not itself establish that the stacked change reached main.
+
+
+## Latest handoff — ATP-ACCOUNT-SEMANTICS-001 (2026-11-13)
+
+### Evidence reviewed
+- Inspected all four images in Library folder `Screenshot`, uploaded as `ATHEER TRADING PRO - Screenshot .zip`.
+- Capital.com captures show approximately 21:56:22, 21:56:29, and 21:56:36. The ATHEER Dashboard capture is approximately 21:56:55; the final comparison is separated by about 19 seconds.
+- Capital.com at 21:56:36: Funds $1,000.20; Equity $996.20; P&L -$4.00; Available $985.21; Margin $10.98.
+- ATHEER at 21:56:55: BALANCE/FUNDS $995.58; EQUITY $990.96; P&L -$4.62; AVAILABLE $984.59; MARGIN $1,000.20.
+- The ATHEER values reveal an exact account-field inversion and double-counted P&L, not merely an unexplained display delay.
+
+### Verified source defect
+- `BrokerAccountSnapshot.swift` previously mapped API `balance.balance` to Funds and `balance.deposit` to Margin.
+- Capital.com API example and platform balance definitions establish: `balance.deposit` = Funds; `balance.balance` = Equity; `balance.profitLoss` = running P&L; `balance.available` = Available; Margin = Equity − Available.
+- The old model then calculated Equity = wrongly mapped Funds + P&L, subtracting negative P&L twice.
+- Corrected screenshot-derived values: Funds $1,000.20; Equity $995.58; P&L -$4.62; Available $984.59; Margin $10.99.
+- This reconciles the semantic fields; exact synchronized broker parity still needs a live Demo capture.
+
+### Implemented in source on GitHub
+- Draft PR #42: https://github.com/atheertrading/AtheerAutotrade/pull/42 (base: `feat/atp-broker-001-continuous-account-sync`; head: `fix/atp-account-semantics-001-rebased`). It is open and unmerged. The branch comparison confirms it is directly based on the broker-sync baseline (12 commits ahead, zero behind); latest PR metadata reports `mergeable=false`, so do not merge and recheck that status later. Earlier PR #41 was closed as superseded after the branch was rebased directly onto the broker-sync baseline. Xcode, XCTest, and Demo verification remain pending.
+- Branch: `fix/atp-account-semantics-001-rebased`, created from `f24cc7bae69eaa50f19e7694e8abdff01772bc70`.
+- Updated `apps/macos/Sources/Core/Broker/Models/BrokerAccountSnapshot.swift` to map Funds/Equity correctly and derive Margin = Equity − Available.
+- Added XCTest regression coverage to `apps/macos/Tests/LocalIPCProtocolTests.swift` for the screenshot values and negative-margin rejection.
+- Added `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` with screenshot evidence, field contract, diagnosis, code changes, and acceptance criteria.
+- Updated `docs/engineering/TASK_REGISTER.md`.
+- Current source and test revisions are tracked on the PR #42 head; subsequent commits on this branch update the engineering records.
+
+### Latency assessment
+- Account state uses a one-second-target REST polling monitor, not account WebSocket events.
+- Market Watch live quotes arrive through Capital.com WebSocket and the inspected live quote handler does not wait for historical-candle matching/reconciliation.
+- In the screenshots, Capital.com Bid/Ask 87.851/87.891 at 21:56:36 and ATHEER Bid/Ask 87.881/87.921 at 21:56:55 share a $0.040 spread. With a 19-second observation gap, this is not proof of a mismatch or latency.
+- ATHEER's 2.4-second quote age uses broker timestamp versus workstation wall clock; it remains uncalibrated until Capital.com server-time offset is measured.
+- Historical-data blocking hypothesis is not supported by the inspected code path. Other scheduling, network, IPC, and rendering delays remain possible and need stage instrumentation.
+
+### Verification still pending
+- No Xcode build or XCTest run has been executed for this branch.
+- No synchronized Capital.com Demo account parity capture has been performed.
+- No calibrated quote latency p50/p95/max has been measured.
+- No volume monitor/1M VOL implementation is included in this account-mapping correction.
+- Keep all dealing and LIVE capability disabled. Preserve local files and uncommitted changes; GitHub updates do not synchronize the user's local checkout.
+
+### Next action
+Build app and tests on the owner's Mac from `fix/atp-account-semantics-001-rebased`, then perform synchronized Demo account reconciliation and timestamped latency measurements. PR #41 is closed/superseded. Keep PR #42 draft until Xcode, XCTest, and Demo checks pass.

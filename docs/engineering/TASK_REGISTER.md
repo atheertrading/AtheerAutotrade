@@ -187,7 +187,7 @@ ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-li
 | ATP-UI-DASHBOARD-002 | Broker account metrics, Market Watch presentation, and Settings navigation | Branch `feat/atp-dashboard-002-account-marketwatch-settings`; record `docs/engineering/ATP-UI-DASHBOARD-002.md` | IMPLEMENTED IN SOURCE — PENDING XCODE BUILD / DEMO VERIFICATION |
 
 - Initial account values were consumed from the read-only `broker.accounts` IPC method. Dashboard-scoped 15-second refresh is superseded by ATP-BROKER-ACCOUNT-001's backend-owned continuous account-state monitor.
-- Capital.com field mapping is Funds/Balance, Available, Equity = Funds + P&L, P&L, Margin, and Margin Level = Equity / Margin × 100.
+- Correct Capital.com account mapping is Funds = `balance.deposit`, Equity = `balance.balance`, P&L = `balance.profitLoss`, Available = `balance.available`, and Margin = Equity − Available. See ATP-ACCOUNT-SEMANTICS-001.
 - Market Watch distinguishes SELL/BID and BUY/ASK, displays broker net/percentage change where supplied, calculates ticks only from broker tickSize, shows volume only when supplied, and adds asset-type icons.
 - Quote-to-quote movement is explicitly distinguished from daily/session movement.
 - Broker Connections is moved from primary navigation into Settings.
@@ -201,10 +201,42 @@ ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-li
 |---|---|---|---|
 | ATP-BROKER-ACCOUNT-001 | Continuous Capital.com account, positions, and working-orders synchronization; shared OOP application state | Branch `feat/atp-broker-001-continuous-account-sync`; `docs/engineering/ATP-BROKER-ACCOUNT-001.md` | IMPLEMENTED IN SOURCE — PENDING BACKEND CI, XCODE BUILD, AND DEMO RECONCILIATION |
 
-- Backend `CapitalComAccountMonitor` begins immediately after successful Demo authentication and publishes account, positions, and working-orders snapshots every 2 seconds without overlapping cycles.
+- Backend `CapitalComAccountMonitor` begins immediately after successful Demo authentication and targets account, positions, and working-orders REST snapshots every 1 second without overlapping cycles.
 - Account polling checks/renews the session each cycle. Capital.com official WebSocket documentation currently documents market quote and OHLC subscriptions, not account balance/positions/order events; account state therefore uses authenticated REST polling.
 - The active financial account ID from the authenticated session is carried in the snapshot; the macOS app selects that account rather than assuming the preferred account is always active.
 - Native OOP domain models are under `Core/Broker/Models`; the shared application service is under `Core/Broker/Services/BrokerAccountStore.swift`.
 - `BrokerAccountStore` is injected at the application root for cross-feature consumption. `MarketDataStore` no longer owns a duplicate account snapshot or polling path.
 - Backend CI run 43466811703 passed on Node.js 24: TypeScript build succeeded; 56 tests passed, 0 failed, 0 skipped. The target-Mac Xcode build and Demo account reconciliation remain pending.
-- Account snapshot stale threshold is 10 seconds. Disconnect/backend loss clears snapshots. No order placement, account mutation, or LIVE capability is introduced.
+- Account freshness is based on local receipt time: LIVE through 2.5 seconds, DELAYED through 5 seconds, then STALE. Disconnect/backend loss clears snapshots. No order placement, account mutation, or LIVE capability is introduced.
+
+
+## Market-data quality milestone — ATP-MD-QUALITY-002
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-MD-QUALITY-002 | Restore fixed SELL/BID and BUY/ASK colors; attribute quote latency across broker/backend/IPC/UI; expose correctly sourced traded volume | PR #40 (`https://github.com/atheertrading/AtheerAutotrade/pull/40`) merged into the realtime feature branch, branch `feat/atp-md-quality-002-quote-sides-latency-volume`; record `docs/engineering/ATP-MD-QUALITY-002.md` | PARTIALLY IMPLEMENTED — SOURCE/IPC TIMING FIELDS ADDED; XCODE, DEMO LATENCY, SERVER-TIME CALIBRATION, AND VOLUME INGESTION PENDING |
+
+- SELL/BID is fixed red and BUY/ASK is fixed green; quote direction is shown independently in delta fields.
+- Removed the 120 ms quote-row animation. Existing 16 ms quote coalescing remains to bound main-thread update volume.
+- Native IPC event receipt time is now captured separately from backend receipt time. Backend-to-client and broker-timestamp-to-backend deltas are distinct model measurements; broker timestamp delta is not yet calibrated against Capital.com server time.
+- Capital.com WebSocket quote payload documents bidQty/ofrQty, not executed volume. REST historical one-minute candle responses provide optional lastTradedVolume. The volume monitor and 1M VOL display remain pending; no quote-side quantity or search snapshot is mislabeled as traded volume.
+- No Xcode build, target-Mac runtime, controlled Demo price comparison, time calibration, or volume test has been performed for this branch. No live execution capability is introduced.
+
+
+## Account semantics correction — ATP-ACCOUNT-SEMANTICS-001
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-ACCOUNT-SEMANTICS-001 | Correct Capital.com Funds, Equity, Available, and Margin field semantics using broker API/platform definitions and screenshot evidence | Draft PR #42: https://github.com/atheertrading/AtheerAutotrade/pull/42; branch `fix/atp-account-semantics-001-rebased`; record `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` | IMPLEMENTED IN SOURCE — PR #42 DRAFT; XCODE BUILD, XCTEST, AND DEMO RECONCILIATION PENDING |
+
+- Screenshot review identified a deterministic inversion: the app displayed API `balance.balance` (Equity) as Funds, displayed `balance.deposit` (Funds) as Margin, and then added P&L to Equity a second time.
+- Correct mapping: Funds = `balance.deposit`; Equity = `balance.balance`; P&L = `balance.profitLoss`; Available = `balance.available`; Margin = Equity − Available.
+- Regression tests were added to the existing XCTest source for the exact screenshot values and negative derived-margin rejection.
+- The screenshot observations are not simultaneous; the 19-second difference is documented and small account-value differences are not treated as proof of stale data.
+- Code inspection found no historical-candle reconciliation step in the live quote event path. Market quotes use WebSocket; account snapshots use one-second-target REST polling.
+- PR #40 was merged into its realtime feature branch, not the broker-sync base branch. This follow-on branch carries that quote-side correction together with the account-semantics fix for review against `feat/atp-broker-001-continuous-account-sync`.
+- No order placement, account mutation, RiskEngine bypass, or LIVE capability is introduced.
+
+## Current next action
+
+Build the macOS application and XCTest target on the owner’s Mac from `fix/atp-account-semantics-001-rebased`. Confirm the account mapping regression tests pass, then perform synchronized Capital.com Demo reconciliation and record measured account/quote latency. Do not enable LIVE trading or merge/release before the required verification and owner approval.
