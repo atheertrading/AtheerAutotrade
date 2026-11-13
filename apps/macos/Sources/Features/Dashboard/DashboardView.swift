@@ -5,17 +5,21 @@ struct DashboardView: View {
     @EnvironmentObject private var marketDataStore: MarketDataStore
 
     private var statusItems: [DashboardStatusItem] {
-        let streaming = marketDataStore.streamStatus == "connected"
+        let subscriptionActive = marketDataStore.streamStatus == "connected"
+        let hasQuotes = !marketDataStore.quotes.isEmpty
         let marketStatus: String
         let marketDetail: String
-        if streaming {
-            marketStatus = "Streaming"
+        if subscriptionActive && hasQuotes {
+            marketStatus = "Quotes Streaming"
             marketDetail = "\(marketDataStore.quotes.count) of \(marketDataStore.watchlist.count) watched instruments have broker quotes."
+        } else if subscriptionActive {
+            marketStatus = "Awaiting Quotes"
+            marketDetail = "The broker subscription is acknowledged; no quote has been received yet."
         } else if marketDataStore.isBrokerConnected {
             marketStatus = "Demo Connected"
             marketDetail = marketDataStore.watchlist.isEmpty
                 ? "Search and add instruments in Brokers to start receiving prices."
-                : "Waiting for broker quote events."
+                : "Waiting for the broker quote subscription."
         } else {
             marketStatus = "Not connected"
             marketDetail = "Connect Capital.com Demo and add instruments to Market Watch."
@@ -27,8 +31,8 @@ struct DashboardView: View {
                 symbol: "waveform.path.ecg",
                 status: marketStatus,
                 detail: marketDetail,
-                statusColor: streaming ? AtheerColors.positive : AtheerColors.warning,
-                indicatorColor: streaming ? AtheerColors.positive : AtheerColors.warning
+                statusColor: subscriptionActive && hasQuotes ? AtheerColors.positive : AtheerColors.warning,
+                indicatorColor: subscriptionActive && hasQuotes ? AtheerColors.positive : AtheerColors.warning
             ),
             DashboardStatusItem(
                 title: "BROKER CONNECTION",
@@ -120,7 +124,7 @@ struct DashboardView: View {
                     .fill(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
                     .frame(width: 7, height: 7)
 
-                Text(marketDataStore.streamStatus == "connected" ? "LIVE MARKET FEED" : "SYSTEM FOUNDATION")
+                Text(marketDataStore.streamStatus == "connected" ? "DEMO MARKET FEED" : "SYSTEM FOUNDATION")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .tracking(0.8)
                     .foregroundColor(AtheerColors.textSecondary)
@@ -212,7 +216,7 @@ struct DashboardView: View {
     private var livePricesPanel: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Live Market Prices")
+                Text("Broker Market Prices")
                     .font(.system(size: 14, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
                 Spacer()
