@@ -360,3 +360,12 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 6. Validate PostgreSQL schema ownership, local-only enforcement, migration correctness, and real local integration before operational OMS work.
 7. Integrate RiskEngine with immutable intents and durable OMS; implement idempotency, outbox, state transitions, unknown-outcome reconciliation, then Execution Gateway and broker dealing in DEMO only.
 8. Perform sustained Demo qualification and recovery testing. LIVE remains disabled pending all safeguards and separate explicit authorization.
+
+
+### ATP-BASELINE-001 — documentation reconciliation branch
+
+- Branch: `docs/atp-baseline-reconciliation-001`, based directly on current main `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48.
+- Eight documentation files updated: README, System Overview, Module Boundaries, Implementation Status, Task Register, Project Continuity, ATP-ARCH-OOP-003 implementation record, and ATP-AUD-002 audit.
+- No source code, tests, Xcode project, SQL migration, broker permission, database, or runtime setting changed.
+- PR #48 is open, draft, not merged, and awaiting review. No build or runtime verification is claimed for this documentation-only change.
