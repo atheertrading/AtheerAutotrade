@@ -161,4 +161,4 @@ Limitations:
 - IPC tests use a deterministic broker test double for unit-level sessions. The production child-process test still starts `server.js`, exercising explicit production composition.
 - Protocol v2, capability allowlist, encrypted credential transfer, read-only broker methods, and disconnect cleanup are unchanged by intent.
 
-**Verification status:** GitHub source changes are present. Backend CI has not yet run for this branch. TypeScript compilation, Node test results, packaged app behavior, Xcode build, and actual Capital.com Demo runtime remain unverified. No dealing or LIVE capability was added.
+**Verification status:** GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript compilation passed and 51/51 Node tests passed. Packaged app behavior, Xcode build, target-Mac runtime, and actual Capital.com Demo runtime remain unverified. No dealing or LIVE capability was added. PR #47 remains open and unmerged.
