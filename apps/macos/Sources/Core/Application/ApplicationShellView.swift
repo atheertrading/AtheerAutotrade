@@ -22,6 +22,8 @@ struct ApplicationShellView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .background(AtheerColors.canvas)
+        .environmentObject(marketDataStore)
+        .onAppear { marketDataStore.startObserving() }
     }
 
     @ViewBuilder
@@ -31,6 +33,8 @@ struct ApplicationShellView: View {
             DashboardView()
         case .tradingWorkspace:
             WorkspaceLayoutView(workspaceManager: workspaceManager)
+        case .markets:
+            MarketWatchView()
         case .brokers:
             CapitalComBrokerView()
         default:
