@@ -52,7 +52,7 @@ This is a narrow first step. The contract remains Capital.com-shaped because the
 - **Verified:** source and test changes merged through PR #47 into main at `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
 - **Verified:** GitHub Actions Backend CI run 43528019119 on Node.js 24.22.2; TypeScript compilation passed and 51/51 Node tests passed.
 - **Not performed:** local Node commands, Xcode build, app packaging, target-Mac runtime, or real Capital.com Demo session.
-- Do not mark this milestone verified until CI evidence is inspected.
+- Backend CI verification is complete for the merged commit. Target-Mac build/runtime verification remains pending.
 
 ## 6. Next steps
 
