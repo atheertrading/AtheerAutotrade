@@ -41,9 +41,62 @@ struct ApplicationShellView: View {
         case .markets:
             MarketWatchView()
         case .brokers:
-            CapitalComBrokerView()
+            SettingsRootView()
+        case .settings:
+            SettingsRootView()
         default:
             DestinationPlaceholderView(section: selection)
         }
+    }
+}
+
+
+/// Settings owns low-frequency configuration destinations such as broker setup.
+/// Broker connectivity is intentionally not a primary workspace destination.
+private struct SettingsRootView: View {
+    @State private var selectedCategory = "Broker Connections"
+
+    var body: some View {
+        HStack(spacing: 0) {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("SETTINGS")
+                    .font(.system(size: 10, weight: .bold, design: .monospaced))
+                    .tracking(1.2)
+                    .foregroundColor(AtheerColors.textTertiary)
+                    .padding(.horizontal, 14)
+                    .padding(.top, 20)
+
+                Button {
+                    selectedCategory = "Broker Connections"
+                } label: {
+                    Label("Broker Connections", systemImage: "building.columns")
+                        .font(.system(size: 12, weight: .medium))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.horizontal, 12)
+                        .padding(.vertical, 9)
+                        .background(
+                            selectedCategory == "Broker Connections"
+                                ? AtheerColors.elevated
+                                : Color.clear
+                        )
+                        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
+                }
+                .buttonStyle(.plain)
+                .foregroundColor(AtheerColors.textPrimary)
+                .padding(.horizontal, 8)
+
+                Spacer()
+            }
+            .frame(width: 190)
+            .background(AtheerColors.sidebar)
+
+            Rectangle()
+                .fill(AtheerColors.border)
+                .frame(width: 1)
+
+            CapitalComBrokerView()
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .background(AtheerColors.canvas)
     }
 }

@@ -6,8 +6,31 @@ struct MarketWatchInstrument: Codable, Hashable, Identifiable {
     let name: String
     let instrumentType: String
     let marketStatus: String
+    var netChange: Double? = nil
+    var percentageChange: Double? = nil
+    var tickSize: Double? = nil
+    var lastTradedVolume: Double? = nil
 
     var id: String { epic }
+}
+
+struct BrokerAccountSnapshot {
+    let accountName: String
+    let status: String
+    let currency: String
+    let symbol: String
+    let funds: Double
+    let margin: Double
+    let profitLoss: Double
+    let available: Double
+    let observedAt: String
+
+    var equity: Double { funds + profitLoss }
+
+    var marginLevel: Double? {
+        guard margin > 0 else { return nil }
+        return equity / margin * 100
+    }
 }
 
 struct MarketQuoteSnapshot: Identifiable {
@@ -16,11 +39,23 @@ struct MarketQuoteSnapshot: Identifiable {
     let ask: Double
     let mid: Double
     let spread: Double
+    let previousMid: Double?
     let brokerTimestamp: Double
     let receivedAt: Double
     let qualityAtReceipt: String
 
     var id: String { epic }
+
+    /// Quote-to-quote movement only; this is not a session/day change.
+    var changeFromPrevious: Double? {
+        guard let previousMid else { return nil }
+        return mid - previousMid
+    }
+
+    var changePercentFromPrevious: Double? {
+        guard let previousMid, previousMid > 0 else { return nil }
+        return (mid - previousMid) / previousMid * 100
+    }
 
     var ageMilliseconds: Double {
         Date().timeIntervalSince1970 * 1_000 - brokerTimestamp
@@ -55,6 +90,9 @@ final class MarketDataStore: ObservableObject {
     @Published private(set) var streamStatus = "stopped"
     @Published private(set) var isBrokerConnected = false
     @Published private(set) var streamError: String?
+    @Published private(set) var accountSnapshot: BrokerAccountSnapshot?
+    @Published private(set) var accountSnapshotError: String?
+    @Published private(set) var isRefreshingAccount = false
 
     private let persistenceKey = "com.atheertrading.market-watch.v1"
     private var isObserving = false
@@ -93,6 +131,64 @@ final class MarketDataStore: ObservableObject {
 
     func setBrokerConnectionState(_ connected: Bool) {
         isBrokerConnected = connected
+        if connected {
+            refreshAccountSnapshot()
+        } else {
+            accountSnapshot = nil
+            accountSnapshotError = nil
+            isRefreshingAccount = false
+        }
+    }
+
+    /// Reads the broker's authoritative, read-only account snapshot over IPC.
+    /// Capital.com defines balance.balance as Funds, deposit as Margin,
+    /// profitLoss as running P&L, and available as Available Funds.
+    func refreshAccountSnapshot() {
+        guard isBrokerConnected, !isRefreshingAccount else { return }
+        isRefreshingAccount = true
+
+        BackendProcessSupervisor.shared.request(
+            method: "broker.accounts",
+            payload: [:],
+            timeout: 15
+        ) { [weak self] result in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                self.isRefreshingAccount = false
+
+                switch result {
+                case .failure(let error):
+                    self.accountSnapshotError = error.localizedDescription
+                case .success(let payload):
+                    guard
+                        let accounts = payload["accounts"] as? [[String: Any]],
+                        let account = accounts.first(where: { $0["preferred"] as? Bool == true }) ?? accounts.first,
+                        let balance = account["balance"] as? [String: Any],
+                        let funds = (balance["balance"] as? NSNumber)?.doubleValue,
+                        let margin = (balance["deposit"] as? NSNumber)?.doubleValue,
+                        let profitLoss = (balance["profitLoss"] as? NSNumber)?.doubleValue,
+                        let available = (balance["available"] as? NSNumber)?.doubleValue,
+                        let currency = account["currency"] as? String
+                    else {
+                        self.accountSnapshotError = "Capital.com returned an incomplete account snapshot."
+                        return
+                    }
+
+                    self.accountSnapshot = BrokerAccountSnapshot(
+                        accountName: account["accountName"] as? String ?? currency,
+                        status: account["status"] as? String ?? "UNKNOWN",
+                        currency: currency,
+                        symbol: account["symbol"] as? String ?? currency,
+                        funds: funds,
+                        margin: margin,
+                        profitLoss: profitLoss,
+                        available: available,
+                        observedAt: payload["observedAt"] as? String ?? ISO8601DateFormatter().string(from: Date())
+                    )
+                    self.accountSnapshotError = nil
+                }
+            }
+        }
     }
 
     func addInstrument(_ instrument: MarketWatchInstrument) {
@@ -208,12 +304,14 @@ final class MarketDataStore: ObservableObject {
                 let quality = payload["quality"] as? String
             else { continue }
 
+            let previousMid = updatedQuotes[epic]?.mid
             updatedQuotes[epic] = MarketQuoteSnapshot(
                 epic: epic,
                 bid: bid,
                 ask: ask,
                 mid: mid,
                 spread: spread,
+                previousMid: previousMid,
                 brokerTimestamp: brokerTimestamp,
                 receivedAt: receivedAt,
                 qualityAtReceipt: quality

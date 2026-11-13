@@ -1,3 +1,4 @@
+import Combine
 import SwiftUI
 
 /// Operational dashboard for the ATHEER Trading Pro macOS workstation.
@@ -11,6 +12,7 @@ struct DashboardView: View {
     private let statusColumns = [
         GridItem(.adaptive(minimum: 220), spacing: 14, alignment: .top)
     ]
+    private let accountRefreshTimer = Timer.publish(every: 15, on: .main, in: .common).autoconnect()
 
     private var isStreaming: Bool {
         marketDataStore.streamStatus == "connected"
@@ -46,6 +48,12 @@ struct DashboardView: View {
         }
         .background(AtheerColors.canvas)
         .textSelection(.enabled)
+        .onAppear {
+            marketDataStore.refreshAccountSnapshot()
+        }
+        .onReceive(accountRefreshTimer) { _ in
+            marketDataStore.refreshAccountSnapshot()
+        }
     }
 
     // MARK: - Header
@@ -89,33 +97,69 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeading(
                 title: "Account Overview",
-                subtitle: "Broker-authoritative account metrics"
+                subtitle: "Capital.com account snapshot · read-only"
             )
 
-            LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
+            if let account = marketDataStore.accountSnapshot {
+                LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
+                    AccountMetricPanel(
+                        title: "FUNDS / BALANCE",
+                        symbol: "creditcard",
+                        value: formatMoney(account.funds, account: account),
+                        detail: "Broker field: balance.balance"
+                    )
+                    AccountMetricPanel(
+                        title: "AVAILABLE",
+                        symbol: "creditcard",
+                        value: formatMoney(account.available, account: account),
+                        detail: "Funds currently available for new positions"
+                    )
+                    AccountMetricPanel(
+                        title: "EQUITY",
+                        symbol: "chart.line.uptrend.xyaxis",
+                        value: formatMoney(account.equity, account: account),
+                        detail: "Calculated as Funds + running P&L"
+                    )
+                    AccountMetricPanel(
+                        title: "P&L",
+                        symbol: "chart.xyaxis.line",
+                        value: formatMoney(account.profitLoss, account: account),
+                        detail: "Running profit / loss on open positions"
+                    )
+                    AccountMetricPanel(
+                        title: "MARGIN",
+                        symbol: "speedometer",
+                        value: formatMoney(account.margin, account: account),
+                        detail: "Broker field: balance.deposit"
+                    )
+                    AccountMetricPanel(
+                        title: "MARGIN LEVEL",
+                        symbol: "speedometer",
+                        value: account.marginLevel.map { String(format: "%.1f%%", $0) } ?? "—",
+                        detail: "Calculated as Equity ÷ Margin"
+                    )
+                }
+
+                Text("Account: \(account.accountName) · \(account.currency) · \(account.status) · Observed: \(account.observedAt)")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundColor(AtheerColors.textTertiary)
+                    .textSelection(.enabled)
+
+                if let refreshError = marketDataStore.accountSnapshotError {
+                    Text("Account refresh failed; figures above are from the last successful snapshot. \(refreshError)")
+                        .font(.system(size: 10))
+                        .foregroundColor(AtheerColors.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            } else {
                 AccountMetricPanel(
-                    title: "BALANCE",
-                    symbol: "creditcard",
+                    title: "ACCOUNT DATA",
+                    symbol: "building.columns",
                     value: "—",
-                    detail: "Account snapshot is not connected to the dashboard."
-                )
-                AccountMetricPanel(
-                    title: "EQUITY",
-                    symbol: "chart.line.uptrend.xyaxis",
-                    value: "—",
-                    detail: "Waiting for an authoritative broker account snapshot."
-                )
-                AccountMetricPanel(
-                    title: "AVAILABLE MARGIN",
-                    symbol: "speedometer",
-                    value: "—",
-                    detail: "Margin values will appear when account data is exposed."
-                )
-                AccountMetricPanel(
-                    title: "OPEN EXPOSURE",
-                    symbol: "arrow.left.and.right",
-                    value: "—",
-                    detail: "Position and exposure aggregation is not connected."
+                    detail: marketDataStore.accountSnapshotError
+                        ?? (marketDataStore.isRefreshingAccount
+                            ? "Refreshing broker account snapshot…"
+                            : "Connect Capital.com Demo to load account metrics.")
                 )
             }
         }
@@ -234,6 +278,10 @@ struct DashboardView: View {
     }
 
     // MARK: - Shared Components
+
+    private func formatMoney(_ value: Double, account: BrokerAccountSnapshot) -> String {
+        "\(account.symbol)\(value.formatted(.number.precision(.fractionLength(2))))"
+    }
 
     private func sectionHeading(title: String, subtitle: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
