@@ -25,6 +25,10 @@ struct CapitalComBrokerView: View {
         let name: String
         let instrumentType: String
         let status: String
+        let netChange: Double?
+        let percentageChange: Double?
+        let tickSize: Double?
+        let lastTradedVolume: Double?
     }
 
     var body: some View {
@@ -252,7 +256,11 @@ struct CapitalComBrokerView: View {
                                         epic: market.id,
                                         name: market.name,
                                         instrumentType: market.instrumentType,
-                                        marketStatus: market.status
+                                        marketStatus: market.status,
+                                        netChange: market.netChange,
+                                        percentageChange: market.percentageChange,
+                                        tickSize: market.tickSize,
+                                        lastTradedVolume: market.lastTradedVolume
                                     )
                                 )
                             }
@@ -694,7 +702,11 @@ struct CapitalComBrokerView: View {
                             id: epic,
                             name: (item["instrumentName"] as? String) ?? epic,
                             instrumentType: (item["instrumentType"] as? String) ?? "MARKET",
-                            status: (item["marketStatus"] as? String) ?? "UNKNOWN"
+                            status: (item["marketStatus"] as? String) ?? "UNKNOWN",
+                            netChange: item["netChange"] as? Double,
+                            percentageChange: item["percentageChange"] as? Double,
+                            tickSize: item["tickSize"] as? Double,
+                            lastTradedVolume: item["lastTradedVolume"] as? Double
                         )
                     }
                     feedback = .success("Capital.com returned \(marketResults.count) matching instruments.")
