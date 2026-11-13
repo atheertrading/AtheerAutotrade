@@ -94,7 +94,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeading(
                 title: "Account Overview",
-                subtitle: "Capital.com account snapshot · read-only"
+                subtitle: "Broker-authoritative account telemetry · read-only"
             )
 
             if let account = brokerAccountStore.accountSnapshot {
@@ -103,37 +103,43 @@ struct DashboardView: View {
                         title: "BALANCE / FUNDS",
                         symbol: "creditcard",
                         value: formatMoney(account.funds, account: account),
-                        detail: "Capital.com account balance"
+                        detail: "Capital.com broker balance",
+                        tint: AtheerColors.accent
                     )
                     AccountMetricPanel(
                         title: "AVAILABLE",
                         symbol: "creditcard",
                         value: formatMoney(account.available, account: account),
-                        detail: "Broker-reported available funds"
+                        detail: "Broker-reported available funds",
+                        tint: AtheerColors.info
                     )
                     AccountMetricPanel(
                         title: "EQUITY",
                         symbol: "chart.line.uptrend.xyaxis",
                         value: formatMoney(account.equity, account: account),
-                        detail: "Funds + broker-reported running P&L"
+                        detail: "Funds + broker-reported running P&L",
+                        tint: AtheerColors.accent
                     )
                     AccountMetricPanel(
                         title: "P&L",
                         symbol: "chart.xyaxis.line",
                         value: formatMoney(account.profitLoss, account: account),
-                        detail: "Broker-reported account P&L"
+                        detail: "Broker-reported account P&L",
+                        tint: account.profitLoss > 0 ? AtheerColors.positive : (account.profitLoss < 0 ? AtheerColors.negative : AtheerColors.textSecondary)
                     )
                     AccountMetricPanel(
                         title: "MARGIN",
                         symbol: "speedometer",
                         value: formatMoney(account.margin, account: account),
-                        detail: "Broker-reported used margin"
+                        detail: "Broker-reported used margin",
+                        tint: AtheerColors.warning
                     )
                     AccountMetricPanel(
                         title: "MARGIN LEVEL",
                         symbol: "speedometer",
                         value: account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—",
-                        detail: "Equity ÷ Margin"
+                        detail: "Equity ÷ Margin",
+                        tint: marginLevelTint(account.marginLevel)
                     )
                 }
 
@@ -284,6 +290,13 @@ struct DashboardView: View {
 
     // MARK: - Shared Components
 
+    private func marginLevelTint(_ value: Decimal?) -> Color {
+        guard let value else { return AtheerColors.textTertiary }
+        if value < 100 { return AtheerColors.negative }
+        if value < 200 { return AtheerColors.warning }
+        return AtheerColors.positive
+    }
+
     private func formatMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
         "\(account.currencySymbol)\(value.formatted(.number.precision(.fractionLength(2))))"
     }
@@ -305,6 +318,7 @@ private struct AccountMetricPanel: View {
     let symbol: String
     let value: String
     let detail: String
+    var tint: Color = AtheerColors.textPrimary
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -320,7 +334,7 @@ private struct AccountMetricPanel: View {
 
             Text(value)
                 .font(.system(size: 25, weight: .medium, design: .rounded))
-                .foregroundColor(AtheerColors.textPrimary)
+                .foregroundColor(tint)
 
             Text(detail)
                 .font(.system(size: 10))
