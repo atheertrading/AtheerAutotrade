@@ -79,6 +79,7 @@
 - PR #18 merged Keychain load/read-back verification and field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
 - PR #19 merged feat/atp-capitalcom-operational-connection into main as `b673d639bf5440ddd52085815bf7cf2a4fd54167`. It adds IPC v2 encrypted secret transfer, read-only Demo broker methods, Xcode backend packaging, market search/history, and WebSocket quote/OHLC event IPC. Target-Mac build, crypto interoperability, packaged runtime, and real Demo verification remain pending.
 - Branch feat/atp-market-data-watchlist-main adds shared Market Watch, multi-epic subscriptions, quote normalization/freshness, and the application-level market-data store. Backend CI and target-Mac verification are pending.
+- ATP-EXEC-001 RiskEngine is merged to main through PR #27 (`df85a423b30ce72d4106c281566cf9797031dfef`); it remains a pure evaluator, not connected to OMS or execution.
 - Stacked branch feat/atp-market-data-watchlist adds shared persistent Market Watch, multi-epic subscriptions, quote normalization, Bid/Ask/Mid/Spread, and freshness display. Backend CI and target-Mac Xcode/runtime verification are pending.
 - Apple Silicon arm64 runtime remains unverified.
 
@@ -119,4 +120,4 @@ Implemented on this branch:
 Limitations:
 - Capital.com documents the account balance field as `available`; it is not asserted to equal RiskEngine `freeMargin`.
 - No order creation, dealing, position mutation, account mutation, SwiftUI consumer, durable reconciliation, or LIVE capability is included.
-- CI pending. No local build or real Demo account observation is claimed.
+- GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript compilation passed and Node test output reported 46 passed, 0 failed, 0 skipped. No local build or real Demo account observation is claimed.
