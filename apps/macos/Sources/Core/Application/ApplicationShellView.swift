@@ -22,6 +22,10 @@ struct ApplicationShellView: View {
                 .navigationTitle(selection.rawValue)
         }
         .navigationSplitViewStyle(.balanced)
+        // Owner requirement: selectable text and native Copy must work throughout
+        // every application destination, not only in individually patched labels.
+        // Editable SwiftUI text controls retain their native Paste behavior.
+        .textSelection(.enabled)
         .background(AtheerColors.canvas)
         .environmentObject(marketDataStore)
         .onAppear { marketDataStore.startObserving() }
