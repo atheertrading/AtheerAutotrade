@@ -214,7 +214,7 @@ ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-li
 
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
-| ATP-MD-QUALITY-002 | Restore fixed SELL/BID and BUY/ASK colors; attribute quote latency across broker/backend/IPC/UI; expose correctly sourced traded volume | Branch `feat/atp-md-quality-002-quote-sides-latency-volume`; record `docs/engineering/ATP-MD-QUALITY-002.md` | PARTIALLY IMPLEMENTED — SOURCE/IPC TIMING FIELDS ADDED; XCODE, DEMO LATENCY, SERVER-TIME CALIBRATION, AND VOLUME INGESTION PENDING |
+| ATP-MD-QUALITY-002 | Restore fixed SELL/BID and BUY/ASK colors; attribute quote latency across broker/backend/IPC/UI; expose correctly sourced traded volume | Draft PR #40 (`https://github.com/atheertrading/AtheerAutotrade/pull/40`), branch `feat/atp-md-quality-002-quote-sides-latency-volume`; record `docs/engineering/ATP-MD-QUALITY-002.md` | PARTIALLY IMPLEMENTED — SOURCE/IPC TIMING FIELDS ADDED; XCODE, DEMO LATENCY, SERVER-TIME CALIBRATION, AND VOLUME INGESTION PENDING |
 
 - SELL/BID is fixed red and BUY/ASK is fixed green; quote direction is shown independently in delta fields.
 - Removed the 120 ms quote-row animation. Existing 16 ms quote coalescing remains to bound main-thread update volume.
