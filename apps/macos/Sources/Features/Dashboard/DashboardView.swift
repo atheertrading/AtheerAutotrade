@@ -125,7 +125,7 @@ struct DashboardView: View {
                         symbol: "chart.xyaxis.line",
                         value: formatLiveMoney(account.profitLoss, account: account),
                         detail: "Broker-reported account P&L",
-                        tint: brokerAccountStore.isDelayed ? AtheerColors.warning : (account.profitLoss > 0 ? AtheerColors.positive : (account.profitLoss < 0 ? AtheerColors.negative : AtheerColors.textSecondary))
+                        tint: brokerAccountStore.isStale ? AtheerColors.negative : ((brokerAccountStore.isDelayed || brokerAccountStore.syncStatus == "degraded") ? AtheerColors.warning : (account.profitLoss > 0 ? AtheerColors.positive : (account.profitLoss < 0 ? AtheerColors.negative : AtheerColors.textSecondary)))
                     )
                     AccountMetricPanel(
                         title: "MARGIN",
@@ -296,7 +296,11 @@ struct DashboardView: View {
     // MARK: - Shared Components
 
     private func accountMetricTint(_ preferred: Color) -> Color {
-        brokerAccountStore.isDelayed ? AtheerColors.warning : preferred
+        if brokerAccountStore.isStale { return AtheerColors.negative }
+        if brokerAccountStore.isDelayed || brokerAccountStore.syncStatus == "degraded" {
+            return AtheerColors.warning
+        }
+        return preferred
     }
 
     private func formatLiveMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
@@ -304,7 +308,10 @@ struct DashboardView: View {
     }
 
     private func marginLevelTint(_ value: Decimal?) -> Color {
-        if brokerAccountStore.isDelayed { return AtheerColors.warning }
+        if brokerAccountStore.isStale { return AtheerColors.negative }
+        if brokerAccountStore.isDelayed || brokerAccountStore.syncStatus == "degraded" {
+            return AtheerColors.warning
+        }
         guard let value else { return AtheerColors.textTertiary }
         if value < 100 { return AtheerColors.negative }
         if value < 200 { return AtheerColors.warning }
