@@ -100,3 +100,13 @@
 - Added `services/backend/src/modules/risk-engine/risk-engine.ts` and `services/backend/tests/risk-engine.test.mjs`.
 - Initial GitHub Actions run 43350570347 passed the Backend CI job (TypeScript build and backend test command). A later commit strengthened account-snapshot freshness and future-intent validation; its CI run is pending.
 - No local Node execution, Xcode build, broker Demo order, or live trade is claimed.
+
+
+## ATP-ORDER-001 — Manual Market BUY/SELL Workflow (2026-11-13)
+
+- Design baseline: `docs/trading/ATP-ORDER-001-MANUAL-MARKET-ORDER-WORKFLOW.md`.
+- Parent branch: `feat/atp-new-batch-risk-engine-foundation` (ATP-EXEC-001 Batch 1 RiskEngine).
+- This milestone records the governed end-to-end BUY/SELL workflow, OMS lifecycle, Capital.com confirmation/reconciliation requirements, and implementation batches.
+- **Implementation status:** DESIGN BASELINE RECORDED. Broker account/position/working-order reads, durable OMS, Execution Gateway, dealing methods, order IPC, and SwiftUI order ticket are not yet implemented by this change.
+- Safety boundary: Demo first; no broker order is submitted by documentation work or automated tests; LIVE remains disabled; no direct UI/AI-to-broker path; no blind retry after an unknown submission outcome.
+- Next code milestone: ATP-ORDER-002 — broker-authoritative account/position/working-order snapshots and durable OMS foundation. This must precede dealing endpoint exposure.
