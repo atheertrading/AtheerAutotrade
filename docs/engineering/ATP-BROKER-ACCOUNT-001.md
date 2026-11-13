@@ -103,7 +103,7 @@ macOS:
 
 - GitHub source updates completed on the feature branch.
 - Backend unit tests were added for initial snapshot publication, partial source failure, session renewal, interval validation, and IPC event delivery.
-- Backend tests have **not yet been executed** for this branch.
+- GitHub Actions Backend CI run [43466811703](https://github.com/atheertrading/AtheerAutotrade/actions/runs/43466811703) passed on commit `f042c8b`: Node.js 24 TypeScript build succeeded; 56 tests passed, 0 failed, 0 skipped.
 - Target-Mac Xcode build has **not yet been executed** for this branch.
 - Real Capital.com Demo account reconciliation has **not yet been performed**.
 - No live account connection or live trading is enabled by this milestone.
