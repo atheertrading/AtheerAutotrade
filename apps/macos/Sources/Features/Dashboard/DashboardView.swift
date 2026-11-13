@@ -58,11 +58,11 @@ struct DashboardView: View {
     private var header: some View {
         HStack(alignment: .center, spacing: 16) {
             VStack(alignment: .leading, spacing: 6) {
-                Text("Trading Dashboard")
+                Text("Trading Operations")
                     .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text("Account overview, market activity and system readiness")
+                Text("Live account state, market movement, and operational readiness")
                     .font(.system(size: 13))
                     .foregroundColor(AtheerColors.textSecondary)
             }
@@ -94,7 +94,7 @@ struct DashboardView: View {
         VStack(alignment: .leading, spacing: 14) {
             sectionHeading(
                 title: "Account Overview",
-                subtitle: "Broker-authoritative account telemetry · read-only"
+                subtitle: "Live broker account telemetry · source-stamped"
             )
 
             if let account = brokerAccountStore.accountSnapshot {
