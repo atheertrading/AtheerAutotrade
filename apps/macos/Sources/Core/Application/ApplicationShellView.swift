@@ -4,7 +4,7 @@ import SwiftUI
 /// Feature views are composed here; domain and execution logic belong in services.
 struct ApplicationShellView: View {
     @State private var selection: WorkspaceSection = .dashboard
-    @StateObject private var workspaceManager = WorkspaceManager()
+    @StateObject private var workspaceManager = WorkspaceManager()\n    @StateObject private var marketDataStore = MarketDataStore.shared
 
     var body: some View {
         NavigationSplitView {
