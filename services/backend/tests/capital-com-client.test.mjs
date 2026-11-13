@@ -32,7 +32,10 @@ test("session creation stores provider tokens in memory and uses demo endpoint",
   const client = new CapitalComClient("demo", credentialsProvider(), async (url, init) => {
     request = { url, init };
     return response(
-      { streamingHost: "wss://api-streaming-capital.backend-capital.com/" },
+      {
+        streamingHost: "wss://api-streaming-capital.backend-capital.com/",
+        currentAccountId: "demo-account-1"
+      },
       { CST: "cst-test", "X-SECURITY-TOKEN": "security-test" }
     );
   });
@@ -50,6 +53,7 @@ test("session creation stores provider tokens in memory and uses demo endpoint",
   assert.equal(session.cst, "cst-test");
   assert.equal(session.securityToken, "security-test");
   assert.equal(session.streamingHost, "wss://api-streaming-capital.backend-capital.com/");
+  assert.equal(session.activeAccountId, "demo-account-1");
   assert.equal(client.isAuthenticated, true);
 });
 
@@ -181,6 +185,7 @@ test("read-only account, preferences, positions, and working orders use authenti
   const accounts=await client.getAccounts(), prefs=await client.getAccountPreferences();
   const positions=await client.getPositions(), orders=await client.getWorkingOrders();
   assert.equal(accounts.accounts[0].balance.available,800);
+  assert.equal(accounts.activeAccountId,"demo-account-1");
   assert.equal(prefs.hedgingMode,false);
   assert.deepEqual(prefs.leverages.COMMODITIES.available,[1,2,5,10]);
   assert.equal(positions.positions[0].position.direction,"BUY");
