@@ -252,6 +252,7 @@ struct MarketWatchTableView: View {
             .foregroundColor(tint)
             .lineLimit(1)
             .textSelection(.enabled)
+            .help(quote.map { String(format: "Broker timestamp to backend receipt: %.1f ms (uncalibrated clock delta). Backend receipt to ATHEER IPC receipt: %.1f ms.", $0.sourceToBackendMilliseconds, $0.backendToClientMilliseconds) } ?? "Waiting for a broker quote.")
     }
 
     private func freshnessText(_ quote: MarketQuoteSnapshot?) -> some View {
