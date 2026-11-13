@@ -29,25 +29,41 @@ struct CapitalComBrokerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 22) {
                 pageHeader
 
-                HStack(alignment: .top, spacing: 18) {
-                    VStack(spacing: 18) {
-                        connectionOverview
-                        credentialsCard
-                        securityNotice
+                // Keep connection state prominent and full-width. The previous
+                // three-metric strip was compressed into a 350-point column.
+                connectionOverview
+
+                // Prefer a two-column workstation layout when it genuinely
+                // fits; fall back to a single column rather than compressing
+                // credentials, status text, or market results.
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 18) {
+                        VStack(spacing: 18) {
+                            credentialsCard
+                            securityNotice
+                        }
+                        .frame(width: 350)
+
+                        VStack(spacing: 18) {
+                            marketDiscoveryCard
+                            integrationStatus
+                        }
+                        .frame(minWidth: 400, maxWidth: .infinity)
                     }
-                    .frame(width: 350)
 
                     VStack(spacing: 18) {
+                        credentialsCard
+                        securityNotice
                         marketDiscoveryCard
                         integrationStatus
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
-            .frame(maxWidth: 1040, alignment: .leading)
+            .frame(maxWidth: 1280, alignment: .leading)
             .padding(.horizontal, 28)
             .padding(.vertical, 26)
             .frame(maxWidth: .infinity, alignment: .topLeading)
