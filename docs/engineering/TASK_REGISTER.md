@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-11-13  
 **Latest observed main baseline:** `675ea4af4d54610539218858e3d2f99c4c9a1985`  
-**Active branch:** `feat/atp-capitalcom-operational-connection`
+**Active branch:** `feat/atp-market-data-watchlist`
 
 ## Status definitions
 
@@ -39,6 +39,7 @@
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
 | ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — Node 24 CI passed (31/31); Xcode/crypto interoperability/packaged runtime/real Demo verification pending |
+| ATP-MD-WATCH-001 | Shared multi-instrument Market Watch and quote freshness | Persistent watchlist, multi-epic Capital.com subscriptions, shared quote events across screens, Bid/Ask/Mid/Spread, broker timestamp, receipt timestamp, freshness classification | IN PROGRESS — source implemented; backend CI, Xcode build, and real Demo quote verification pending |
 
 Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
 
@@ -75,7 +76,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 ### Remaining scope and safety boundaries
 
 - WebSocket quote/OHLC adapter is wired through IPC v2 event frames and the macOS UI; actual quote/OHLC delivery and sustained stream behavior remain unverified.
-- Market-data freshness, stale-state, gap detection, and recovery remain unimplemented.
+- Initial quote normalization and 5/10/15-second freshness classification are now present in source; end-to-end Demo delivery remains unverified. Full ordering/deduplication, gap detection, OHLC integrity, persistence, and recovery remain unimplemented.
 - Broker account/position snapshots and reconciliation remain unimplemented.
 - LIVE, order, dealing, and execution methods remain absent. All future exposure-increasing intents must pass through centralized Risk Engine and OMS authorization.
 
@@ -86,6 +87,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
 | ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
+| ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Enable selection/copy for static text across all screens and retain native paste/edit behavior for editable controls; no per-label patches | PLANNED |
 | ATP-CAP-ACCOUNT-001 | Read-only broker account and position snapshots | Confirm official Capital.com API contracts, normalize and reconcile broker-authoritative state | PLANNED |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
 | ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
@@ -113,9 +115,11 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-First run Node 24 CI and correct all build/test failures. Then build the macOS target and verify the packaged child, CryptoKit/Node crypto channel, actual Capital.com Demo session, and WebSocket quote/OHLC delivery. Account reconciliation remains a subsequent milestone.
+Run Node 24 CI for ATP-MD-WATCH-001, then build the macOS target on the target Intel Mac. Verify the packaged child, CryptoKit/Node crypto channel, actual Capital.com Demo session, multi-instrument WebSocket subscriptions, sustained Bid/Ask delivery, and freshness display. Then continue with full Market Data gap/recovery controls, read-only account reconciliation, Risk Engine, OMS, and Execution Gateway. Application-wide copy/paste is a separate planned UI milestone.
 
 ## Change log
+
+- 2026-11-13: Added ATP-MD-WATCH-001 on `feat/atp-market-data-watchlist`, stacked on the unmerged ATP-CAP-SESSION-001 branch. Added shared persisted watchlist, multi-epic subscriptions, cross-screen Market Watch display, and quote normalization/freshness classification. CI, target-Mac Xcode build, and real Demo quote delivery remain pending. Added ATP-UX-CLIPBOARD-001 as a separate planned milestone.
 
 - 2026-11-13: PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`. Started ATP-CAP-SESSION-001 on `feat/atp-capitalcom-operational-connection`: encrypted IPC v2, one-shot credential handoff, Demo REST session lifecycle, market search/history, Xcode backend packaging, CI, and updated UI. Verification pending.
 
