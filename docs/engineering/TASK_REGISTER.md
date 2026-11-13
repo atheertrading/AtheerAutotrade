@@ -191,5 +191,5 @@ ATP-UI-DASHBOARD-002 is the current active UI task on `feat/atp-dashboard-002-ac
 - The active financial account ID from the authenticated session is carried in the snapshot; the macOS app selects that account rather than assuming the preferred account is always active.
 - Native OOP domain models are under `Core/Broker/Models`; the shared application service is under `Core/Broker/Services/BrokerAccountStore.swift`.
 - `BrokerAccountStore` is injected at the application root for cross-feature consumption. `MarketDataStore` no longer owns a duplicate account snapshot or polling path.
-- Backend tests cover monitor snapshots, partial failures, session renewal, polling interval validation, and IPC event delivery. Execution remains pending.
+- Backend CI run 43466811703 passed on Node.js 24: TypeScript build succeeded; 56 tests passed, 0 failed, 0 skipped. The target-Mac Xcode build and Demo account reconciliation remain pending.
 - Account snapshot stale threshold is 10 seconds. Disconnect/backend loss clears snapshots. No order placement, account mutation, or LIVE capability is introduced.
