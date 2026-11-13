@@ -163,3 +163,12 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Existing Capital.com connection, credential, IPC and quote subscription source paths were not changed.
 - Dashboard text selection is enabled; application-wide text selection was already merged in PR #34.
 - This feature branch does not modify `main`. Merge only after review and target-Mac build/runtime verification.
+
+
+## Newly accepted architecture standard
+
+| ID | Milestone | Scope | Status |
+|---|---|---|---|
+| ATP-ARCH-OOP-001 | Project-wide Object-Oriented Design Standard | ADR-0006, language-specific Swift/TypeScript conventions, bounded-context directory/file conventions, object contract checklist, and incremental conformance policy | DONE — DOCUMENTED; EXISTING-CODE CONFORMANCE NOT YET AUDITED |
+
+**Next action:** assess each existing bounded context against docs/architecture/OOP_DESIGN_STANDARD.md. Record Conformant / Partially conformant / Not assessed / Blocked with path-level evidence. Refactor only within scoped implementation milestones; preserve existing behavior and Xcode project membership.
