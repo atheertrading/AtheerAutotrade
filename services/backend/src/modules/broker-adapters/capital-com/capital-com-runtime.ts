@@ -5,6 +5,7 @@ import {
   type CapitalComHistoricalPrices,
   type CapitalComMarketSearchResult
 } from "./capital-com-client.js";
+import { normalizeMarketQuote } from "../../market-data/market-data-quality.js";
 import {
   createCapitalComMarketDataStream,
   type CapitalComStreamOptions
