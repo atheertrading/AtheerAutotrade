@@ -83,7 +83,7 @@ struct BrokerAccountStatusBar: View {
     private var freshnessColor: Color {
         switch brokerAccountStore.freshnessLabel {
         case "LIVE": return AtheerColors.positive
-        case "DELAYED": return AtheerColors.warning
+        case "DELAYED", "DEGRADED": return AtheerColors.warning
         case "STALE": return AtheerColors.negative
         default: return AtheerColors.textTertiary
         }
