@@ -138,6 +138,9 @@ final class MarketDataStore: ObservableObject {
                 if case .failure(let error) = result {
                     self.streamStatus = "error"
                     self.streamError = error.localizedDescription
+                } else if self.watchlist.map(\.epic) != epics {
+                    // A watchlist edit arrived while the prior subscription was starting.
+                    self.restartStream()
                 }
             }
         }
