@@ -263,3 +263,14 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - Directory conventions follow bounded contexts and architectural layers. Existing paths are preserved until a scoped migration is justified.
 - This milestone changes architecture documentation only. Existing code has not yet been audited or refactored for full conformance.
 - Next: assess current source module-by-module and record evidence; remediate incrementally without disturbing working Capital.com connectivity or workspace functionality.
+
+
+## Latest handoff — ATP-ARCH-OOP-002 (2026-11-14)
+
+- Branch: `audit/atp-arch-oop-002-source-conformance`, based on `architecture/atp-oop-standards-001` so the accepted ADR-0006/OOP standard is available to the audit.
+- Added `docs/engineering/ATP-ARCH-OOP-002-SOURCE-CONFORMANCE-AUDIT.md` with an initial path-level assessment.
+- Reviewed: macOS `MarketDataStore`, `BackendProcessSupervisor`, `CapitalComBrokerView`; backend `stdio-ipc.ts`, `CapitalComRuntime`, `CapitalComClient`, `IpcSecretChannel`, and `RiskEngine`.
+- Initial findings: state/orchestration concentration and singleton/concrete dependencies in key macOS and IPC/broker components; positive encapsulation in `IpcSecretChannel` and deterministic domain policy structure in `RiskEngine`.
+- Audit remains IN PROGRESS. The full repository file inventory and remaining active modules have not been inspected; no whole-project conformance claim is made.
+- No source code, Xcode project, package configuration, broker behavior, or trading permissions changed. No Xcode/Node tests or runtime checks were run during this audit stage.
+- Next: complete source inventory and inspect remaining modules, callers, tests, dependency construction, and directory ownership; then propose narrow, behavior-preserving refactors with separate verification gates.

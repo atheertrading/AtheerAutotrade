@@ -1,6 +1,6 @@
 # Engineering Task Register
 
-**Last reconciled:** 2026-11-13  
+**Last reconciled:** 2026-11-14  
 **Latest observed main baseline:** `bf884b57f11619472ea5d6c1aaca23534d9d781e` (main head observed during ATP-UI-DASHBOARD-001)  
 **Active implementation branches:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation); `feat/atp-dashboard-001-operational-dashboard` (Dashboard UI)
 
@@ -172,3 +172,16 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 | ATP-ARCH-OOP-001 | Project-wide Object-Oriented Design Standard | ADR-0006, language-specific Swift/TypeScript conventions, bounded-context directory/file conventions, object contract checklist, and incremental conformance policy | DONE — DOCUMENTED; EXISTING-CODE CONFORMANCE NOT YET AUDITED |
 
 **Next action:** assess each existing bounded context against docs/architecture/OOP_DESIGN_STANDARD.md. Record Conformant / Partially conformant / Not assessed / Blocked with path-level evidence. Refactor only within scoped implementation milestones; preserve existing behavior and Xcode project membership.
+
+
+## ATP-ARCH-OOP-002 — source-code OOP conformance audit
+
+| ID | Milestone | Scope | Status |
+|---|---|---|---|
+| ATP-ARCH-OOP-002 | Comprehensive source-code audit against ADR-0006 and OOP_DESIGN_STANDARD.md | Inventory and inspect each active module; assess responsibility concentration, abstraction, encapsulation, dependency direction, lifecycle, testability, and directory/file ownership; record path-level evidence and staged remediation priorities | IN PROGRESS — initial critical-path audit recorded; full repository/module inventory and remaining source reviews pending |
+
+- Audit report: [ATP-ARCH-OOP-002 Source Conformance Audit](ATP-ARCH-OOP-002-SOURCE-CONFORMANCE-AUDIT.md).
+- Initial reviewed modules: macOS MarketDataStore, BackendProcessSupervisor, CapitalComBrokerView; backend stdio IPC, CapitalComRuntime, CapitalComClient, IPCSecretChannel, and RiskEngine.
+- Initial assessment: state/orchestration modules are predominantly Partially conformant; IPCSecretChannel and RiskEngine are Conformant for the inspected responsibilities. Other modules remain Not assessed until complete source review.
+- No source refactor, directory move, runtime change, or trading permission change is included in this audit stage.
+- Next: complete source inventory and inspect each remaining active module, its callers, tests, and composition boundary before defining module-specific refactors.
