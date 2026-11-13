@@ -126,7 +126,13 @@ export class CapitalComRuntime {
   startAccountMonitor(emit: CapitalComAccountMonitorEmitter): void {
     if (this.accountMonitor) return;
     const client = this.requireClient();
-    const monitor = new CapitalComAccountMonitor(client, emit, { intervalMs: 3_000 });
+    const provider = {
+      ensureSession: async () => { await client.getSessionForStreaming(); },
+      getAccounts: () => client.getAccounts(),
+      getPositions: () => client.getPositions(),
+      getWorkingOrders: () => client.getWorkingOrders()
+    };
+    const monitor = new CapitalComAccountMonitor(provider, emit, { intervalMs: 3_000 });
     this.accountMonitor = monitor;
     monitor.start();
   }
