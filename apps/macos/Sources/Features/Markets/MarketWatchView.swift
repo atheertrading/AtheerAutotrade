@@ -79,10 +79,11 @@ struct MarketWatchTableView: View {
             Text("BUY / ASK").frame(width: 82, alignment: .trailing)
             Text("Δ PX").frame(width: 72, alignment: .trailing)
             Text("Δ %").frame(width: 58, alignment: .trailing)
+            Text("TICKS").frame(width: 52, alignment: .trailing)
+            Text("VOL").frame(width: 48, alignment: .trailing)
             if !compact {
                 Text("MID").frame(width: 76, alignment: .trailing)
                 Text("SPREAD").frame(width: 72, alignment: .trailing)
-                Text("VOL").frame(width: 44, alignment: .trailing)
                 Text("AGE").frame(width: 54, alignment: .trailing)
                 Text("STATUS").frame(width: 76, alignment: .trailing)
                 Color.clear.frame(width: 22)
@@ -124,17 +125,14 @@ struct MarketWatchTableView: View {
 
             priceText(quote?.bid, tint: AtheerColors.negative).frame(width: 82, alignment: .trailing)
             priceText(quote?.ask, tint: AtheerColors.positive).frame(width: 82, alignment: .trailing)
-            movementText(quote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
-            movementText(quote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
+            movementText(instrument.netChange ?? quote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
+            movementText(instrument.percentageChange ?? quote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
+            tickText(instrument).frame(width: 52, alignment: .trailing)
+            volumeText(instrument).frame(width: 48, alignment: .trailing)
 
             if !compact {
                 priceText(quote?.mid).frame(width: 76, alignment: .trailing)
                 priceText(quote?.spread).frame(width: 72, alignment: .trailing)
-                Text("—")
-                    .font(.system(size: 10, design: .monospaced))
-                    .foregroundColor(AtheerColors.textTertiary)
-                    .frame(width: 44, alignment: .trailing)
-                    .help("Volume is not included in the current Capital.com quote snapshot.")
                 ageText(quote).frame(width: 54, alignment: .trailing)
                 freshnessText(quote).frame(width: 76, alignment: .trailing)
 
@@ -200,7 +198,28 @@ struct MarketWatchTableView: View {
             .font(.system(size: 10, weight: .semibold, design: .monospaced))
             .foregroundColor(tint)
             .lineLimit(1)
-            .help("Movement since the previous received quote; not a daily/session change or exchange tick count.")
+            .help("Uses Capital.com netChange/percentageChange when supplied; otherwise shows movement since the previous quote.")
+    }
+
+    private func tickText(_ instrument: MarketWatchInstrument) -> some View {
+        let ticks: String
+        if let change = instrument.netChange, let tickSize = instrument.tickSize, tickSize > 0 {
+            ticks = String(format: "%.1f", change / tickSize)
+        } else {
+            ticks = "—"
+        }
+
+        return Text(ticks)
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .foregroundColor(AtheerColors.textSecondary)
+            .help("Net price change divided by the broker-provided tickSize.")
+    }
+
+    private func volumeText(_ instrument: MarketWatchInstrument) -> some View {
+        Text(instrument.lastTradedVolume.map { $0.formatted(.number.precision(.fractionLength(0))) } ?? "—")
+            .font(.system(size: 10, weight: .medium, design: .monospaced))
+            .foregroundColor(AtheerColors.textSecondary)
+            .help("Last traded volume, only when supplied by the broker market snapshot.")
     }
 
     private func instrumentSymbol(_ instrumentType: String) -> String {
