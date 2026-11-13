@@ -51,7 +51,7 @@
 
 - Capital.com WebSocket quote events are wired through IPC v2 and the shared Market Watch UI; owner confirms quote delivery works locally. OHLC events are accepted by the IPC protocol but are not yet consumed or stored by MarketDataStore, so chart candles are not available.
 - Full Market Data ingestion lifecycle remains incomplete: ordering, deduplication, gap detection, candle integrity, durable storage, stale-event propagation, and recovery. The current quote normalizer is an initial component, not a completed Market Data Engine.
-- Durable broker account/position/order reconciliation and persistence. Read-only API snapshot methods are being implemented in ATP-CAP-ACCOUNT-001; no SwiftUI consumer is wired yet.
+- Durable broker account/position/order reconciliation and persistence. Read-only API snapshot methods for accounts, preferences, positions, and working orders are merged in PR #29 and have 46/46 mock-based backend tests; no SwiftUI consumer or durable reconciliation is wired yet.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
 - Risk Engine integration into an enforced order-intake/OMS path; the pure pre-trade evaluator is merged but not operationally integrated.
 - Order Management System and durable intent state machine.
