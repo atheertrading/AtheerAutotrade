@@ -67,6 +67,8 @@ Modules communicate through typed interfaces and explicit application/domain eve
 
 ### 6. Local application/backend security decision deferred
 
+> **Superseded:** The transport selection in this subsection was resolved by accepted ADR-0005, which selects parent-owned anonymous standard-I/O pipes for production desktop IPC and defines the protocol/security contract. Read ADR-0005 as authoritative for the current transport decision and implementation status.
+
 Loopback binding alone is not client authentication. No local transport mechanism is selected by this ADR. Before broker operations are exposed to the desktop client, a focused architecture spike must compare supported macOS IPC options and demonstrate:
 - authenticated client identity and least privilege;
 - no broker secret in HTTP request bodies, app logs, process arguments, or world-readable files;
