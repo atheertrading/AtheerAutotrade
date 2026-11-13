@@ -22,6 +22,10 @@ struct ApplicationShellView: View {
                 .navigationTitle(selection.rawValue)
         }
         .navigationSplitViewStyle(.balanced)
+        // Make static application content selectable throughout the UI.
+        // Native macOS Copy/Paste commands remain available; editable controls
+        // retain their standard text-editing behavior.
+        .textSelection(.enabled)
         .background(AtheerColors.canvas)
         .environmentObject(marketDataStore)
         .onAppear { marketDataStore.startObserving() }
