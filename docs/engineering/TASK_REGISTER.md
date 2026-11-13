@@ -135,3 +135,13 @@ Run Node 24 CI for ATP-MD-WATCH-001, then build the macOS target on the target I
 
 
 - 2026-11-13: Started The New Batch, ATP-EXEC-001 Batch 1, on `feat/atp-new-batch-risk-engine-foundation` from main commit `4f618e3080ed54e71b61ad94d1ad5b69deb95959`. Added the pure centralized pre-trade RiskEngine and focused tests in PR #27. Initial Backend CI run 43350570347 passed; a follow-up commit added stale account-snapshot and future-intent rejection and requires its own CI result. No broker dealing, IPC, UI, or LIVE path was added. PR #27 remains draft and unmerged.
+
+
+## ATP-ORDER-001 — Manual Market BUY/SELL Workflow (2026-11-13)
+
+- Design baseline: `docs/trading/ATP-ORDER-001-MANUAL-MARKET-ORDER-WORKFLOW.md`.
+- Parent branch: `feat/atp-new-batch-risk-engine-foundation` (ATP-EXEC-001 Batch 1 RiskEngine).
+- This milestone records the governed end-to-end BUY/SELL workflow, OMS lifecycle, Capital.com confirmation/reconciliation requirements, and implementation batches.
+- **Implementation status:** DESIGN BASELINE RECORDED. Broker account/position/working-order reads, durable OMS, Execution Gateway, dealing methods, order IPC, and SwiftUI order ticket are not yet implemented by this change.
+- Safety boundary: Demo first; no broker order is submitted by documentation work or automated tests; LIVE remains disabled; no direct UI/AI-to-broker path; no blind retry after an unknown submission outcome.
+- Next code milestone: ATP-ORDER-002 — broker-authoritative account/position/working-order snapshots and durable OMS foundation. This must precede dealing endpoint exposure.
