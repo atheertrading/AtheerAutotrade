@@ -17,10 +17,14 @@ struct ApplicationShellView: View {
                     max: 280
                 )
         } detail: {
-            destinationView
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(AtheerColors.canvas)
-                .navigationTitle(selection.rawValue)
+            VStack(spacing: 0) {
+                BrokerAccountStatusBar()
+
+                destinationView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .background(AtheerColors.canvas)
+            .navigationTitle(selection.rawValue)
         }
         .navigationSplitViewStyle(.balanced)
         // Owner requirement: selectable text and native Copy must work throughout
