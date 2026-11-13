@@ -39,7 +39,7 @@
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
 | ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — Node 24 CI passed (31/31); Xcode/crypto interoperability/packaged runtime/real Demo verification pending |
-| ATP-MD-WATCH-001 | Shared multi-instrument Market Watch and quote freshness | Persistent watchlist, multi-epic Capital.com subscriptions, shared quote events across screens, Bid/Ask/Mid/Spread, broker timestamp, receipt timestamp, freshness classification | IN PROGRESS — source implemented; backend CI, Xcode build, and real Demo quote verification pending |
+| ATP-MD-WATCH-001 | Shared multi-instrument Market Watch and quote freshness | Persistent watchlist, multi-epic Capital.com subscriptions, shared quote events across Dashboard/Markets/Workspace/Brokers, Bid/Ask/Mid/Spread, broker timestamp, receipt timestamp, freshness classification | IN PROGRESS — source implemented; backend CI, Xcode build, and real Demo quote verification pending |
 
 Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
 
