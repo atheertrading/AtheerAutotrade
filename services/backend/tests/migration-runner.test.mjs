@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { mkdtemp, mkdir, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -13,7 +13,7 @@ import {
 test("computes a deterministic SHA-256 checksum", () => {
   assert.equal(
     sha256("atheer"),
-    "5b6d3e6c8f3c2b3f7e7d0e3f1f3e3e5f3e2e3d4c5b6a79808192a3b4c5d6e7f8".slice(0, 64)
+    "544ad6179b013697f5b59d4e12db29dd4d83405b1670f9594c5692d2620e0662"
   );
 });
 
@@ -30,10 +30,7 @@ test("discovers migrations in deterministic version order and ignores non-migrat
   await writeFile(join(directory, "README.md"), "not a migration");
 
   const migrations = await discoverMigrations(directory);
-  assert.deepEqual(migrations.map((migration) => migration.version), [
-    "0001_first",
-    "0002_second"
-  ]);
+  assert.deepEqual(migrations.map((migration) => migration.version), ["0001_first", "0002_second"]);
   assert.equal(migrations[0].checksum, sha256(migrations[0].sql));
 });
 
@@ -46,6 +43,7 @@ test("wraps migration and checksum record in one advisory-locked transaction", (
   });
 
   assert.match(transaction, /pg_advisory_xact_lock/);
+  assert.match(transaction, /CREATE TABLE IF NOT EXISTS atheer\.schema_migrations/);
   assert.match(transaction, /checksum mismatch/);
   assert.match(transaction, /CREATE TABLE example/);
   assert.match(transaction, /INSERT INTO atheer\.schema_migrations/);

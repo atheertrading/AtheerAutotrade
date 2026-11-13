@@ -37,7 +37,7 @@ export async function discoverMigrations(directory = DEFAULT_MIGRATIONS_DIRECTOR
 }
 
 export function composeMigrationTransaction(migration) {
-  const version = migration.version.replaceAll("'", "''");
+  const version = migration.version;
   const checksum = migration.checksum;
   if (!/^\d{4}_[a-z0-9_]+$/.test(version) || !/^[0-9a-f]{64}$/.test(checksum)) {
     throw new Error("Invalid migration identity or checksum.");
@@ -45,6 +45,14 @@ export function composeMigrationTransaction(migration) {
 
   return `BEGIN;
 SELECT pg_advisory_xact_lock(${ADVISORY_LOCK_KEY});
+
+CREATE SCHEMA IF NOT EXISTS atheer;
+CREATE TABLE IF NOT EXISTS atheer.schema_migrations (
+  version varchar(128) PRIMARY KEY,
+  checksum_sha256 varchar(64) NOT NULL
+    CHECK (checksum_sha256 ~ '^[0-9a-f]{64}$'),
+  applied_at_utc timestamptz NOT NULL DEFAULT now()
+);
 
 DO $atheer_migration_guard$
 BEGIN
@@ -74,7 +82,6 @@ function requiredServiceConfiguration(environment) {
     throw new Error("PGSERVICE must name a configured PostgreSQL service.");
   }
   if (!serviceFile) throw new Error("PGSERVICEFILE must point to a protected libpq service file.");
-
   return { service, serviceFile };
 }
 
@@ -95,10 +102,7 @@ function executePsql(sql, environment) {
       `service=${environment.PGSERVICE}`,
       "--file",
       "-"
-    ], {
-      env: environment,
-      stdio: ["pipe", "inherit", "inherit"]
-    });
+    ], { env: environment, stdio: ["pipe", "inherit", "inherit"] });
 
     child.once("error", () => rejectPromise(new Error("Could not start psql. Install PostgreSQL client tools and verify PATH.")));
     child.once("close", (code) => {
@@ -115,14 +119,12 @@ export async function runMigrations({
 } = {}) {
   const { serviceFile } = requiredServiceConfiguration(environment);
   await verifyServiceFilePermissions(serviceFile);
-
   const migrations = await discoverMigrations(directory);
   if (migrations.length === 0) throw new Error("No versioned SQL migrations were found.");
 
   for (const migration of migrations) {
-    const transaction = composeMigrationTransaction(migration);
     console.log(`Applying/checking migration ${migration.version} (${migration.checksum.slice(0, 12)}…)`);
-    await executePsql(transaction, environment);
+    await executePsql(composeMigrationTransaction(migration), environment);
   }
   console.log(`Migration check complete: ${migrations.length} migration(s) processed.`);
 }
