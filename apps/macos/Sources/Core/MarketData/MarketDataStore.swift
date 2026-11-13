@@ -53,6 +53,7 @@ final class MarketDataStore: ObservableObject {
     @Published private(set) var watchlist: [MarketWatchInstrument] = []
     @Published private(set) var quotes: [String: MarketQuoteSnapshot] = [:]
     @Published private(set) var streamStatus = "stopped"
+    @Published private(set) var isBrokerConnected = false
     @Published private(set) var streamError: String?
 
     private let persistenceKey = "com.atheertrading.market-watch.v1"
@@ -76,6 +77,10 @@ final class MarketDataStore: ObservableObject {
 
     func contains(epic: String) -> Bool {
         watchlist.contains { $0.epic == epic }
+    }
+
+    func setBrokerConnectionState(_ connected: Bool) {
+        isBrokerConnected = connected
     }
 
     func addInstrument(_ instrument: MarketWatchInstrument) {
