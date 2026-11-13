@@ -47,7 +47,9 @@ Domain-oriented directory structure:
 
 `BrokerAccountStore` is a single shared ObservableObject injected at the application shell. It receives broker events independently of Dashboard lifecycle and exposes immutable typed account, position, and working-order snapshots to every feature through the SwiftUI environment. `BackendProcessSupervisor` now supports multiple independent event subscribers so broker-account consumers do not replace the existing market-data event handler.
 
-The previous account polling implementation was removed from `MarketDataStore`. Market quotes remain in `MarketDataStore`; financial account state is owned by `BrokerAccountStore`.
+The previous account polling implementation was removed from `MarketDataStore`. Market quotes remain in `MarketDataStore`; financial account state is owned by `BrokerAccountStore`. A persistent `BrokerAccountStatusBar` is composed above every application destination, so account state and synchronization freshness remain visible when the user navigates away from Dashboard.
+
+SwiftUI screen types remain value-type `View` structs, as required by the framework. Encapsulated application/domain services are reference types, and immutable broker observations are typed value objects. The folder structure follows domain boundaries and responsibility layers rather than forcing every Swift type into a class.
 
 ## Account metric semantics
 
@@ -93,7 +95,9 @@ macOS:
 - `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift`
 - `apps/macos/Sources/Core/Application/ApplicationShellView.swift`
 - `apps/macos/Sources/Core/MarketData/MarketDataStore.swift`
+- `apps/macos/Sources/Features/Brokers/BrokerAccountStatusBar.swift` (new)
 - `apps/macos/Sources/Features/Dashboard/DashboardView.swift`
+- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` (new Swift files registered in target)
 
 ## Verification status
 
