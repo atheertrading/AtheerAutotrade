@@ -128,3 +128,14 @@ Limitations:
 - Capital.com documents the account balance field as `available`; it is not asserted to equal RiskEngine `freeMargin`.
 - No order creation, dealing, position mutation, account mutation, SwiftUI consumer, durable reconciliation, or LIVE capability is included.
 - GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript compilation passed and Node test output reported 46 passed, 0 failed, 0 skipped. No local build or real Demo account observation is claimed.
+
+
+## Project-wide OOP design standard — ATP-ARCH-OOP-001
+
+- Accepted architecture decision: ADR-0006.
+- Normative conventions: docs/architecture/OOP_DESIGN_STANDARD.md.
+- Scope: all source modules, directories, files, tests, and implementation teams across Swift/SwiftUI and TypeScript/Node.js.
+- New and materially changed code must use cohesive object responsibilities, encapsulation, explicit protocol/interface boundaries, composition, dependency injection, and lifecycle ownership.
+- Idiomatic Swift value types/protocols/enums and deterministic pure functions remain valid; the rule is not class-per-file or class-per-function.
+- Existing source conformance has **not yet been audited**. Do not claim whole-repository OOP compliance until each bounded context is assessed and evidence is recorded.
+- No source-code refactor or directory move was performed as part of this documentation milestone.
