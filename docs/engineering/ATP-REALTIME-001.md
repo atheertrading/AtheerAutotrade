@@ -58,7 +58,7 @@ Capital.com currently documents WebSocket streaming for market quotes and OHLC, 
 | Positive P&L | Positive green |
 | Negative P&L | Negative red |
 | Used Margin | Warning amber |
-| Margin Level | Green at 200% or higher; amber from 100% to below 200%; red below 100% |
+| Margin Level | Green at 200% or higher; amber from 100% to below 200%; red below 100% (presentation heuristic only; not a broker close-out threshold or RiskEngine policy) |
 | Spread / informational data | Information blue |
 | Delayed feed | Warning amber |
 | Stale feed | Negative red |
