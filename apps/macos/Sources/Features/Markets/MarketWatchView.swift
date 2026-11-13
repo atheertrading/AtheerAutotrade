@@ -75,8 +75,8 @@ struct MarketWatchTableView: View {
     private var headerRow: some View {
         HStack(spacing: 10) {
             Text("INSTRUMENT").frame(maxWidth: .infinity, alignment: .leading)
-            Text("SELL / BID").frame(width: 82, alignment: .trailing)
-            Text("BUY / ASK").frame(width: 82, alignment: .trailing)
+            Text("SELL / BID").foregroundColor(AtheerColors.negative).frame(width: 82, alignment: .trailing)
+            Text("BUY / ASK").foregroundColor(AtheerColors.positive).frame(width: 82, alignment: .trailing)
             Text("Δ PX").frame(width: 72, alignment: .trailing)
             Text("Δ %").frame(width: 58, alignment: .trailing)
             Text("TICKS").frame(width: 52, alignment: .trailing)
@@ -102,10 +102,9 @@ struct MarketWatchTableView: View {
     private func instrumentRow(_ instrument: MarketWatchInstrument) -> some View {
         let quote = marketDataStore.quotes[instrument.epic]
         let liveQuote = quote?.currentQuality == "FRESH" ? quote : nil
-        // Side labels define execution direction; price tint defines movement.
-        // Do not permanently color every bid red and every ask green.
+        // Execution-side semantics are invariant: SELL/BID is red; BUY/ASK is green.
+        // Quote direction is communicated separately in the delta columns.
         // Delayed/degraded/stale quotes are withheld from executable-price cells.
-        let movementTint = movementColor(liveQuote?.changeFromPrevious)
 
         return HStack(spacing: 10) {
             HStack(spacing: 8) {
@@ -128,8 +127,8 @@ struct MarketWatchTableView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            priceText(liveQuote?.bid, tint: movementTint).frame(width: 82, alignment: .trailing)
-            priceText(liveQuote?.ask, tint: movementTint).frame(width: 82, alignment: .trailing)
+            priceText(liveQuote?.bid, tint: AtheerColors.negative).frame(width: 82, alignment: .trailing)
+            priceText(liveQuote?.ask, tint: AtheerColors.positive).frame(width: 82, alignment: .trailing)
             movementText(liveQuote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
             movementText(liveQuote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
             tickText(instrument, quote: liveQuote).frame(width: 52, alignment: .trailing)
@@ -158,7 +157,6 @@ struct MarketWatchTableView: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 49)
-        .animation(.easeOut(duration: 0.12), value: quote?.mid)
     }
 
     private var emptyState: some View {
