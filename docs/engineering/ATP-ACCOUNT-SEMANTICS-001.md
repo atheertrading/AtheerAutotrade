@@ -12,7 +12,7 @@ The owner supplied four screenshots from 13 November 2026:
 - One ATHEER Dashboard capture at approximately 21:56:55.
 
 The final Capital.com capture showed:
-- Funds: $1,000.00
+- Funds: $1,000.20
 - Equity: $996.20
 - P&L: -$4.00
 - Available: $985.21
@@ -66,7 +66,7 @@ With the corrected mapping, those same snapshot values become:
 - Available: $984.59
 - Derived Margin: $10.99
 
-This corrected set is coherent with the Capital.com capture 19 seconds earlier (Funds $1,000.00, Equity $996.20, P&L -$4.00, Available $985.21, Margin $10.98). The small residual differences are compatible with different observation times; a synchronized Demo capture is still required for formal parity verification.
+This corrected set is coherent with the Capital.com capture 19 seconds earlier (Funds $1,000.20, Equity $996.20, P&L -$4.00, Available $985.21, Margin $10.98). The $0.62 changes in P&L, Equity, and Available are internally consistent with the two observation times; Margin changes by only $0.01 and Funds remain unchanged. The account values now reconcile semantically, while synchronized Demo capture remains the formal acceptance check.
 
 ## Implemented source correction
 
