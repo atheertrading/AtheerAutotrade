@@ -13,6 +13,7 @@ struct BrokerAccountSnapshot: Identifiable, Equatable {
     let available: Decimal
     let profitLoss: Decimal
     let margin: Decimal
+    /// Broker/backend observation timestamp; transport freshness is tracked separately by BrokerAccountStore.
     let observedAt: Date
 
     var id: String { accountID }
@@ -27,7 +28,7 @@ struct BrokerAccountSnapshot: Identifiable, Equatable {
         max(0, Date().timeIntervalSince(observedAt))
     }
 
-    var isStale: Bool { age > 10 }
+    var isStale: Bool { age > 5 }
 
     init?(payload: [String: Any], observedAt fallbackDate: Date = Date()) {
         guard

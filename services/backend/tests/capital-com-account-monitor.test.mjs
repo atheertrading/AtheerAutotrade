@@ -7,15 +7,15 @@ function provider(overrides = {}) {
     async ensureSession() {},
     async getAccounts() {
       return {
-        observedAt: "2026-11-13T10:00:00.000Z",
+        observedAt: new Date().toISOString(),
         accounts: [{ accountId: "demo-account", balance: { balance: 1_000, available: 900 } }]
       };
     },
     async getPositions() {
-      return { observedAt: "2026-11-13T10:00:00.000Z", positions: [] };
+      return { observedAt: new Date().toISOString(), positions: [] };
     },
     async getWorkingOrders() {
-      return { observedAt: "2026-11-13T10:00:00.000Z", workingOrders: [] };
+      return { observedAt: new Date().toISOString(), workingOrders: [] };
     },
     ...overrides
   };
@@ -25,7 +25,7 @@ test("account monitor publishes an initial account, positions and working-orders
   const events = [];
   const monitor = new CapitalComAccountMonitor(provider(), (event, payload) => {
     events.push({ event, payload });
-  }, { intervalMs: 2_000 });
+  }, { intervalMs: 1_000 });
 
   monitor.start();
   await new Promise((resolve) => setImmediate(resolve));
@@ -45,7 +45,7 @@ test("account monitor publishes partial source failures and degraded state", asy
     async getPositions() { throw new Error("private transport detail"); }
   }), (event, payload) => {
     events.push({ event, payload });
-  }, { intervalMs: 2_000 });
+  }, { intervalMs: 1_000 });
 
   monitor.start();
   await new Promise((resolve) => setImmediate(resolve));
@@ -64,7 +64,7 @@ test("account monitor renews the session before each snapshot cycle", async () =
   let sessionChecks = 0;
   const monitor = new CapitalComAccountMonitor(provider({
     async ensureSession() { sessionChecks += 1; }
-  }), (event, payload) => events.push({ event, payload }), { intervalMs: 2_000 });
+  }), (event, payload) => events.push({ event, payload }), { intervalMs: 1_000 });
 
   monitor.start();
   await new Promise((resolve) => setImmediate(resolve));
@@ -73,9 +73,19 @@ test("account monitor renews the session before each snapshot cycle", async () =
   assert.equal(sessionChecks, 1);
 });
 
-test("account monitor rejects unsafe polling intervals", () => {
+test("account monitor accepts the one-second target cadence", () => {
+  assert.doesNotThrow(
+    () => new CapitalComAccountMonitor(provider(), () => {}, { intervalMs: 1_000 })
+  );
+});
+
+test("account monitor rejects polling below one second or above the bounded maximum", () => {
   assert.throws(
-    () => new CapitalComAccountMonitor(provider(), () => {}, { intervalMs: 500 }),
-    /between 2000 and 30000/
+    () => new CapitalComAccountMonitor(provider(), () => {}, { intervalMs: 999 }),
+    /between 1000 and 30000/
+  );
+  assert.throws(
+    () => new CapitalComAccountMonitor(provider(), () => {}, { intervalMs: 30_001 }),
+    /between 1000 and 30000/
   );
 });

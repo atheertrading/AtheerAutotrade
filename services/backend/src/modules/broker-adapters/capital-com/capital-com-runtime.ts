@@ -132,7 +132,7 @@ export class CapitalComRuntime {
       getPositions: () => client.getPositions(),
       getWorkingOrders: () => client.getWorkingOrders()
     };
-    const monitor = new CapitalComAccountMonitor(provider, emit, { intervalMs: 2_000 });
+    const monitor = new CapitalComAccountMonitor(provider, emit, { intervalMs: 1_000 });
     this.accountMonitor = monitor;
     monitor.start();
   }

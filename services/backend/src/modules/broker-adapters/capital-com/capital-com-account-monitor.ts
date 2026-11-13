@@ -31,16 +31,19 @@ export interface CapitalComAccountMonitorOptions {
   readonly intervalMs?: number;
 }
 
-const DEFAULT_INTERVAL_MS = 3_000;
-const MIN_INTERVAL_MS = 2_000;
+// One-second polling is a bounded REST compromise: three concurrent snapshots
+// plus at most one session check per cycle, below Capital.com's documented
+// general request ceiling. It is not an account WebSocket feed.
+const DEFAULT_INTERVAL_MS = 1_000;
+const MIN_INTERVAL_MS = 1_000;
 const MAX_INTERVAL_MS = 30_000;
 
 /**
- * Continuously reconciles the authoritative Capital.com account, positions,
- * and working-order REST snapshots and publishes them to local application
- * consumers. Capital.com documents WebSocket subscriptions for market quotes
- * and OHLC, not account-balance events; this monitor therefore uses bounded,
- * non-overlapping REST polling.
+ * Continuously reconciles authoritative Capital.com account, positions, and
+ * working-order REST snapshots. Market quotes/OHLC remain on the WebSocket path.
+ *
+ * Cycles never overlap. If a cycle takes longer than the configured interval,
+ * the next timer tick is skipped rather than queuing stale refresh work.
  */
 export class CapitalComAccountMonitor {
   private timer: ReturnType<typeof setInterval> | undefined;
@@ -93,7 +96,6 @@ export class CapitalComAccountMonitor {
     if (this.stopped || this.refreshInFlight) return;
     this.refreshInFlight = true;
     const cycleId = ++this.cycle;
-    const observedAt = new Date().toISOString();
 
     try {
       try {
@@ -162,7 +164,7 @@ export class CapitalComAccountMonitor {
         cycleId,
         failedSources,
         intervalMs: this.intervalMs,
-        observedAt
+        observedAt: new Date().toISOString()
       });
     } finally {
       this.refreshInFlight = false;

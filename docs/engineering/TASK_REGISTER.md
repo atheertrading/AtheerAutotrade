@@ -108,6 +108,21 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ATP-CAP-001-DEMO | Verify actual Capital.com Demo authentication and market data | No real session or broker-originated quote/candle evidence | PLANNED |
 | ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Prior runtime verification was x86_64 | PLANNED |
 
+## Real-time telemetry milestone — ATP-REALTIME-001
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-REALTIME-001 | One-second broker account synchronization, lower-latency quote presentation, account/price semantic colors, and visible feed freshness | Branch `feat/atp-realtime-001-live-telemetry-and-color-semantics`; implementation record `docs/engineering/ATP-REALTIME-001.md` | IMPLEMENTED IN SOURCE — BACKEND CI PASSED (57/57); TARGET-MAC BUILD AND DEMO PERFORMANCE VERIFICATION PENDING |
+
+- Capital.com account, positions, and working-order snapshots target a 1,000 ms cadence using authenticated REST polling; cycles remain non-overlapping.
+- Three concurrent broker snapshots plus session validation imply approximately four requests per second at steady state, below the documented general ten-requests-per-second ceiling. This is a target cadence, not a guarantee of instantaneous broker-side updates.
+- Market quote presentation batching reduced from 100 ms to 16 ms, coalescing the latest quote per instrument.
+- Account freshness is based on local snapshot receipt time: LIVE through 2.5 seconds, DELAYED through 5 seconds, then STALE. The global account strip displays age and freshness continuously.
+- Market Watch colors actual quote-to-quote price direction. Only FRESH quote prices/movement are displayed; delayed/degraded/stale/unknown quote values are withheld. Query-time volume and session/day change are not mislabeled as live stream data. Bid/Ask side is no longer confused with price direction.
+- Dashboard and global account metrics use semantic colors for Balance/Funds, Available, Equity, P&L, Margin, and Margin Level.
+- OOP boundaries remain domain-oriented: `CapitalComAccountMonitor`, `CapitalComRuntime`, `BrokerAccountStore`, `MarketDataStore`, and centralized `AtheerColors`.
+- No order placement, account mutation, RiskEngine bypass, or LIVE capability is introduced.
+
 ## Preservation and safety constraints
 
 - Preserve local files, local changes, and stashes; GitHub work does not imply local synchronization.
@@ -118,7 +133,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-ATP-UI-DASHBOARD-002 is the current active UI task on `feat/atp-dashboard-002-account-marketwatch-settings`, stacked on the Dashboard presentation branch. It integrates the existing read-only Capital.com account IPC into the Dashboard, improves Market Watch quote-side and movement presentation, adds broker market metadata fields and instrument icons, and relocates broker setup under Settings. Source and engineering record are authored; target-Mac Xcode build and real Demo data verification are pending. ATP-PERSIST-001 Stage 1 remains pending on its separate branch and is not discarded. No broker dealing or LIVE capability is introduced.
+ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-live-telemetry-and-color-semantics`, stacked on the continuous broker-account synchronization branch. It tightens account polling to a one-second target, reduces quote presentation batching to 16 ms, adds account/quote semantic colors, and makes feed freshness continuously visible. Backend CI, target-Mac Xcode build, and real Capital.com Demo latency/reconciliation remain pending. ATP-PERSIST-001 Stage 1 remains pending on its separate branch and is not discarded. No broker dealing or LIVE capability is introduced.
 
 ## Change log
 
