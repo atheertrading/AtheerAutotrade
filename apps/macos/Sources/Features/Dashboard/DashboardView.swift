@@ -144,6 +144,13 @@ struct DashboardView: View {
                     .font(.system(size: 10, design: .monospaced))
                     .foregroundColor(AtheerColors.textTertiary)
                     .textSelection(.enabled)
+
+                if let refreshError = marketDataStore.accountSnapshotError {
+                    Text("Account refresh failed; figures above are from the last successful snapshot. \(refreshError)")
+                        .font(.system(size: 10))
+                        .foregroundColor(AtheerColors.warning)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
             } else {
                 AccountMetricPanel(
                     title: "ACCOUNT DATA",
