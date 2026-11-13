@@ -110,7 +110,7 @@ struct DashboardView: View {
                     )
                     AccountMetricPanel(
                         title: "AVAILABLE",
-                        symbol: "wallet.bifold",
+                        symbol: "creditcard",
                         value: formatMoney(account.available, account: account),
                         detail: "Funds currently available for new positions"
                     )
@@ -128,7 +128,7 @@ struct DashboardView: View {
                     )
                     AccountMetricPanel(
                         title: "MARGIN",
-                        symbol: "gauge.with.dots.needle.67percent",
+                        symbol: "speedometer",
                         value: formatMoney(account.margin, account: account),
                         detail: "Broker field: balance.deposit"
                     )
