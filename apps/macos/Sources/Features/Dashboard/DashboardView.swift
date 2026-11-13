@@ -10,7 +10,7 @@ struct DashboardView: View {
         let marketDetail: String
         if streaming {
             marketStatus = "Streaming"
-            marketDetail = "(marketDataStore.quotes.count) of (marketDataStore.watchlist.count) watched instruments have broker quotes."
+            marketDetail = "\\(marketDataStore.quotes.count) of \\(marketDataStore.watchlist.count) watched instruments have broker quotes."
         } else if marketDataStore.isBrokerConnected {
             marketStatus = "Demo Connected"
             marketDetail = marketDataStore.watchlist.isEmpty
@@ -117,7 +117,7 @@ struct DashboardView: View {
 
             HStack(spacing: 8) {
                 Circle()
-                    .fill(AtheerColors.warning)
+                    .fill(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
                     .frame(width: 7, height: 7)
 
                 Text(marketDataStore.streamStatus == "connected" ? "LIVE MARKET FEED" : "SYSTEM FOUNDATION")
