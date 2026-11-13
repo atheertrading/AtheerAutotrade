@@ -2,27 +2,54 @@
 import SwiftUI
 
 struct DashboardView: View {
+    @EnvironmentObject private var marketDataStore: MarketDataStore
 
-    private let statusItems: [DashboardStatusItem] = [
-        DashboardStatusItem(
-            title: "MARKET DATA",
-            symbol: "waveform.path.ecg",
-            status: "Not configured",
-            detail: "No market data provider is connected."
-        ),
-        DashboardStatusItem(
-            title: "BROKER CONNECTION",
-            symbol: "building.2",
-            status: "Not configured",
-            detail: "No broker account is connected."
-        ),
-        DashboardStatusItem(
-            title: "AUTOMATION",
-            symbol: "slider.horizontal.3",
-            status: "Disabled",
-            detail: "Automated trading is not available in this build."
-        )
-    ]
+    private var statusItems: [DashboardStatusItem] {
+        let streaming = marketDataStore.streamStatus == "connected"
+        let marketStatus: String
+        let marketDetail: String
+        if streaming {
+            marketStatus = "Streaming"
+            marketDetail = "(marketDataStore.quotes.count) of (marketDataStore.watchlist.count) watched instruments have broker quotes."
+        } else if marketDataStore.isBrokerConnected {
+            marketStatus = "Demo Connected"
+            marketDetail = marketDataStore.watchlist.isEmpty
+                ? "Search and add instruments in Brokers to start receiving prices."
+                : "Waiting for broker quote events."
+        } else {
+            marketStatus = "Not connected"
+            marketDetail = "Connect Capital.com Demo and add instruments to Market Watch."
+        }
+
+        return [
+            DashboardStatusItem(
+                title: "MARKET DATA",
+                symbol: "waveform.path.ecg",
+                status: marketStatus,
+                detail: marketDetail,
+                statusColor: streaming ? AtheerColors.positive : AtheerColors.warning,
+                indicatorColor: streaming ? AtheerColors.positive : AtheerColors.warning
+            ),
+            DashboardStatusItem(
+                title: "BROKER CONNECTION",
+                symbol: "building.2",
+                status: marketDataStore.isBrokerConnected ? "Demo Connected" : "Not connected",
+                detail: marketDataStore.isBrokerConnected
+                    ? "Capital.com Demo session authenticated."
+                    : "Open Brokers to connect your Capital.com Demo account.",
+                statusColor: marketDataStore.isBrokerConnected ? AtheerColors.positive : AtheerColors.warning,
+                indicatorColor: marketDataStore.isBrokerConnected ? AtheerColors.positive : AtheerColors.warning
+            ),
+            DashboardStatusItem(
+                title: "AUTOMATION",
+                symbol: "slider.horizontal.3",
+                status: "Disabled",
+                detail: "Automated trading remains unavailable until Risk Engine and execution controls are implemented.",
+                statusColor: AtheerColors.warning,
+                indicatorColor: AtheerColors.warning
+            )
+        ]
+    }
 
     private let statusColumns = [
         GridItem(
@@ -49,6 +76,8 @@ struct DashboardView: View {
                             DashboardStatusCard(item: item)
                         }
                     }
+
+                    livePricesPanel
 
                     activityPanel
 
@@ -91,7 +120,7 @@ struct DashboardView: View {
                     .fill(AtheerColors.warning)
                     .frame(width: 7, height: 7)
 
-                Text("FOUNDATION BUILD")
+                Text(marketDataStore.streamStatus == "connected" ? "LIVE MARKET FEED" : "SYSTEM FOUNDATION")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .tracking(0.8)
                     .foregroundColor(AtheerColors.textSecondary)
@@ -108,6 +137,31 @@ struct DashboardView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var noticeTitle: String {
+        if marketDataStore.streamStatus == "connected" {
+            return "Capital.com market data is streaming"
+        }
+        if marketDataStore.isBrokerConnected {
+            return "Capital.com Demo session is connected"
+        }
+        return "Connect Capital.com Demo to load prices"
+    }
+
+    private var noticeDetail: String {
+        if let error = marketDataStore.streamError {
+            return error
+        }
+        if marketDataStore.streamStatus == "connected" {
+            return "Broker Bid/Ask quotes are arriving. Prices below update as new observations are received."
+        }
+        if marketDataStore.isBrokerConnected {
+            return marketDataStore.watchlist.isEmpty
+                ? "Search for instruments in Brokers and add them to Market Watch."
+                : "The session is authenticated; the quote stream is not yet confirmed."
+        }
+        return "Open Brokers, authenticate your Demo session, then add instruments to Market Watch."
+    }
+
     // MARK: - Foundation Notice
 
     private var foundationNotice: some View {
@@ -118,16 +172,14 @@ struct DashboardView: View {
                 .padding(.top, 1)
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("Trading services are not connected")
+                Text(noticeTitle)
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text(
-                    "This foundation build does not retrieve live market, broker, account, or execution data."
-                )
-                .font(.system(size: 11))
-                .foregroundColor(AtheerColors.textSecondary)
-                .fixedSize(horizontal: false, vertical: true)
+                Text(noticeDetail)
+                    .font(.system(size: 11))
+                    .foregroundColor(AtheerColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer(minLength: 0)
@@ -148,6 +200,32 @@ struct DashboardView: View {
                 style: .continuous
             )
             .stroke(AtheerColors.accent.opacity(0.16), lineWidth: 1)
+        }
+    }
+
+    // MARK: - Live Market Prices
+
+    private var livePricesPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Live Market Prices")
+                    .font(.system(size: 14, weight: .semibold))
+                    .foregroundColor(AtheerColors.textPrimary)
+                Spacer()
+                Text(marketDataStore.streamStatus.uppercased())
+                    .font(.system(size: 9, weight: .bold, design: .monospaced))
+                    .foregroundColor(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
+            }
+
+            MarketWatchTableView(compact: true)
+        }
+        .padding(18)
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .background(AtheerColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
+                .stroke(AtheerColors.border, lineWidth: 1)
         }
     }
 
@@ -217,6 +295,8 @@ private struct DashboardStatusItem: Identifiable {
     let symbol: String
     let status: String
     let detail: String
+    let statusColor: Color
+    let indicatorColor: Color
 
     var id: String { title }
 }
@@ -236,7 +316,7 @@ private struct DashboardStatusCard: View {
                 Spacer()
 
                 Circle()
-                    .fill(AtheerColors.warning)
+                    .fill(item.indicatorColor)
                     .frame(width: 6, height: 6)
                     .accessibilityHidden(true)
             }
@@ -249,7 +329,7 @@ private struct DashboardStatusCard: View {
 
                 Text(item.status)
                     .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(AtheerColors.textPrimary)
+                    .foregroundColor(item.statusColor)
 
                 Text(item.detail)
                     .font(.system(size: 10))
