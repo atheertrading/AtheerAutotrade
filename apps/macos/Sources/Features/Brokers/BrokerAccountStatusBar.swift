@@ -30,9 +30,14 @@ struct BrokerAccountStatusBar: View {
                             .foregroundColor(AtheerColors.textTertiary)
                     }
                 } else if brokerAccountStore.accountSnapshot != nil {
-                    Label("STALE · VALUES WITHHELD", systemImage: "exclamationmark.triangle")
-                        .font(.system(size: 9, weight: .bold, design: .monospaced))
-                        .foregroundColor(AtheerColors.negative)
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Label("STALE · VALUES WITHHELD", systemImage: "exclamationmark.triangle")
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(AtheerColors.negative)
+                        Text(ageLabel)
+                            .font(.system(size: 8, weight: .medium, design: .monospaced))
+                            .foregroundColor(AtheerColors.textTertiary)
+                    }
                 } else {
                     Text(brokerAccountStore.lastSyncError ?? "Waiting for the first broker account snapshot")
                         .font(.system(size: 10))
