@@ -138,10 +138,10 @@ Review and complete PR for ATP-UX-001, then build and run the macOS app on the t
 - 2026-11-13: ATP-EXEC-001 Batch 1 merged through PR #27 as `df85a423b30ce72d4106c281566cf9797031dfef`. The pure centralized pre-trade RiskEngine and freshness hardening are now on main; it remains unintegrated with OMS/Execution Gateway. Backend CI run 43358303256 for ATP-CAP-ACCOUNT-001 passed TypeScript compilation and all 46 backend tests.
 
 
-### ATP-CAP-ACCOUNT-001 — read-only broker trading-state snapshots
+### ATP-CAP-ACCOUNT-001 — merged read-only broker trading-state snapshots
 
 - Base: `main` at `df85a423b30ce72d4106c281566cf9797031dfef`, after PR #27 merged.
-- Branch: `feat/atp-cap-account-001-readonly-snapshots`.
+- Development branch: `feat/atp-cap-account-001-readonly-snapshots` (merged through PR #29).
 - Scope: typed read-only REST parsing for accounts, account preferences, open positions, and working orders; backend runtime delegation; explicit IPC allowlist; mock-based client and IPC tests.
 - Official API endpoints: `GET /api/v1/accounts`, `GET /api/v1/accounts/preferences`, `GET /api/v1/positions`, and `GET /api/v1/workingorders`.
 - Account `balance.available` is preserved as-is and is not assumed to equal RiskEngine free margin.
