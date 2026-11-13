@@ -139,7 +139,9 @@ struct DashboardView: View {
 
     private var noticeTitle: String {
         if marketDataStore.streamStatus == "connected" {
-            return "Capital.com market data is streaming"
+            return marketDataStore.quotes.isEmpty
+                ? "Capital.com subscription is active"
+                : "Capital.com market data is streaming"
         }
         if marketDataStore.isBrokerConnected {
             return "Capital.com Demo session is connected"
@@ -152,7 +154,9 @@ struct DashboardView: View {
             return error
         }
         if marketDataStore.streamStatus == "connected" {
-            return "Broker Bid/Ask quotes are arriving. Prices below update as new observations are received."
+            return marketDataStore.quotes.isEmpty
+                ? "Subscription acknowledgement received; waiting for the first broker Bid/Ask quote."
+                : "Broker Bid/Ask quotes are arriving. Prices below update as new observations are received."
         }
         if marketDataStore.isBrokerConnected {
             return marketDataStore.watchlist.isEmpty
