@@ -9,6 +9,7 @@ import type {
  * The monitor owns scheduling; CapitalComClient remains the API adapter.
  */
 export interface CapitalComAccountDataProvider {
+  ensureSession?(): Promise<void>;
   getAccounts(): Promise<CapitalComAccountsSnapshot>;
   getPositions(): Promise<CapitalComPositionsSnapshot>;
   getWorkingOrders(): Promise<CapitalComWorkingOrdersSnapshot>;
@@ -95,6 +96,24 @@ export class CapitalComAccountMonitor {
     const observedAt = new Date().toISOString();
 
     try {
+      try {
+        await this.provider.ensureSession?.();
+      } catch {
+        if (!this.stopped) {
+          this.emitFailure("accounts");
+          this.emitFailure("positions");
+          this.emitFailure("workingOrders");
+          this.emit("broker.account.sync.status", {
+            status: "degraded",
+            cycleId,
+            failedSources: 3,
+            intervalMs: this.intervalMs,
+            observedAt: new Date().toISOString()
+          });
+        }
+        return;
+      }
+
       const [accounts, positions, workingOrders] = await Promise.allSettled([
         this.provider.getAccounts(),
         this.provider.getPositions(),
