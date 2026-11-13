@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-11-13  
 **Latest observed main baseline:** `b673d639bf5440ddd52085815bf7cf2a4fd54167`  
-**Active branch:** `feat/atp-market-data-watchlist-main`
+**Active branch:** `feat/atp-new-batch-risk-engine-foundation` (new execution batch; PR #27)
 
 ## Status definitions
 
@@ -35,6 +35,8 @@
 | ATP-CAP-UI-002 | Keychain credential restoration and read-back verification | PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`; Xcode/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
 
 ## Active milestone
+
+| ATP-EXEC-001 | Automated trading execution foundation — Batch 1: centralized pre-trade Risk Engine | Pure BUY/SELL intent risk evaluation; broker quote/account freshness; stop-loss risk, gross exposure, position-count and free-margin checks | IN PROGRESS — PR #27 open; initial Node 24 CI passed; follow-up freshness hardening CI pending |
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
@@ -130,3 +132,6 @@ Run Node 24 CI for ATP-MD-WATCH-001, then build the macOS target on the target I
 - 2026-11-12: Started `security/atp-sec-ipc-001-swift-supervisor`; native Swift IPC source, XCTest source, Xcode membership, and signed bundle layout contract authored. PR #16 subsequently merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`; verification pending.
 - 2026-11-13: Added ATP-CAP-UI-001 on the same branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. Verification and PR #17 pending.
 - 2026-11-13: Added ATP-CAP-UI-001 on the same active branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. PR #17 merged ATP-CAP-UI-001; PR #18 merged ATP-CAP-UI-002. Xcode build and UI/Keychain tests remain pending.
+
+
+- 2026-11-13: Started The New Batch, ATP-EXEC-001 Batch 1, on `feat/atp-new-batch-risk-engine-foundation` from main commit `4f618e3080ed54e71b61ad94d1ad5b69deb95959`. Added the pure centralized pre-trade RiskEngine and focused tests in PR #27. Initial Backend CI run 43350570347 passed; a follow-up commit added stale account-snapshot and future-intent rejection and requires its own CI result. No broker dealing, IPC, UI, or LIVE path was added. PR #27 remains draft and unmerged.
