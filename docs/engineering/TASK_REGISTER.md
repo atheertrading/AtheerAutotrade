@@ -118,7 +118,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - Three concurrent broker snapshots plus session validation imply approximately four requests per second at steady state, below the documented general ten-requests-per-second ceiling. This is a target cadence, not a guarantee of instantaneous broker-side updates.
 - Market quote presentation batching reduced from 100 ms to 16 ms, coalescing the latest quote per instrument.
 - Account freshness is based on local snapshot receipt time: LIVE through 2.5 seconds, DELAYED through 5 seconds, then STALE. The global account strip displays age and freshness continuously.
-- Market Watch colors actual quote-to-quote price direction, while session/day net change remains a separate broker-provided measure. Bid/Ask side is no longer confused with price direction.
+- Market Watch colors actual quote-to-quote price direction. Only FRESH quote prices/movement are displayed; delayed/degraded/stale/unknown quote values are withheld. Query-time volume and session/day change are not mislabeled as live stream data. Bid/Ask side is no longer confused with price direction.
 - Dashboard and global account metrics use semantic colors for Balance/Funds, Available, Equity, P&L, Margin, and Margin Level.
 - OOP boundaries remain domain-oriented: `CapitalComAccountMonitor`, `CapitalComRuntime`, `BrokerAccountStore`, `MarketDataStore`, and centralized `AtheerColors`.
 - No order placement, account mutation, RiskEngine bypass, or LIVE capability is introduced.
