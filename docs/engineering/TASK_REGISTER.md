@@ -112,7 +112,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
-| ATP-REALTIME-001 | One-second broker account synchronization, lower-latency quote presentation, account/price semantic colors, and visible feed freshness | Branch `feat/atp-realtime-001-live-telemetry-and-color-semantics`; implementation record `docs/engineering/ATP-REALTIME-001.md` | IMPLEMENTED IN SOURCE — PENDING CI, TARGET-MAC BUILD, AND CAPITAL.COM DEMO PERFORMANCE VERIFICATION |
+| ATP-REALTIME-001 | One-second broker account synchronization, lower-latency quote presentation, account/price semantic colors, and visible feed freshness | Branch `feat/atp-realtime-001-live-telemetry-and-color-semantics`; implementation record `docs/engineering/ATP-REALTIME-001.md` | IMPLEMENTED IN SOURCE — BACKEND CI PASSED (57/57); TARGET-MAC BUILD AND DEMO PERFORMANCE VERIFICATION PENDING |
 
 - Capital.com account, positions, and working-order snapshots target a 1,000 ms cadence using authenticated REST polling; cycles remain non-overlapping.
 - Three concurrent broker snapshots plus session validation imply approximately four requests per second at steady state, below the documented general ten-requests-per-second ceiling. This is a target cadence, not a guarantee of instantaneous broker-side updates.
