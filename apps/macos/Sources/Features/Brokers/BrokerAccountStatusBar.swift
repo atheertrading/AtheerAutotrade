@@ -11,7 +11,7 @@ struct BrokerAccountStatusBar: View {
 
                 Spacer(minLength: 12)
 
-                if let account = brokerAccountStore.accountSnapshot, !brokerAccountStore.isStale {
+                if let account = brokerAccountStore.accountSnapshot, !brokerAccountStore.isDelayed {
                     metric("BALANCE / FUNDS", value: money(account.funds, account: account), tint: AtheerColors.accent)
                     metric("EQUITY", value: money(account.equity, account: account), tint: AtheerColors.info)
                     metric("AVAILABLE", value: money(account.available, account: account), tint: AtheerColors.info)
@@ -31,9 +31,9 @@ struct BrokerAccountStatusBar: View {
                     }
                 } else if brokerAccountStore.accountSnapshot != nil {
                     VStack(alignment: .trailing, spacing: 2) {
-                        Label("STALE · VALUES WITHHELD", systemImage: "exclamationmark.triangle")
+                        Label("\(brokerAccountStore.freshnessLabel) · VALUES WITHHELD", systemImage: "exclamationmark.triangle")
                             .font(.system(size: 9, weight: .bold, design: .monospaced))
-                            .foregroundColor(AtheerColors.negative)
+                            .foregroundColor(brokerAccountStore.isStale ? AtheerColors.negative : AtheerColors.warning)
                         Text(ageLabel)
                             .font(.system(size: 8, weight: .medium, design: .monospaced))
                             .foregroundColor(AtheerColors.textTertiary)
