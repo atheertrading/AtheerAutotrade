@@ -47,7 +47,7 @@ Repository records are authoritative over conversation summaries. When documents
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
 - ADR-0005 selects parent-owned anonymous stdio pipes. PR #17 merged the Capital.com screen/Keychain store and PR #18 merged Keychain load/read-back verification and credential restoration. The active branch feat/atp-capitalcom-operational-connection adds protocol v2 encrypted one-shot credential transfer, read-only Demo session methods, market search/history, WebSocket quote/OHLC event delivery to the macOS UI, Connect/Disconnect/stream controls, application-termination child shutdown, and an Xcode runtime packaging phase. These new changes are source-only pending CI, target-Mac build, crypto interoperability, packaged launch, and real Demo verification.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
-- Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
+- A first quote-normalization component is now present on the stacked Market Watch branch, but no real Demo quote is verified. Full Market Data ordering/deduplication, gap detection, OHLC integrity, persistence/audit, and recovery remain incomplete. Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
 
 ## 5. Architecture baseline accepted in ADR-0004
@@ -147,3 +147,42 @@ Verification:
 ### Local repository preservation
 
 All work in this handoff was performed through GitHub. No local filesystem, Xcode build, or local Git working copy was accessed. Preserve all user local changes and stashes.
+
+
+### ATP-MD-WATCH-001 — stacked branch / pull request pending
+
+Current branch: `feat/atp-market-data-watchlist`  
+Base branch: `feat/atp-capitalcom-operational-connection` (PR #19 remains a separate draft and must not be merged implicitly)
+
+Implemented in source:
+- Shared `MarketDataStore` receives IPC market-data events at the application root rather than only while the Brokers screen is visible.
+- Market Watch instruments persist locally; Capital.com subscriptions support multiple selected epics, bounded by the broker adapter's 40-instrument limit.
+- Markets destination and the Trading Workspace Market Watch panel display Bid, Ask, derived Mid/Spread, quote age, and freshness state.
+- Broker market search adds instruments to the watchlist; stream lifecycle is no longer stopped simply because the user navigates away from Brokers.
+- Backend quote normalization validates positive, ordered Bid/Ask values, retains broker and local receipt timestamps, derives Mid/Spread, and classifies age as FRESH (0–5s), DELAYED (>5–10s), DEGRADED (>10–15s), STALE (>15s), or UNKNOWN for future-dated observations.
+- Added Node tests for quote normalization, integrity checks, and freshness boundaries.
+
+Not verified:
+- Node 24 CI for this branch has not yet run.
+- Xcode 14.3.1 / Swift 5.8.1 compilation and target-Mac runtime are not verified.
+- No actual Capital.com Demo WebSocket subscription acknowledgement or sustained quote has been observed.
+- The current normalizer is not the complete Market Data Engine: ordering, deduplication, gap detection, OHLC integrity, persistence, and recovery remain outstanding.
+
+### Design, controls, and clipboard review
+
+- The supplied Q&A design specification identifies IPDS v1.0 as the approved baseline: dark-first, institutional/information-dense, SF Pro/SF Mono, centralized tokens, controlled semantic colors, clear button hierarchy and immediate feedback, explicit trade confirmation, keyboard navigation, visible focus, accessible labels, and non-color-only status communication.
+- The two uploaded ZIP archives contain textual design/architecture specifications but no bundled PNG, JPEG, SVG, Figma, Sketch, or other standalone mockup/image assets.
+- GitHub integration currently exposes `atheertrading/AtheerAutotrade`; attempting to read `atheertrading/atheer-trading-knowledge-base` returned 404. The referenced independent style-guide repository therefore remains unreviewed, not assumed absent.
+- Existing SwiftUI source uses locally styled `.plain` buttons and a static environment selector; no shared button/toggle component library or explicit jumper component was found. The accessible design documents specify button hierarchy and feedback but do not provide a distinct toggle/jumper component contract.
+- No app-wide text-selection or clipboard command implementation was found in the accessible source. Track ATP-UX-CLIPBOARD-001 separately: enable selectable static text from the application root and preserve native copy/paste in editable controls, without per-label patches.
+- Current source color values are not fully aligned with the approved IPDS palette. This visual-system correction is deferred while price visibility is prioritized; do not introduce new local colors or control styles in the Market Watch work.
+
+### Next acceptance sequence
+
+1. Run Node 24 CI for ATP-MD-WATCH-001 and fix all build/test failures.
+2. Build the macOS target on the target Intel Mac using Xcode 14.3.1 / Swift 5.8.1; verify Xcode project membership and app startup.
+3. Verify encrypted IPC interoperability and packaged backend launch.
+4. Authenticate with the user's Capital.com Demo account and verify multiple instrument subscriptions, Bid/Ask events, timestamps, freshness labels, and persistence after navigating between screens.
+5. Implement the full Market Data Engine and read-only account/position reconciliation.
+6. Implement Risk Engine, OMS, and Execution Gateway before enabling Demo order submission. LIVE must remain disabled until all required controls, reconciliation, authorization, and explicit approval are satisfied.
+7. Implement ATP-UX-CLIPBOARD-001 as a separate application-wide UI milestone; review the independent style-guide repository once GitHub access is available.
