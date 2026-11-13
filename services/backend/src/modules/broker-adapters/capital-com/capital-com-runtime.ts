@@ -14,6 +14,10 @@ import {
   createCapitalComMarketDataStream,
   type CapitalComStreamOptions
 } from "./capital-com-market-data-stream.js";
+import {
+  CapitalComAccountMonitor,
+  type CapitalComAccountMonitorEmitter
+} from "./capital-com-account-monitor.js";
 
 function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
@@ -26,6 +30,7 @@ export class CapitalComRuntime {
   private connectedAt: string | undefined;
   private marketDataStream: ReturnType<typeof createCapitalComMarketDataStream> | undefined;
   private marketDataEpics: readonly string[] = [];
+  private accountMonitor: CapitalComAccountMonitor | undefined;
 
   setCredentials(value: unknown): void {
     if (!isObject(value)
@@ -60,7 +65,15 @@ export class CapitalComRuntime {
       connected: true,
       environment,
       authenticatedAt: this.connectedAt,
-      capabilities: ["broker.session", "broker.marketSearch", "broker.historicalPrices", "broker.marketDataStream"]
+      capabilities: [
+        "broker.session",
+        "broker.marketSearch",
+        "broker.historicalPrices",
+        "broker.marketDataStream",
+        "broker.accountSnapshots",
+        "broker.positionsSnapshots",
+        "broker.workingOrderSnapshots"
+      ]
     });
   }
 
@@ -110,6 +123,19 @@ export class CapitalComRuntime {
     this.marketDataEpics = [];
   }
 
+  startAccountMonitor(emit: CapitalComAccountMonitorEmitter): void {
+    if (this.accountMonitor) return;
+    const client = this.requireClient();
+    const monitor = new CapitalComAccountMonitor(client, emit, { intervalMs: 3_000 });
+    this.accountMonitor = monitor;
+    monitor.start();
+  }
+
+  stopAccountMonitor(): void {
+    this.accountMonitor?.stop();
+    this.accountMonitor = undefined;
+  }
+
   async searchMarkets(searchTerm: string): Promise<CapitalComMarketSearchResult> {
     return this.requireClient().searchMarkets(searchTerm);
   }
@@ -131,6 +157,7 @@ export class CapitalComRuntime {
   async getWorkingOrders(): Promise<CapitalComWorkingOrdersSnapshot> { return this.requireClient().getWorkingOrders(); }
 
   disconnect(): void {
+    this.stopAccountMonitor();
     this.stopMarketDataStream();
     this.client?.invalidateSession();
     this.client = undefined;
