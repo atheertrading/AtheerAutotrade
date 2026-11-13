@@ -36,14 +36,14 @@ Capital.com currently documents WebSocket streaming for market quotes and OHLC, 
   - **LIVE:** snapshot received within 2.5 seconds.
   - **DELAYED:** older than 2.5 seconds but no older than 5 seconds.
   - **STALE:** no successful account snapshot received for more than 5 seconds.
-- Stale financial values are withheld from the Dashboard and persistent account strip; the last-known snapshot remains in the shared store for diagnostics/reconciliation but is never presented as current. Delayed values remain visible only with an amber DELAYED/DEGRADED state. Disconnect/backend loss clears account, position, and working-order state.
+- Delayed, degraded, and stale account values are withheld from the live Dashboard and persistent account strip; the last-known snapshot remains in the shared store for diagnostics/reconciliation but is never presented as current. Feed state and age remain visible. Disconnect/backend loss clears account, position, and working-order state.
 - The global account strip refreshes its age/freshness display every second, even when no new snapshot arrives.
 
 ## Implemented market-data responsiveness
 
 - Quote batching/coalescing window is reduced from 100 ms to 16 ms (approximately one 60 Hz display frame).
 - The newest quote per instrument is retained during each batch to prevent a burst of updates from flooding the main UI queue.
-- Quote freshness thresholds remain aligned with the existing market-data/RiskEngine policy: up to 5 seconds (fresh), 5–10 seconds (delayed), 10–15 seconds (degraded), and beyond 15 seconds (stale).
+- Quote freshness thresholds remain aligned with the existing market-data/RiskEngine policy: up to 5 seconds (fresh), 5–10 seconds (delayed), 10–15 seconds (degraded), and beyond 15 seconds (stale). Only FRESH quote values are shown in executable-price cells; delayed, degraded, stale, and unknown quote prices/movement values are withheld. Volume is shown as unavailable until a live stream field is available; query-time volume is not presented as current.
 - Market Watch applies a short 120 ms presentation transition when the mid-price changes.
 
 ## Semantic color system
@@ -97,8 +97,8 @@ Balance and Funds remain one displayed metric because Capital.com's `balance.bal
 4. External Demo account activity updates Balance/Funds, Available, Equity, P&L, Margin, positions, and working orders without requiring Dashboard navigation or manual refresh.
 5. Market quote updates render with no additional 100 ms application debounce; target batching is 16 ms. Quote freshness classification remains aligned with RiskEngine thresholds.
 6. Positive, negative, neutral, informational, warning, delayed, and stale states are visually distinguishable.
-7. When account data stops arriving, the status bar changes to DELAYED/DEGRADED/STALE within the defined thresholds, stale values are withheld, and the last value is never labeled LIVE.
-8. When market quotes become stale, the quote freshness state is visible and no consumer may treat the stale quote as current.
+7. When account data stops arriving, the status bar changes to DELAYED/DEGRADED/STALE within the defined thresholds, delayed/degraded/stale values are withheld, and the last value is never labeled LIVE.
+8. When market quotes become delayed, degraded, stale, or unknown, price/movement cells are withheld, freshness state remains visible, and no consumer may treat the quote as current.
 9. All account consumers use the same shared `BrokerAccountStore`; no duplicate per-screen polling is introduced.
 10. No order placement, account mutation, RiskEngine bypass, or LIVE capability is introduced.
 
