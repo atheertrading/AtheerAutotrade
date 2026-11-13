@@ -95,7 +95,7 @@ struct DashboardView: View {
             LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
                 AccountMetricPanel(
                     title: "BALANCE",
-                    symbol: "wallet.bifold",
+                    symbol: "creditcard",
                     value: "—",
                     detail: "Account snapshot is not connected to the dashboard."
                 )
@@ -107,13 +107,13 @@ struct DashboardView: View {
                 )
                 AccountMetricPanel(
                     title: "AVAILABLE MARGIN",
-                    symbol: "gauge.with.dots.needle.50percent",
+                    symbol: "speedometer",
                     value: "—",
                     detail: "Margin values will appear when account data is exposed."
                 )
                 AccountMetricPanel(
                     title: "OPEN EXPOSURE",
-                    symbol: "scale.3d",
+                    symbol: "arrow.left.and.right",
                     value: "—",
                     detail: "Position and exposure aggregation is not connected."
                 )
