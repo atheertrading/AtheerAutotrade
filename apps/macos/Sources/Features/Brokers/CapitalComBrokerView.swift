@@ -479,10 +479,8 @@ struct CapitalComBrokerView: View {
             )
             readinessRow(
                 title: "Encrypted local credential handoff",
-                detail: isConnected
-                    ? "Verified by the authenticated Capital.com Demo session"
-                    : "X25519 key agreement and AES-256-GCM credential transfer are implemented",
-                complete: isConnected
+                detail: "Implemented with ephemeral X25519 key agreement and AES-256-GCM credential transfer",
+                complete: true
             )
             readinessRow(
                 title: "Capital.com Demo API session",
