@@ -45,9 +45,9 @@ struct MarketQuoteSnapshot: Identifiable {
     var currentQuality: String {
         let age = ageMilliseconds
         guard age >= 0 else { return "UNKNOWN" }
-        if age <= 5_000 { return "FRESH" }
-        if age <= 10_000 { return "DELAYED" }
-        if age <= 15_000 { return "DEGRADED" }
+        if age <= 2_500 { return "FRESH" }
+        if age <= 5_000 { return "DELAYED" }
+        if age <= 10_000 { return "DEGRADED" }
         return "STALE"
     }
 
@@ -75,8 +75,8 @@ final class MarketDataStore: ObservableObject {
     private var isObserving = false
     private var isStartingStream = false
 
-    // Market Watch is a presentation consumer: retain the newest quote per epic
-    // and publish batches at a bounded rate instead of flooding the main queue.
+    // Keep only the newest quote per epic and publish on approximately one
+    // display-frame cadence. The former 100 ms debounce added visible lag.
     private let quoteBufferLock = NSLock()
     private var pendingQuotePayloads: [String: [String: Any]] = [:]
     private var quoteFlushScheduled = false
@@ -118,7 +118,7 @@ final class MarketDataStore: ObservableObject {
     }
 
     func removeInstrument(epic: String) {
-        watchlist.removeAll { $0.epic == epic }
+        watchlist.removeAll { $0.epic != epic }
         quotes.removeValue(forKey: epic)
         persistWatchlist()
 
@@ -171,7 +171,6 @@ final class MarketDataStore: ObservableObject {
                     self.streamStatus = "error"
                     self.streamError = error.localizedDescription
                 } else if self.watchlist.map(\.epic) != epics {
-                    // A watchlist edit arrived while the prior subscription was starting.
                     self.restartStream()
                 }
             }
@@ -191,7 +190,7 @@ final class MarketDataStore: ObservableObject {
 
         guard shouldScheduleFlush else { return }
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(16)) { [weak self] in
             self?.flushPendingQuotes()
         }
     }
