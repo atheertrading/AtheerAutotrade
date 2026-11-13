@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #18 merge: `675ea4af4d54610539218858e3d2f99c4c9a1985`.
+- Latest observed `main` baseline after PR #17 merge: `9297f28fd2079dc5801cd89baf2b4723ed625a75`.
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -42,10 +42,10 @@ Repository records are authoritative over conversation summaries. When documents
 ## 4. Current implementation baseline
 
 - Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
-- On main, backend exposes diagnostic HTTP mode and production stdio IPC v1 (PR #15). Native Swift IPC client/supervisor source and Xcode project membership were merged via PR #16; target-Mac build/runtime verification remains pending.
+- On main, backend exposes diagnostic HTTP mode and a production stdio IPC startup mode with handshake/ping only (PR #15). Native Swift IPC client/supervisor source and Xcode project membership were merged via PR #16; they have not been compiled or runtime-tested.
 - Provider-neutral Trading Domain Instrument model is merged.
 - Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- ADR-0005 selects parent-owned anonymous stdio pipes. PR #17 merged the Capital.com screen/Keychain store and PR #18 merged Keychain load/read-back verification and credential restoration. The active branch feat/atp-capitalcom-operational-connection adds protocol v2 encrypted one-shot credential transfer, read-only Demo session methods, market search/history, WebSocket quote/OHLC event delivery to the macOS UI, Connect/Disconnect/stream controls, application-termination child shutdown, and an Xcode runtime packaging phase. These new changes are source-only pending CI, target-Mac build, crypto interoperability, packaged launch, and real Demo verification.
+- ADR-0005 selects parent-owned anonymous stdio pipes; backend stdio mode and native Swift client/supervisor source are merged through PR #16 but not yet build/runtime-verified. PR #17 merged `CapitalComCredentialStore.swift` and `CapitalComBrokerView.swift`, with navigation through **Broker Connections → Brokers**. PR #18 contains the Keychain read-back/save verification and view restoration correction; it remains draft and unmerged. The Connect action remains disabled until signed runtime packaging and one-shot credential handoff are verified.
 - No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
 - Market Data quality/freshness lifecycle, persistence/audit, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
 - No live order path is implemented or authorized.
@@ -56,7 +56,7 @@ Repository records are authoritative over conversation summaries. When documents
 - Backend remains a Node.js/TypeScript modular monolith with explicit module ownership and typed boundaries.
 - Backend owns broker lifecycle, market-data ingestion, domain orchestration, persistence, Risk, OMS, execution, and reconciliation.
 - Capital.com is the primary broker target; initial broker integration remains read-only.
-- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; protocol v2 transfers credentials only as AES-256-GCM ciphertext over the per-session X25519/HKDF channel.
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; credential transfer is deferred pending a dedicated contract.
 - The Execution Gateway is the only dealing path. It accepts dispatch only from OMS with a Risk decision bound to the exact immutable intent.
 - Every exposure-increasing intent passes through centralized Risk Engine.
 - Broker-confirmed account and execution state is authoritative. Unknown submission outcomes require reconciliation; never blind retry.
@@ -101,48 +101,42 @@ Reassess the toolchain only when the development environment changes or a task r
 
 ## 9. Latest handoff — 2026-11-13
 
-### Merged baseline
+### ATP-ARCH-REBASE-001 — DONE / MERGED
 
-- PR #14 merged ADR-0004 product identity and modular-monolith architecture as 9445a749d78c63030e9125041a6103dca0eabafc.
-- PR #15 merged backend stdio IPC foundation as 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
-- PR #16 merged native Swift IPC protocol/supervisor source as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
-- PR #17 merged the Capital.com broker screen and Keychain store as 9297f28fd2079dc5801cd89baf2b4723ed625a75.
-- PR #18 merged Keychain load/read-back verification and saved-field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
-- Current observed main baseline: 675ea4af4d54610539218858e3d2f99c4c9a1985.
+PR #14 was merged into `main` as squash commit `9445a749d78c63030e9125041a6103dca0eabafc`. ADR-0004 establishes ATHEER Trading Pro as product identity and the modular-monolith architecture baseline.
 
-### ATP-CAP-SESSION-001 — current branch / PR #19
+### ATP-SEC-IPC-001 — IN PROGRESS
 
-Current branch: feat/atp-capitalcom-operational-connection  
-Draft PR: https://github.com/atheertrading/AtheerAutotrade/pull/19
+PR #15 merged backend stdio protocol and startup mode as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`. PR #16 merged native Swift IPC protocol/supervisor source as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 
-The branch extends the merged work; it does not recreate the app or replace the existing adapter.
+PR #17 (`feat(macOS): add Capital.com broker screen and Keychain credentials`) was merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`. Current correction branch: `fix/atp-cap-credentials-restore`, with draft PR #18 (`fix(macOS): restore and verify Capital.com Keychain credentials`).
 
-Implemented in source:
-- IPC protocol v2 with per-child ephemeral X25519/HKDF-SHA256/AES-256-GCM encrypted credential transfer and one-shot credential submission.
-- CapitalComRuntime for Demo REST session creation, authenticated ping, status, market search, historical prices, and WebSocket stream lifecycle.
-- WebSocket quote/OHLC event frames from backend to native Swift UI, including subscription state and bounded frame validation.
-- SwiftUI Connect/Disconnect, authenticated market discovery, live quote/one-minute OHLC view, two-column broker workspace, and app-termination child shutdown.
-- Xcode build phase and packaging script for a bundled universal Node.js 24 runtime, ESM package metadata, and compiled backend. A minimal V8 JIT entitlement is applied to the Node helper when code signing is enabled.
-- Updated security, protocol, bundle, ADR, implementation-status, and task-register documentation.
+Batch 1 authored:
+- `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe transport for desktop process IPC, with threat model and alternatives.
+- `docs/security/LOCAL_IPC_PROTOCOL.md` — versioned NDJSON contract, strict envelope, handshake, limits, method allowlist, and safe errors.
+- `services/backend/src/api/stdio-ipc.ts` — protocol handler for handshake and ping only; bounded frames, UUIDs, duplicate detection, request limits, and method allowlist.
+- `services/backend/tests/stdio-ipc.test.mjs` — focused protocol tests authored but not executed.
+- Updated security baseline, system overview, architecture diagrams, backend README, ADR index, task register, and implementation status.
 
-Verification:
-- GitHub Actions Backend CI run 43332767979 passed on Node.js 24.22.2: TypeScript build succeeded and 31/31 tests passed.
-- The Node tests cover IPC framing, handshake, one-shot encrypted credential submission, AES-GCM authentication-tag rejection, and the existing backend tests.
-- CryptoKit-to-Node cross-language interoperability has not been tested.
-- Xcode 14.3.1 / Swift 5.8.1 build, app-bundle packaging, nested signing/entitlement verification, packaged child-process launch, and real Capital.com Demo authentication remain pending.
-- Actual WebSocket subscription acknowledgements and sustained quote/OHLC delivery remain unverified.
-- Account/position reconciliation, Risk Engine, OMS, Execution Gateway, order/dealing, and LIVE remain absent.
+Batch 1–2 backend work is merged. The stdio handler is wired into `server.ts` through explicit `--transport=stdio` mode; default HTTP mode remains for development diagnostics only. A child-process integration test was authored, but the merged backend build/test result is not confirmed in this work session.
 
-### Next acceptance sequence
+Batch 3 authored and merged via PR #16:
+- `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict request/response envelope handling and bounded NDJSON framing.
+- `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — fixed-path child launch, stdio pipes, handshake, request IDs/timeouts, stderr drain, and termination handling.
+- `apps/macos/Tests/LocalIPCProtocolTests.swift` — focused XCTest source.
+- Xcode project membership for the two production Swift files and the test file.
+- `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — fixed bundle paths and signing/packaging gates.
 
-1. Build the macOS target on the actual Intel Mac using Xcode 14.3.1 / Swift 5.8.1.
-2. Verify the Xcode backend packaging phase, universal Node runtime, ESM entry point, JIT entitlement, nested signature, and outer app signature.
-3. Verify CryptoKit/Node X25519-HKDF-AES-GCM interoperability, invalid-tag rejection, and one-shot handoff.
-4. Launch the packaged child and verify protocol v2, app shutdown, process restart, and UI state.
-5. Authenticate against the user's Capital.com Demo account; verify ping, market search, historical prices, WebSocket subscription acknowledgements, and sustained quote/OHLC delivery. Credentials must remain on the user's Mac and must not be shared in ChatGPT.
-6. Implement market-data freshness, stale-state, gap detection, and recovery.
-7. Implement read-only account/position snapshots and reconciliation only after confirming official API contracts.
-8. Keep all order/dealing/LIVE capabilities disabled until Risk Engine, OMS, Execution Gateway, authorization, audit, and reconciliation gates are implemented and verified.
+PR #16 is merged, but Xcode build/test, backend build/test, runtime package, or child process execution has not been performed for that IPC implementation. PR #17 merged ATP-CAP-UI-001: a native Keychain credential store and Capital.com broker screen with DEMO-only credential entry, save/remove controls, a disabled Connect action, and readiness states. PR #18 corrects credential persistence by adding Keychain load/read-back verification and restoring saved fields on screen appearance. No secret transfer to Backend, broker authentication, account method, or order/execution method is enabled.
+
+### Next batch
+
+1. Compile and test the native Swift IPC source and XCTest target on the user's actual Mac.
+2. Run the merged backend Node 24 build/tests in a supported environment.
+3. Add packaging copy phases for a pinned Node runtime and compiled backend output.
+4. Verify nested code signatures, hardened-runtime behavior, process launch, timeout, child crash, and explicit restart.
+5. Connect the supervisor to application lifecycle and expose process readiness.
+6. Build and test PR #18's Capital.com screen/Keychain persistence correction on the target Mac; then design one-shot Keychain credential transfer before enabling connection or broker session methods.
 
 ### Local repository preservation
 

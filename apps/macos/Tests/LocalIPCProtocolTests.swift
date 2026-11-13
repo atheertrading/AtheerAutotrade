@@ -6,10 +6,7 @@ final class LocalIPCProtocolTests: XCTestCase {
         let frame = try LocalIPCProtocol.request(
             id: "f2b66c1b-8c25-4c35-ae80-b0d59d7a9133",
             method: "system.hello",
-            payload: [
-                "clientVersion": LocalIPCProtocol.clientVersion,
-                "clientPublicKey": Data(repeating: 0, count: 32).base64EncodedString()
-            ]
+            payload: ["clientVersion": LocalIPCProtocol.clientVersion]
         )
 
         XCTAssertEqual(frame.last, 0x0A)
@@ -44,19 +41,9 @@ final class LocalIPCProtocolTests: XCTestCase {
         XCTAssertThrowsError(try decoder.append(oversized))
     }
 
-    func testEventParserAcceptsVersionedMarketDataEvents() throws {
-        let frame = Data(
-            "{\\"protocol\\":\\"atheer.local-ipc\\",\\"version\\":2,\\"kind\\":\\"event\\",\\"event\\":\\"broker.marketData.status\\",\\"payload\\":{\\"status\\":\\"connected\\"}}".utf8
-        )
-
-        let event = try LocalIPCProtocol.event(from: frame)
-        XCTAssertEqual(event.name, "broker.marketData.status")
-        XCTAssertEqual(event.payload["status"] as? String, "connected")
-    }
-
     func testResponseRejectsProtocolVersionMismatch() {
         let frame = Data(
-            "{\"protocol\":\"atheer.local-ipc\",\"version\":1,\"kind\":\"response\",\"id\":\"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133\",\"ok\":true,\"result\":{}}".utf8
+            "{\"protocol\":\"atheer.local-ipc\",\"version\":2,\"kind\":\"response\",\"id\":\"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133\",\"ok\":true,\"result\":{}}".utf8
         )
 
         XCTAssertThrowsError(try LocalIPCProtocol.response(from: frame))

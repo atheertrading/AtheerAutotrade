@@ -2,7 +2,7 @@ import Foundation
 
 enum LocalIPCProtocol {
     static let identifier = "atheer.local-ipc"
-    static let version = 2
+    static let version = 1
     static let maximumFrameBytes = 65_536
     static let clientVersion = "0.1.0"
 
@@ -31,35 +31,6 @@ enum LocalIPCProtocol {
 
         frame.append(0x0A)
         return frame
-    }
-
-    static func event(from frame: Data) throws -> LocalIPCEvent {
-        let object: Any
-        do {
-            object = try JSONSerialization.jsonObject(with: frame)
-        } catch {
-            throw LocalIPCError.invalidJSON
-        }
-
-        guard
-            let envelope = object as? [String: Any],
-            Set(envelope.keys) == Set(["protocol", "version", "kind", "event", "payload"]),
-            envelope["protocol"] as? String == identifier,
-            envelope["version"] as? Int == version,
-            envelope["kind"] as? String == "event",
-            let name = envelope["event"] as? String,
-            Set([
-                "broker.marketData.status",
-                "broker.marketData.quote",
-                "broker.marketData.ohlc",
-                "broker.marketData.error"
-            ]).contains(name),
-            let payload = envelope["payload"] as? [String: Any]
-        else {
-            throw LocalIPCError.invalidResponse
-        }
-
-        return LocalIPCEvent(name: name, payload: payload)
     }
 
     static func response(from frame: Data) throws -> LocalIPCResponse {
@@ -114,11 +85,6 @@ enum LocalIPCProtocol {
     }
 }
 
-struct LocalIPCEvent {
-    let name: String
-    let payload: [String: Any]
-}
-
 struct LocalIPCResponse {
     let id: String
     let result: [String: Any]?
@@ -136,7 +102,6 @@ enum LocalIPCError: LocalizedError {
     case processLaunchFailed(String)
     case processNotReady
     case processTerminated
-    case credentialsNotFound
     case requestTimedOut
     case frameTooLarge
     case invalidFrame
@@ -157,8 +122,6 @@ enum LocalIPCError: LocalizedError {
             return "The local backend has not completed its IPC handshake."
         case .processTerminated:
             return "The local backend process terminated."
-        case .credentialsNotFound:
-            return "No saved Capital.com credentials were found in macOS Keychain."
         case .requestTimedOut:
             return "The local backend request timed out."
         case .frameTooLarge:

@@ -1,8 +1,8 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `675ea4af4d54610539218858e3d2f99c4c9a1985`  
-**Active branch:** `feat/atp-capitalcom-operational-connection`
+**Latest observed main baseline:** `9297f28fd2079dc5801cd89baf2b4723ed625a75`  
+**Active branch:** `fix/atp-cap-credentials-restore`
 
 ## Status definitions
 
@@ -32,61 +32,83 @@
 | ATP-ARCH-REBASE-001 | Establish ATHEER Trading Pro product identity and modular-monolith architecture baseline | ADR-0004 and aligned architecture/security/engineering docs; PR #14 squash-merged as `9445a749d78c63030e9125041a6103dca0eabafc` | DONE — MERGED; no runtime build required |
 | ATP-SEC-IPC-001-B1B2 | Backend stdio protocol and production transport mode | PR #15 merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`; backend build/tests remain unverified | DONE — MERGED; PENDING VERIFICATION |
 | ATP-CAP-UI-001 | Capital.com broker screen and Keychain credential entry | PR #17 merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`; Xcode/UI/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
-| ATP-CAP-UI-002 | Keychain credential restoration and read-back verification | PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`; Xcode/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
 
 ## Active milestone
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-CAP-SESSION-001 | Operational Capital.com Demo session over encrypted local IPC | Ephemeral X25519/HKDF/AES-256-GCM credential transfer, backend session lifecycle, authenticated ping, status, market search, historical prices, WebSocket quote/OHLC event IPC, Xcode runtime packaging, functional UI | IN PROGRESS — Node 24 CI passed (31/31); Xcode/crypto interoperability/packaged runtime/real Demo verification pending |
+| ATP-SEC-IPC-001 | Secure local application/backend boundary and credential-provider design | Select transport, define threat model and protocol, implement bounded backend stdio protocol, then integrate native app process/client and Keychain ownership | IN PROGRESS — native Swift IPC source merged; compile/runtime verification and packaging pending |
+| ATP-CAP-UI-002 | Restore and verify Capital.com Keychain credentials | Add Keychain load/read-back verification and restore saved values in the broker view | IN PROGRESS — draft PR #18; Xcode/Keychain verification pending |
 
-Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5.
+Merged backend foundation: PR #15, commit `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
 
-Native Swift IPC supervisor: PR #16, merged as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
+Native Swift IPC supervisor: PR #16, merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`.
 
-Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged into main. Current branch extends that baseline; it does not recreate those milestones.
+Current implementation branch: `fix/atp-cap-credentials-restore` (ATP-CAP-UI-002 correction only). PR #17 merged the original Capital.com UI into main.
 
-### Existing merged IPC baseline
+### Batch 1 changes on active branch
 
-- Backend stdio transport and protocol framing are merged through PR #15.
-- Native Swift child-process supervisor and protocol codec are merged through PR #16.
-- Protocol v2 on the active branch adds per-child ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM encrypted credential transfer, and one-shot credential submission.
-- The backend exposes only read-only Demo session connect/disconnect/status, market search, historical-price, and quote/OHLC stream start/stop methods.
-- No account mutation, order, dealing, execution, or LIVE method is exposed.
+- `docs/decisions/ADR-0005-SECURE-MACOS-IPC.md` — accepted parent-owned anonymous standard-I/O pipe design and threat model.
+- `docs/security/LOCAL_IPC_PROTOCOL.md` — versioned NDJSON protocol contract.
+- `services/backend/src/api/stdio-ipc.ts` — bounded protocol handler with handshake, ping, strict envelope validation, UUID and duplicate checks, 65,536-byte frame cap, 4,096-request session limit, allowlist, and safe errors.
+- `services/backend/tests/stdio-ipc.test.mjs` — focused framing, handshake, duplicate, payload, malformed-frame, version, size, and child-process startup tests.
+- Updated security baseline, architecture overview/diagrams, decision index, backend README, and implementation status.
 
-### ATP-CAP-UI-001 / ATP-CAP-UI-002 — merged baseline
+### Explicitly not implemented in Batch 1
 
-- Capital.com broker screen and Keychain credential storage were merged in PR #17.
-- Keychain load/read-back verification and restoration of saved fields were merged in PR #18.
-- Both remain pending target-Mac Xcode and Keychain runtime verification.
+- The stdio protocol handler is wired into `server.ts` through explicit `--transport=stdio` mode; HTTP remains the default development/diagnostic mode.
+- No Swift `Process` launcher, pipe client, or Xcode project integration exists.
+- No bundled Node.js runtime or signed backend packaging exists.
+- No Keychain provider or credential-transfer method exists.
+- No broker, account, risk, order, or execution method is exposed.
+- A child-process integration test exercises the stdio startup path; no build or test result has been observed for the new IPC code yet.
 
-### ATP-CAP-SESSION-001 — active implementation
+### Batch 3 — native Swift IPC client (source authored; verification pending)
 
-- services/backend/src/security/ipc-secret-channel.ts — ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM decryption, and in-memory key handling.
-- services/backend/src/modules/broker-adapters/capital-com/capital-com-runtime.ts — in-memory credentials, Demo session creation, authenticated ping, status, market search, historical prices, and disconnect.
-- services/backend/src/api/stdio-ipc.ts — protocol v2 handshake, one-shot encrypted credentials.submit, and read-only broker method allowlist.
-- apps/macos/Sources/Core/Backend/IPCSecretChannel.swift — CryptoKit X25519/HKDF/AES-GCM credential encryption.
-- apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift — Keychain load, encrypted one-shot transfer, Demo connect/disconnect, status, market search/history, WebSocket event consumption, and app-termination child shutdown.
-- apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift — active Connect/Disconnect state, authenticated market search, and layered data-protection explanation.
-- apps/macos/Scripts/package-backend.sh and Xcode project build phase — Node.js 24 universal runtime and compiled backend packaging into fixed app-bundle paths.
-- Added backend Node 24 CI workflow and Node-side encrypted-envelope authentication/one-shot transfer test source; CryptoKit-to-Node interoperability remains pending.
-- Node 24 CI run 43332767979 passed TypeScript compilation and 31/31 backend tests. Xcode, CryptoKit/Node interoperability, packaged runtime, and real Capital.com Demo results remain pending.
+- `apps/macos/Sources/Core/Backend/LocalIPCProtocol.swift` — strict NDJSON request encoder, response-envelope validation, and incremental bounded frame decoder.
+- `apps/macos/Sources/Core/Backend/BackendProcessSupervisor.swift` — child-process launch from a fixed app-bundle path, anonymous stdio pipes, handshake/capability validation, request correlation, timeout handling, stdout parsing, stderr draining, and termination handling.
+- `apps/macos/Tests/LocalIPCProtocolTests.swift` — framing, envelope, size-limit, and protocol-version tests authored.
+- `apps/macos/AtheerAutotrade.xcodeproj/project.pbxproj` — both source files and the XCTest file registered in their targets.
+- `docs/security/MACOS_BACKEND_BUNDLE_LAYOUT.md` — expected signed runtime/backend layout and packaging gates.
+- No Xcode build/test, Node build/test, runtime packaging, or child-process execution has been performed for this batch. The Capital.com screen and local Keychain store were added later and merged via PR #17; Keychain-to-backend credential handoff remains unimplemented.
 
-### Remaining scope and safety boundaries
+### ATP-CAP-UI-001 — Capital.com broker screen (merged in PR #17; verification pending)
 
-- WebSocket quote/OHLC adapter is wired through IPC v2 event frames and the macOS UI; actual quote/OHLC delivery and sustained stream behavior remain unverified.
-- Market-data freshness, stale-state, gap detection, and recovery remain unimplemented.
-- Broker account/position snapshots and reconciliation remain unimplemented.
-- LIVE, order, dealing, and execution methods remain absent. All future exposure-increasing intents must pass through centralized Risk Engine and OMS authorization.
+- `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — Capital.com screen with broker status, DEMO environment, LIVE lock state, API key/identifier/password fields, save/remove controls, restoration of saved credentials on appearance, retention of values after Save, connection readiness, and disabled Connect control until IPC credential handoff is verified.
+- `apps/macos/Sources/Core/Security/CapitalComCredentialStore.swift` — stores the three credentials as one Keychain generic-password item; supports typed `load()`, the native macOS Keychain accessibility policy, and read-back verification after both insert and update; does not persist secrets in preferences or files.
+- `WorkspaceSection.swift`, `SidebarView.swift`, and `ApplicationShellView.swift` — expose the screen in the application sidebar under **BROKER CONNECTIONS → Brokers**.
+- `project.pbxproj` — registers both Swift files and their groups in the app target.
+- The UI baseline is merged into `main` via PR #17. It has not been built or run on the target Mac in this verification cycle. Credential transfer and actual broker authentication remain disabled.
 
-## Planned implementation sequence after the initial broker session
+### ATP-SEC-IPC-001 acceptance criteria
+
+1. Production desktop mode uses parent-owned anonymous stdio pipes and opens no TCP listener or filesystem socket.
+2. Parent owns backend process launch, handshake, supervision, shutdown, and restart.
+3. Stdout is protocol-only; stderr is sanitized diagnostics.
+4. Protocol version, frame size, request IDs, duplicate handling, session limits, method allowlist, and error responses are enforced.
+5. Native Swift client rejects protocol mismatch, invalid frames, unknown IDs, oversized responses, and child termination.
+6. Backend is packaged as a known signed runtime; no arbitrary PATH-based Node executable.
+7. Native macOS application owns Keychain access; any secret handoff is separately scoped, memory-only, and audited.
+8. No broker, account, order, or execution capability is exposed until subsequent milestones.
+9. Backend tests and macOS build/runtime tests pass on the supported development Mac and toolchain.
+10. No credentials are committed, logged, or passed through process arguments/environment; LIVE remains disabled.
+
+### ATP-CAP-UI-002 — Credential restoration and Keychain verification (PR #18; pending)
+
+- Add Keychain `load()` with explicit missing-item, malformed-data, and OSStatus handling.
+- Retain the native macOS Keychain accessibility policy; do not apply iOS-style accessibility attributes without opting into the Data Protection Keychain and its entitlement requirements.
+- Verify the stored credential payload after both Keychain insert and update.
+- Restore saved values when the broker screen appears; do not clear fields after Save.
+- Clear form state only after explicit credential removal.
+- PR #18 is draft. Source has been read back from GitHub; Xcode build and Keychain runtime tests remain pending on the target Mac.
+
+## Planned implementation sequence after IPC
 
 | ID | Milestone | Dependency / scope | Status |
 |---|---|---|---|
 | ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
-| ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
+| ATP-CAP-LIFECYCLE-001 | Capital.com read-only session lifecycle integration | Verified IPC + native Keychain provider + explicit secret transfer; auth and ping | PLANNED |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
-| ATP-CAP-ACCOUNT-001 | Read-only broker account and position snapshots | Confirm official Capital.com API contracts, normalize and reconcile broker-authoritative state | PLANNED |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
 | ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
 | ATP-OMS-001 | Order Management System | Durable lifecycle, outbox/idempotency, unknown outcomes, broker reconciliation | PLANNED |
@@ -113,13 +135,11 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-First run Node 24 CI and correct all build/test failures. Then build the macOS target and verify the packaged child, CryptoKit/Node crypto channel, actual Capital.com Demo session, and WebSocket quote/OHLC delivery. Account reconciliation remains a subsequent milestone.
+First compile and verify PR #18's Keychain load/save/restore/delete paths and the Capital.com screen on the user's actual Mac. Then finish signed runtime/backend packaging, packaged IPC verification, and the one-shot credential-transfer contract. Enable broker connection only after those gates pass.
 
 ## Change log
 
-- 2026-11-13: PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`. Started ATP-CAP-SESSION-001 on `feat/atp-capitalcom-operational-connection`: encrypted IPC v2, one-shot credential handoff, Demo REST session lifecycle, market search/history, Xcode backend packaging, CI, and updated UI. Verification pending.
-
-- 2026-11-13: PR #17 merged ATP-CAP-UI-001 as `9297f28fd2079dc5801cd89baf2b4723ed625a75`; PR #18 subsequently merged ATP-CAP-UI-002 as `675ea4af4d54610539218858e3d2f99c4c9a1985`.
+- 2026-11-13: PR #17 merged ATP-CAP-UI-001 as `9297f28fd2079dc5801cd89baf2b4723ed625a75`. Opened draft PR #18 for ATP-CAP-UI-002: Keychain read-back/load, insert/update verification, saved-field restoration, and retaining fields after Save. Xcode verification remains pending.
 
 - 2026-11-12: PR #14 merged as `9445a749d78c63030e9125041a6103dca0eabafc`; ATP-ARCH-REBASE-001 completed.
 - 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.

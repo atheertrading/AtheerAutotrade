@@ -1,55 +1,45 @@
 # Security baseline
 
 **Product:** ATHEER Trading Pro  
-**Repository identifier:** AtheerAutotrade (temporary technical name)  
-**Evidence rule:** The presence of source code is not proof of a successful build, secure package, or live broker session.
+**Repository identifier:** AtheerAutotrade (temporary technical name)
 
-## Implemented in source
+## Implemented in the current foundation
 
-- The native macOS application owns credential entry and Keychain access. The Capital.com API key, identifier, and password are stored as one Keychain item; macOS protects Keychain data at rest.
-- The app-to-backend boundary uses parent-owned anonymous stdio pipes. Production desktop mode does not open a TCP listener or filesystem socket.
-- IPC protocol v2 performs per-child-session ephemeral X25519 key agreement, HKDF-SHA256 key derivation, and AES-256-GCM authenticated encryption for the credential payload.
-- Credential submission is one-shot per backend child session. The backend decrypts and validates in memory, clears the mutable plaintext buffer after parsing where feasible, and keeps credentials only in process memory. JavaScript strings cannot be guaranteed to be zeroized.
-- Capital.com REST requests use HTTPS/TLS. CST and X-SECURITY-TOKEN remain in backend-process memory only.
-- The backend allowlist exposes only read-only Demo session connect/disconnect/status, market search, historical prices, and quote/OHLC WebSocket stream start/stop.
-- The WebSocket adapter is wired through IPC v2 event frames to the native macOS broker screen. Actual broker-originated event delivery remains unverified.
-- The Xcode project includes a packaging phase that compiles the backend and copies a Node.js 24 universal runtime, ESM package metadata, and compiled backend into fixed app-bundle paths. When code signing is enabled, the Node helper is signed with the minimal JIT entitlement needed for V8.
-- The native app requests child-process termination when the application exits.
+- Backend binds to `127.0.0.1` by default and exposes process health only; it does not expose broker/account operations.
+- The Capital.com adapter source accepts an injected credentials provider and keeps CST/X-SECURITY-TOKEN in process memory only.
+- The adapter source does not read credentials from environment variables, files, source-controlled configuration, or logs.
+- ADR-0005 selects parent-owned anonymous standard-I/O pipes for the production desktop/backend process boundary. The backend protocol handler is wired to the explicit `--transport=stdio` startup mode; the native Swift client and bundled runtime are not yet integrated.
+- No concrete broker credential provider or broker-secret transfer method is implemented.
+- `.gitignore` excludes environment files, common secret files, build output, and test artifacts.
+- Health responses use `Cache-Control: no-store` and disclose process health only.
 
-The Node backend TypeScript build and 31/31 tests passed in GitHub Actions on Node.js 24.22.2 (run 43332767979). The Xcode build, CryptoKit/Node interoperability, packaged runtime launch, signature verification, and real Capital.com Demo session remain unverified.
+These are repository/source observations. They do not establish a verified Keychain integration, broker session, or production security posture.
 
-## Data encryption versus application integrity
+## Selected local IPC boundary
 
-The project encrypts the **data**, not the application binary:
+- Production desktop mode uses a backend child process launched and supervised by the native macOS application.
+- Parent-to-child requests use child stdin; child-to-parent responses use child stdout. Stdout is protocol-only; sanitized diagnostics use stderr.
+- No TCP listener or filesystem socket is opened in production desktop mode. The existing loopback HTTP health endpoint is development/diagnostic-only.
+- The versioned NDJSON protocol enforces a 65,536-byte frame limit, handshake, UUID request IDs, duplicate detection, a 4,096-request session limit, and an explicit method allowlist.
+- Initial protocol capabilities are limited to handshake and process ping. No broker, account, credential, risk, order, or execution methods are exposed.
+- Pipe possession is not a defense against a compromised parent/child or malicious code with equivalent process-inspection privileges. Code signing, hardened runtime, controlled executable packaging, and least privilege remain required.
 
-1. **At rest:** macOS Keychain protects stored broker credentials.
-2. **Across local IPC:** AES-256-GCM encrypts the credential payload using a per-process ephemeral X25519/HKDF-SHA256 key.
-3. **Across the network:** Capital.com REST uses HTTPS/TLS; the WebSocket adapter uses the broker's secure streaming endpoint.
-4. **Application integrity:** code signing, Hardened Runtime, entitlements, and notarization are separate controls. They verify and constrain executable code; they are not substitutes for encrypting broker data.
+## Required controls before broker account integration
 
-No second static application-owned encryption key is stored alongside the credentials.
-
-## Local IPC boundary and restrictions
-
-- Parent-to-child requests use child stdin; child-to-parent responses and market-data events use child stdout. Stdout is protocol-only; stderr is diagnostics-only.
-- Frames are bounded to 65,536 bytes. Protocol v2 validates envelopes, UUID request IDs, duplicates, request limits, capabilities, and event names.
-- The backend executable is resolved from a fixed app-bundle path at runtime. PATH is used only by the build script to locate a Node.js 24 universal runtime.
-- Credentials and tokens are never placed in source, Git, logs, crash diagnostics, process arguments, environment variables, or app resources.
-- The X25519 exchange encrypts data over the inherited pipe but does not independently authenticate the backend executable. Verify the signed bundle and nested runtime before production release.
-- The backend has no direct Keychain access.
-- No account mutation, position mutation, order, dealing, execution, or LIVE method is exposed.
-
-## Remaining controls before production broker integration
-
-- Pin an exact Node.js 24 patch release and checksum for release builds.
-- Run backend TypeScript build/tests and CryptoKit/Node X25519-HKDF-AES-GCM interoperability tests, including invalid-tag rejection.
-- Build on the target Mac and verify the packaged universal Node runtime, embedded JIT entitlement, nested signature, outer app signature, Hardened Runtime, and notarization behavior.
-- Verify actual Capital.com Demo authentication, market search, historical prices, WebSocket subscription acknowledgements, sustained quote/OHLC delivery, and reconnect behavior.
-- Implement market-data freshness, stale/unknown state, ordering, deduplication, gap detection, candle integrity, and recovery.
-- Add read-only account/position snapshots and reconciliation only after official broker API contracts are confirmed.
-- Implement authorization, audit, persistence, and recovery controls before exposing any account mutation or execution API.
-- Keep account, order, dealing, and execution methods out of the IPC allowlist until Risk Engine, OMS, and Execution Gateway are implemented and verified.
-- Keep LIVE disabled until safety gates, explicit user authorization, monitoring, reconciliation, and recovery procedures are implemented and verified.
+- Keep Keychain ownership in the signed native macOS application (or a separately reviewed native credential broker); do not give the Node.js backend direct Keychain access.
+- Design and test a narrow one-shot credential transfer over the established IPC session before broker authentication is implemented. Document JavaScript memory exposure; do not claim guaranteed secret zeroization.
+- Package a known, signed Node.js runtime and compiled backend with a controlled bundle layout; do not resolve an arbitrary Node executable from PATH.
+- Implement parent-owned child startup, handshake, supervision, graceful shutdown, crash handling, and fresh-session restart behavior.
+- Implement a macOS Keychain-backed credential provider with documented ownership, access controls, rotation, revocation, and migration behavior.
+- Expose future broker operations only through the parent-owned stdio IPC method allowlist; do not add a production TCP/HTTP or filesystem-socket listener.
+- Do not add a bearer token to the stdio protocol; its endpoint access is controlled by inherited anonymous pipes. Reassess authentication if the transport or process ownership model changes.
+- Never place credentials, API keys, CST, X-SECURITY-TOKEN, certificates, or private keys in source code, Git history, logs, crash reports, process arguments, app resources, or ChatGPT.
+- Keep broker session tokens memory-only and redact authentication material from all errors and diagnostics.
+- Add request validation, authorization, audit events, and abuse controls before exposing any API beyond a tightly controlled local boundary.
+- Separate Demo and Live environments and credentials. Live endpoint support does not authorize live account onboarding or dealing.
+- Keep LIVE dealing disabled until safety gates, explicit user authorization, monitoring, reconciliation, and recovery procedures are implemented and verified.
+- Design emergency controls to separately stop new exposure and manage existing positions.
+- Treat unknown execution outcomes as requiring reconciliation; never blindly resubmit.
 
 ## Required execution controls
 
@@ -58,10 +48,9 @@ No second static application-owned encryption key is stored alongside the creden
 - OMS owns the durable intent lifecycle.
 - Execution Gateway is the only component allowed to call broker dealing operations and must require an OMS-authorized intent with a valid Risk decision bound to the immutable intent identity.
 - Broker-confirmed account and execution state is authoritative.
-- Unknown execution outcomes require reconciliation; never blindly resubmit.
 
 ## Current limitations
 
-The current branch provides a source implementation of encrypted credential transfer, read-only Demo session lifecycle, market discovery/history, and WebSocket quote/OHLC event delivery. None of these have yet been verified end-to-end against a real Capital.com Demo account. Account/position reconciliation, Risk Engine, OMS, Execution Gateway, durable audit/persistence, and LIVE execution remain unimplemented.
+No concrete Keychain provider, authenticated application/backend boundary, authorization service, durable audit log, persistence/recovery, operational monitoring, broker account session, or execution safety chain has been verified. The development API is not intended for network exposure.
 
 See [ADR-0004 — Production Architecture Baseline](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md), [ADR-0005 — Secure macOS IPC](../decisions/ADR-0005-SECURE-MACOS-IPC.md), and [Local IPC Protocol](LOCAL_IPC_PROTOCOL.md).

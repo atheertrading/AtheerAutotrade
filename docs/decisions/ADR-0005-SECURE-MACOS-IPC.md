@@ -7,7 +7,7 @@
 
 ## Context
 
-ATHEER Trading Pro uses a native SwiftUI macOS client and a Node.js/TypeScript modular-monolith backend. The backend currently exposes only process health over loopback HTTP. No broker/account operation is exposed through that API, and the desktop/backend boundary is being implemented over a parent-owned private pipe.
+ATHEER Trading Pro uses a native SwiftUI macOS client and a Node.js/TypeScript modular-monolith backend. The backend currently exposes only process health over loopback HTTP. No broker/account operation is exposed through that API, and no authenticated desktop/backend boundary is implemented.
 
 A production desktop client must communicate with its backend without opening a network listener, treating loopback as authentication, or placing secrets in command-line arguments, environment variables, files, or logs.
 
@@ -37,19 +37,19 @@ A future transport change must re-evaluate peer authentication. TCP loopback and
 
 - Only the signed macOS application (or a separately reviewed native credential broker) accesses the user's Keychain items.
 - The Node.js backend does not call Keychain directly and does not receive Keychain entitlements.
-- Credential transfer is implemented in source for protocol v2 using an ephemeral X25519 key agreement, HKDF-SHA256, and AES-256-GCM encrypted payload. The backend decrypts only in memory, validates the credential object, and keeps it only for the current child-process session.
-- The cryptographic channel is not a substitute for verifying the signed backend executable. Peer integrity, bundle signing, and target-machine verification remain required before production use.
-- JavaScript strings cannot be reliably zeroized. The implemented transfer minimizes copies, clears the mutable plaintext buffer after parsing, avoids diagnostics/telemetry, and documents the remaining immutable-string lifetime. Do not claim guaranteed memory erasure.
+- Broker credential transfer to the backend is **not implemented by this ADR**. It requires a dedicated, narrowly scoped credential-message design and tests before Capital.com authentication is integrated.
+- If credentials must enter the Node process, they may be transferred only over the established private IPC session, in response to an explicit connection operation, in memory, with strict payload limits and redaction. No credential may be persisted by the backend.
+- JavaScript strings cannot be reliably zeroized. Any future secret-transfer design must document this residual memory exposure, minimize copies and lifetime, avoid diagnostics/telemetry, and clear mutable buffers where feasible. Do not claim guaranteed memory erasure.
 
 ### 4. Protocol and method policy
 
-- Protocol: UTF-8 newline-delimited JSON, version 2.
+- Protocol: UTF-8 newline-delimited JSON, version 1.
 - Maximum frame size: 65,536 bytes, excluding line terminator.
 - Every request has a UUID request ID, protocol identifier/version, method, and object payload.
 - The first request must be a version handshake. No application method is accepted before successful handshake.
 - Request IDs must be unique within a process session.
 - Methods are explicitly registered allowlist entries. No generic shell, filesystem, arbitrary URL, or dynamic method dispatch.
-- Protocol v2 negotiates an ephemeral X25519/HKDF-SHA256/AES-256-GCM secret channel. The current allowlist exposes `system.ping`, encrypted `broker.credentials.submit`, read-only `broker.connect`/`broker.disconnect`, `broker.status`, `broker.marketSearch`, and `broker.historicalPrices`.
+- Initial protocol capability is limited to `system.ping`; no broker credentials, account data, trading, order, or execution method is exposed.
 - Malformed, oversized, unsupported-version, or invalid protocol input is rejected. A protocol violation closes the session.
 - Responses contain only bounded structured results or safe error codes/messages. Never serialize stack traces or internal exception text.
 - Standard output is protocol-only; diagnostics use standard error with secret redaction.
@@ -57,7 +57,7 @@ A future transport change must re-evaluate peer authentication. TCP loopback and
 ### 5. Runtime packaging and process hardening
 
 Before production use:
-- The Xcode project now has a build phase that compiles the backend and copies a Node.js 24 universal runtime into the fixed app-bundle paths. The runtime is resolved from PATH only at build time; the shipped application launches only the bundled executable. Exact patch pinning, release signature verification, and notarization remain required.
+- Package a known Node.js runtime and compiled backend within the signed application distribution, or use a separately signed and version-pinned backend installation. Do not rely on an arbitrary system Node installation.
 - Verify code signatures and bundle layout at build/release time.
 - Use a controlled working directory and minimal environment. Never pass credentials in environment variables or process arguments.
 - Keep the backend process under parent supervision. On app termination, request graceful shutdown and enforce a bounded termination deadline.
@@ -103,7 +103,8 @@ The existing loopback HTTP `GET /health` endpoint may remain available only as a
 
 - A compromised application or backend process can access data available to that process.
 - Same-user malware with equivalent process-inspection or code-injection privileges is outside the protection offered by pipe possession alone.
-- The packaging phase, encrypted credential transfer, and read-only Demo session source are implemented but have not been built or runtime-verified. Backend signature verification and release notarization remain outstanding.
+- The backend runtime and compiled code must be packaged and signed correctly; this is not yet implemented.
+- Credential transfer and broker session creation remain deferred.
 - The stdio protocol is local and synchronous by design; it is not a remote service API or multi-client transport.
 - macOS code-signing, hardened-runtime, crash-report, and release-packaging controls require target-machine verification.
 
@@ -112,5 +113,5 @@ The existing loopback HTTP `GET /health` endpoint may remain available only as a
 - Production desktop mode will not listen on TCP or create a filesystem IPC endpoint.
 - The backend is a child process supervised by the macOS application in desktop deployment.
 - Backend protocol implementation and native Swift process/client integration are separate implementation batches.
-- Capital.com credentials remain Keychain-owned by the native app; protocol v2 transfers them only as encrypted ciphertext to the backend process. Actual Demo authentication and sustained market-data operation remain unverified.
+- Capital.com credential access remains unavailable until the native Keychain provider and dedicated secret-transfer contract are implemented and verified.
 - This ADR does not authorize trading, order submission, or LIVE connectivity.
