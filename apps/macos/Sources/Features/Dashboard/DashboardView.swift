@@ -10,7 +10,7 @@ struct DashboardView: View {
         let marketDetail: String
         if streaming {
             marketStatus = "Streaming"
-            marketDetail = "\\(marketDataStore.quotes.count) of \\(marketDataStore.watchlist.count) watched instruments have broker quotes."
+            marketDetail = "\(marketDataStore.quotes.count) of \(marketDataStore.watchlist.count) watched instruments have broker quotes."
         } else if marketDataStore.isBrokerConnected {
             marketStatus = "Demo Connected"
             marketDetail = marketDataStore.watchlist.isEmpty
