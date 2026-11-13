@@ -6,6 +6,10 @@ struct MarketWatchInstrument: Codable, Hashable, Identifiable {
     let name: String
     let instrumentType: String
     let marketStatus: String
+    var netChange: Double? = nil
+    var percentageChange: Double? = nil
+    var tickSize: Double? = nil
+    var lastTradedVolume: Double? = nil
 
     var id: String { epic }
 }
