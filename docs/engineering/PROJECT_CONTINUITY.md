@@ -31,7 +31,7 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline after PR #19 merge: `b673d639bf5440ddd52085815bf7cf2a4fd54167`.
+- Latest observed `main` baseline: `794e9c5854bba45c5b007b44de697b030f3b72a8` (PR #29 merge).
 - PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
 - PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
 - PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
@@ -220,3 +220,34 @@ Not verified:
 
 ### Next implementation step
 After CI passes and the branch is reviewed, implement the durable OMS intent journal/state machine and idempotency boundary. Do not expose a broker dealing method until OMS and Execution Gateway are integrated with the merged RiskEngine and broker-state reconciliation.
+
+
+## 10. Latest handoff — ATP-PERSIST-001 (2026-11-13)
+
+### Verified GitHub baseline
+- Current main: `794e9c5854bba45c5b007b44de697b030f3b72a8`, merged PR #29.
+- PR #21 (ATP-MD-WATCH-001) is merged as `3fed5711393059d4e089a5209b55f5fef5d8860b`; CI, target-Mac build/runtime, and real Capital.com Demo quote delivery remain pending.
+- PR #27 (ATP-EXEC-001 Batch 1) is merged as `df85a423b30ce72d4106c281566cf9797031dfef`; the pure RiskEngine is not integrated with OMS or Execution Gateway.
+- PR #29 (ATP-CAP-ACCOUNT-001) is merged as `794e9c5854bba45c5b007b44de697b030f3b72a8`; Node 24.22.2 TypeScript build and 46/46 tests passed in CI. No target-Mac or real broker session verification is claimed.
+- PR #25 (quote UI coalescing) and PR #26 (workspace sizing) remain open at the time of this handoff.
+
+### Architecture reconciliation
+- The earlier Task Register handoff said to proceed directly to the durable OMS journal/state machine after PR #29.
+- ATP-ARCH-003 is an approved persistence architecture baseline and explicitly sequences: PostgreSQL database/migration baseline first, then canonical persistence types, then OMS persistence.
+- ATP-ARCH-019 requires durable intent journaling, append-only lifecycle events, scoped payload-bound idempotency, and no blind retry for unknown external outcomes.
+- Therefore, this branch starts ATP-PERSIST-001 Stage 1 before ATP-OMS-001. This is sequencing reconciliation, not a change to the PostgreSQL architecture decision.
+
+### Active branch and authored source
+- Branch: `feat/atp-persist-001-postgres-foundation`, based on main `794e9c5854bba45c5b007b44de697b030f3b72a8`.
+- Added `services/backend/migrations/0001_trading_oms_foundation.sql`.
+- Added `services/backend/migrations/README.md`.
+- Updated Task Register and Implementation Status to record this bounded milestone and its verification limits.
+- Initial schema covers `atheer.schema_migrations`, `trading.idempotency_records`, `trading.trade_intents`, `trading.order_events`, and `trading.order_command_outbox`.
+- Exact decimal quantity storage uses PostgreSQL `numeric` without a fixed scale; timestamps use `timestamptz`; scoped idempotency includes command type, account, mode, principal, key, and payload fingerprint.
+
+### Verification and exclusions
+- SQL has not been executed against PostgreSQL and no database has been provisioned.
+- No PostgreSQL driver, migration runner, runtime configuration, database roles/grants, integration tests, OMS command service, RiskEngine integration, outbox dispatcher, Execution Gateway, broker dealing method, or order IPC method has been added.
+- No order is submitted. LIVE remains disabled.
+- Next: review and validate the schema against ATP-ARCH-003/019; implement the pinned PostgreSQL client and checksum-verified migration runner; add PostgreSQL integration tests for atomic intent/idempotency/event creation, concurrent duplicate requests, payload mismatch, rollback, and restart recovery. Only then proceed to ATP-OMS-001 state-transition handling.
+- Preserve all local Mac work and stashes. This milestone was performed through GitHub only; no local filesystem or Xcode environment was accessed.

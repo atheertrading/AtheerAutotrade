@@ -27,6 +27,13 @@
 - The backend stores CST and X-SECURITY-TOKEN only in process memory. Capital.com REST uses HTTPS/TLS.
 - No broker dealing, order, position mutation, account mutation, or LIVE method is exposed.
 
+### Persistence foundation — ATP-PERSIST-001 (active branch)
+- Authored `services/backend/migrations/0001_trading_oms_foundation.sql` on `feat/atp-persist-001-postgres-foundation`.
+- The migration defines PostgreSQL schemas and initial tables for scoped idempotency records, canonical trade intents, append-oriented order events, and a durable command outbox.
+- Quantities use PostgreSQL `numeric` without a fixed scale to avoid unintended precision truncation; timestamps use `timestamptz`; idempotency is scoped by command, account, trading mode, principal, and key, with a canonical payload SHA-256 fingerprint.
+- Added `services/backend/migrations/README.md` documenting the architecture basis, scope, exclusions, and next verification gates.
+- This is schema source only. No migration runner, PostgreSQL driver, database connection, database role/grant configuration, or applied database is present yet. Do not describe persistence as operational.
+
 ### Runtime packaging source
 - Xcode app target includes a Package Backend Runtime build phase.
 - apps/macos/Scripts/package-backend.sh requires Node.js 24 universal (x86_64 + arm64), compiles the backend, and copies the Node executable and compiled backend into the fixed bundle paths used by the supervisor.
