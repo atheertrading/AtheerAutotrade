@@ -152,7 +152,9 @@ All work in this handoff was performed through GitHub. No local filesystem, Xcod
 ### ATP-MD-WATCH-001 — branch based on merged main
 
 Current branch: `feat/atp-market-data-watchlist-main`  
-Base branch: `main` (PR #19 is already merged)
+Base branch: `main` (PR #19 is already merged)  
+Draft PR #21: https://github.com/atheertrading/AtheerAutotrade/pull/21  
+Superseded stacked PR #20 was closed; it was not merged.
 
 Implemented in source:
 - Shared `MarketDataStore` receives IPC market-data events at the application root rather than only while the Brokers screen is visible.
