@@ -10,7 +10,7 @@
 - Native SwiftUI macOS application target, dark-first navigation shell, and Trading Workspace with panel management, resizing, and drag/drop.
 - Capital.com broker screen with DEMO environment, Keychain credential entry/save/restore/delete, connection state, Connect/Disconnect actions, and authenticated market discovery UI.
 - Shared MarketDataStore and Markets destination; user watchlists persist locally, support up to 40 Capital.com instruments, and remain subscribed when navigating away from the Brokers screen.
-- Market Watch table displays broker Bid/Ask, derived Mid/Spread, quote age, and freshness state; the same table is available as a full Markets destination and as a workspace panel.
+- Dashboard, Markets destination, Brokers screen, and Trading Workspace panel share the same Market Watch table, displaying broker Bid/Ask, derived Mid/Spread, quote age, and freshness state. Dashboard connection indicators are driven by shared broker/feed state rather than hard-coded disconnected labels.
 - Native app owns macOS Keychain access. Credential values are not persisted in preferences or project files.
 - IPCSecretChannel.swift uses ephemeral Curve25519/X25519 key agreement, HKDF-SHA256, and AES-256-GCM to encrypt the credential payload before it crosses the local app/backend pipe.
 - BackendProcessSupervisor.swift starts the backend from fixed app-bundle paths, performs protocol v2 handshake/capability negotiation, correlates requests, applies timeouts, consumes broker market-data events, and supervises child termination. The SwiftUI app delegate requests child shutdown during application termination.
