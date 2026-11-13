@@ -1,6 +1,6 @@
 # ATP-ARCH-OOP-003 — Backend IPC Composition Boundary
 
-**Status:** IMPLEMENTED IN SOURCE — PENDING BACKEND CI  
+**Status:** IMPLEMENTED IN SOURCE — BACKEND CI VERIFIED; PR #47 OPEN, NOT MERGED  
 **Date:** 2026-11-14  
 **Branch:** `refactor/atp-arch-oop-003-stdio-composition`  
 **Base:** `main`  
@@ -50,13 +50,13 @@ This is a narrow first step. The contract remains Capital.com-shaped because the
 ## 5. Verification
 
 - **Verified:** branch created from main; source and test file updates committed through GitHub; documentation updated.
-- **Pending:** Node.js 24 TypeScript build and full backend test suite through GitHub Actions.
+- **Verified:** GitHub Actions Backend CI run 43528019119 on Node.js 24.22.2; TypeScript compilation passed and 51/51 Node tests passed.
 - **Not performed:** local Node commands, Xcode build, app packaging, target-Mac runtime, or real Capital.com Demo session.
 - Do not mark this milestone verified until CI evidence is inspected.
 
 ## 6. Next steps
 
-1. Run and inspect Backend CI for this branch.
-2. Resolve compile/test failures without changing protocol semantics.
-3. Review the resulting diff and request engineering review.
-4. Continue the next bounded OOP remediation only after this boundary passes CI.
+1. Review PR #47 and obtain owner review before merge.
+2. Preserve the passing CI evidence; rerun only if the branch changes.
+3. After merge, create a milestone tag/version and update the project handoff.
+4. Continue the next bounded OOP remediation only after this boundary is accepted.
