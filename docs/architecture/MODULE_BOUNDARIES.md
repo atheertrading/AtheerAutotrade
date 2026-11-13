@@ -68,3 +68,12 @@ Do not mark target modules as operational based on architecture diagrams or sour
 ## Change control
 
 Changes to module ownership, authorization, execution flow, broker lifecycle, or trust boundaries require an ADR and corresponding updates to the architecture diagrams. Keep the implementation status synchronized with verified code and test evidence.
+
+
+## OOP implementation convention
+
+All modules implement the project-wide object-oriented standard in [OOP Design Standard](OOP_DESIGN_STANDARD.md), governed by [ADR-0006](../decisions/ADR-0006-OBJECT-ORIENTED-DESIGN-STANDARD.md).
+
+Module boundaries are expressed as cohesive objects and explicit contracts: protocols/interfaces at domain/application boundaries; constructor-injected collaborators; explicit lifecycle ownership; and composition-root assembly. SwiftUI Views remain declarative presentation objects. Stateful backend services, adapters, repositories, engines, and supervisors use focused classes where reference identity/lifecycle is appropriate. Immutable value objects, Swift structs/enums, and deterministic pure functions remain valid when they provide stronger semantics and testability.
+
+Folders group bounded contexts and architectural layers; they are not themselves OOP constructs. Existing paths must not be moved merely to match a template. Refactors require a scoped milestone, tests, and Xcode/package membership verification.
