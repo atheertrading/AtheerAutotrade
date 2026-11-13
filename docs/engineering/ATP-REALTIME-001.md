@@ -43,7 +43,7 @@ Capital.com currently documents WebSocket streaming for market quotes and OHLC, 
 
 - Quote batching/coalescing window is reduced from 100 ms to 16 ms (approximately one 60 Hz display frame).
 - The newest quote per instrument is retained during each batch to prevent a burst of updates from flooding the main UI queue.
-- Quote freshness thresholds are tightened to 2.5 seconds (fresh), 5 seconds (delayed), 10 seconds (degraded), and beyond 10 seconds (stale).
+- Quote freshness thresholds remain aligned with the existing market-data/RiskEngine policy: up to 5 seconds (fresh), 5–10 seconds (delayed), 10–15 seconds (degraded), and beyond 15 seconds (stale).
 - Market Watch applies a short 120 ms presentation transition when the mid-price changes.
 
 ## Semantic color system
@@ -95,7 +95,7 @@ Balance and Funds remain one displayed metric because Capital.com's `balance.bal
 2. macOS target builds on the target Mac with Xcode.
 3. Capital.com Demo account metrics update from broker snapshots at the configured cadence.
 4. External Demo account activity updates Balance/Funds, Available, Equity, P&L, Margin, positions, and working orders without requiring Dashboard navigation or manual refresh.
-5. Market quote updates render with no additional 100 ms application debounce; target batching is 16 ms.
+5. Market quote updates render with no additional 100 ms application debounce; target batching is 16 ms. Quote freshness classification remains aligned with RiskEngine thresholds.
 6. Positive, negative, neutral, informational, warning, delayed, and stale states are visually distinguishable.
 7. When account data stops arriving, the status bar changes to DELAYED/STALE within the defined thresholds and never continues to label the last value LIVE.
 8. When market quotes become stale, the quote freshness state is visible and no consumer may treat the stale quote as current.
