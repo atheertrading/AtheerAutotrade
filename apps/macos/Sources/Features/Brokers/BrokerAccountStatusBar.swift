@@ -116,7 +116,7 @@ struct BrokerAccountStatusBar: View {
                 .foregroundColor(AtheerColors.textTertiary)
             Text(value)
                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundColor(brokerAccountStore.isStale ? AtheerColors.warning : tint)
+                .foregroundColor(brokerAccountStore.isStale ? AtheerColors.negative : ((brokerAccountStore.isDelayed || brokerAccountStore.syncStatus == "degraded") ? AtheerColors.warning : tint))
                 .lineLimit(1)
         }
         .help(title)
