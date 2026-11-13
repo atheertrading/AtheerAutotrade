@@ -208,3 +208,16 @@ ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-li
 - `BrokerAccountStore` is injected at the application root for cross-feature consumption. `MarketDataStore` no longer owns a duplicate account snapshot or polling path.
 - Backend CI run 43466811703 passed on Node.js 24: TypeScript build succeeded; 56 tests passed, 0 failed, 0 skipped. The target-Mac Xcode build and Demo account reconciliation remain pending.
 - Account snapshot stale threshold is 10 seconds. Disconnect/backend loss clears snapshots. No order placement, account mutation, or LIVE capability is introduced.
+
+
+## Market-data quality milestone — ATP-MD-QUALITY-002
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-MD-QUALITY-002 | Restore fixed SELL/BID and BUY/ASK colors; attribute quote latency across broker/backend/IPC/UI; expose correctly sourced traded volume | Branch `feat/atp-md-quality-002-quote-sides-latency-volume`; record `docs/engineering/ATP-MD-QUALITY-002.md` | PARTIALLY IMPLEMENTED — SOURCE/IPC TIMING FIELDS ADDED; XCODE, DEMO LATENCY, SERVER-TIME CALIBRATION, AND VOLUME INGESTION PENDING |
+
+- SELL/BID is fixed red and BUY/ASK is fixed green; quote direction is shown independently in delta fields.
+- Removed the 120 ms quote-row animation. Existing 16 ms quote coalescing remains to bound main-thread update volume.
+- Native IPC event receipt time is now captured separately from backend receipt time. Backend-to-client and broker-timestamp-to-backend deltas are distinct model measurements; broker timestamp delta is not yet calibrated against Capital.com server time.
+- Capital.com WebSocket quote payload documents bidQty/ofrQty, not executed volume. REST historical one-minute candle responses provide optional lastTradedVolume. The volume monitor and 1M VOL display remain pending; no quote-side quantity or search snapshot is mislabeled as traded volume.
+- No Xcode build, target-Mac runtime, controlled Demo price comparison, time calibration, or volume test has been performed for this branch. No live execution capability is introduced.
