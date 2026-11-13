@@ -287,7 +287,7 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - Added XCTest regression coverage to `apps/macos/Tests/LocalIPCProtocolTests.swift` for the screenshot values and negative-margin rejection.
 - Added `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` with screenshot evidence, field contract, diagnosis, code changes, and acceptance criteria.
 - Updated `docs/engineering/TASK_REGISTER.md`.
-- Latest implementation commit at handoff: `68d48c274d7d47262c4d02d9b541fa086573626b` (continuity update; preceding source/test/doc commits are on the same branch).
+- Current source and test revisions are tracked on the PR #42 head; subsequent commits on this branch update the engineering records.
 
 ### Latency assessment
 - Account state uses a one-second-target REST polling monitor, not account WebSocket events.
