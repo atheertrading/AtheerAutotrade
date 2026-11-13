@@ -241,3 +241,8 @@ Apple-inspired quality means native macOS behavior and disciplined information d
 - No PostgreSQL migration has been executed.
 - No target-Mac Xcode build, packaged runtime test, or sustained broker soak is claimed.
 - No OMS/Execution Gateway dealing path or LIVE capability is present.
+
+
+### ATP-BASELINE-001 disposition
+
+A documentation-only reconciliation is prepared on branch `docs/atp-baseline-reconciliation-001` and draft PR #48. It updates eight engineering/architecture status files to reflect current main and active PR evidence. It does not change source, tests, SQL, broker permissions, or runtime behavior. PR #48 remains open and unmerged pending review.
