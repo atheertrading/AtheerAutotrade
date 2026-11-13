@@ -79,7 +79,7 @@ export class CapitalComRuntime {
     const stream = createCapitalComMarketDataStream(client, {
       onQuote: (quote) => {
         try {
-          emit("broker.marketData.quote", normalizeMarketQuote(quote));
+          emit("broker.marketData.quote", { ...normalizeMarketQuote(quote) });
         } catch {
           emit("broker.marketData.error", { message: "Capital.com quote failed market-data validation." });
         }
