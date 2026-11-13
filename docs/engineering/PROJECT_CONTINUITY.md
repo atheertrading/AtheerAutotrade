@@ -213,7 +213,8 @@ Not verified:
 - LIVE remains disabled; RiskEngine, OMS authorization, Execution Gateway, explicit operator confirmation, audit, and reconciliation remain mandatory before future dealing.
 
 ### Verification state
-- Backend CI pending for this branch.
+- GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript compilation passed; 46 tests passed, 0 failed, 0 skipped.
+- Draft PR #29: https://github.com/atheertrading/AtheerAutotrade/pull/29.
 - No local build, target-Mac runtime, or real Demo account read is claimed.
 - Credentials remain on the user's Mac and must never be sent in ChatGPT.
 
