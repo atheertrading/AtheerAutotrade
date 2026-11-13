@@ -11,6 +11,11 @@
 - Capital.com broker screen with DEMO environment, Keychain credential entry/save/restore/delete, connection state, Connect/Disconnect actions, and authenticated market discovery UI.
 - Shared MarketDataStore and Markets destination; user watchlists persist locally, support up to 40 Capital.com instruments, and remain subscribed when navigating away from the Brokers screen.
 - Dashboard, Markets destination, Brokers screen, and Trading Workspace panel share the same Market Watch table, displaying broker Bid/Ask, derived Mid/Spread, quote age, and freshness state. Dashboard connection indicators are driven by shared broker/feed state rather than hard-coded disconnected labels.
+- Application-wide static text selection is enabled at the NavigationSplitView root, so standard macOS Copy is available across app content; editable TextField controls retain native Paste/editing behavior. Secure credential fields remain protected and are not made copyable.
+- Market Watch instrument rows expose context-menu actions to copy the full instrument/quote snapshot or the instrument epic.
+- Capital.com broker screen uses an adaptive two-column/stacked layout, gives connection metrics full-width space, and distinguishes encrypted handoff, REST authentication, quote delivery, and disabled order execution.
+- Dashboard status distinguishes an acknowledged quote subscription from actual received quotes and labels the feed explicitly as DEMO.
+
 - Native app owns macOS Keychain access. Credential values are not persisted in preferences or project files.
 - IPCSecretChannel.swift uses ephemeral Curve25519/X25519 key agreement, HKDF-SHA256, and AES-256-GCM to encrypt the credential payload before it crosses the local app/backend pipe.
 - BackendProcessSupervisor.swift starts the backend from fixed app-bundle paths, performs protocol v2 handshake/capability negotiation, correlates requests, applies timeouts, consumes broker market-data events, and supervises child termination. The SwiftUI app delegate requests child shutdown during application termination.
@@ -39,12 +44,12 @@
 - Node.js X25519/HKDF/AES-GCM decryption has backend test source but no executed result. CryptoKit-to-Node cross-language interoperability has not yet been tested.
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
 - Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
-- No real Capital.com Demo authentication, market search, historical-price response, live quote, or OHLC event has been verified against a real Demo account.
+- Owner-reported runtime evidence (2026-11-13): the user confirms the Capital.com Demo connection is working in the local Xcode application and broker-originated asset prices are being received. This is owner-confirmed runtime evidence, not independently reproduced in this GitHub review. No OHLC consumption in the SwiftUI MarketDataStore is verified.
 - The new Market Watch SwiftUI files and Xcode project membership have not yet been compiled on the target Mac.
 
 ## Not implemented or not operationally integrated
 
-- Capital.com WebSocket quote/OHLC stream is wired through IPC v2 events and the shared Market Watch UI, but actual broker-originated quote/OHLC delivery has not been verified.
+- Capital.com WebSocket quote events are wired through IPC v2 and the shared Market Watch UI; owner confirms quote delivery works locally. OHLC events are accepted by the IPC protocol but are not yet consumed or stored by MarketDataStore, so chart candles are not available.
 - Full Market Data ingestion lifecycle remains incomplete: ordering, deduplication, gap detection, candle integrity, durable storage, stale-event propagation, and recovery. The current quote normalizer is an initial component, not a completed Market Data Engine.
 - Durable broker account/position/order reconciliation and persistence. Read-only API snapshot methods are being implemented in ATP-CAP-ACCOUNT-001; no SwiftUI consumer is wired yet.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
@@ -54,6 +59,15 @@
 - Portfolio/account/position reconciliation.
 - Strategy Runtime and Intelligence services.
 - LIVE trading; no real order path is implemented or authorized.
+
+## UI design and clipboard limitations
+
+- The current product UI is a functional foundation, not yet a complete Apple-quality workstation. Eight of thirteen navigation destinations still render explicit placeholders; the Chart, Order Entry, Positions, Orders, History, Journal, Performance, News, and System Status workspace panels are not all functional.
+- The current visual system is dark-only, relies heavily on fixed point font sizes, and does not yet provide a user appearance preference or a complete Dynamic Type/accessibility audit.
+- Market Watch is a custom fixed-column HStack rather than a fully interactive native data table; sorting, filtering, column configuration, keyboard row navigation, and candle/chart rendering remain outstanding.
+- The System Activity panel is still a placeholder; a durable event/audit feed is not connected.
+- The new clipboard work makes static text selectable application-wide and adds structured row-copy actions. Paste remains native to editable controls. Credentials in SecureField are intentionally not exposed to clipboard selection.
+- Broker connection status is refreshed when the Broker screen appears; continuous session-expiry/process-health propagation into every view is not yet implemented.
 
 ## Architecture and security baseline
 
