@@ -11,6 +11,7 @@ const intent = {
   quantity: 1,
   contractMultiplier: 1,
   stopLossPrice: 74,
+  estimatedInitialMargin: 500,
   requestedAt: now
 };
 const account = {
@@ -39,7 +40,7 @@ test("approves an order within configured risk, exposure, margin, and freshness 
   const result = new RiskEngine().evaluate(intent, account, quote, policy, now + 100);
   assert.equal(result.approved, true);
   assert.equal(result.referencePrice, 75.1);
-  assert.equal(result.estimatedLoss, 1.1);
+  assert.ok(Math.abs(result.estimatedLoss - 1.1) < 1e-9);
   assert.deepEqual(result.reasons, []);
 });
 
@@ -58,7 +59,7 @@ test("rejects a missing or incorrectly placed stop loss", () => {
 test("rejects intents that exceed per-trade risk, aggregate exposure, position, or margin limits", () => {
   const engine = new RiskEngine();
   const result = engine.evaluate(
-    { ...intent, quantity: 100 },
+    { ...intent, quantity: 100, estimatedInitialMargin: 9_000 },
     { ...account, grossExposure: 9_500, openPositions: 5, freeMargin: 1_000 },
     quote,
     policy,
