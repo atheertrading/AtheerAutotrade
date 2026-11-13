@@ -26,6 +26,7 @@ export interface RiskAccountSnapshot {
   readonly freeMargin: number;
   readonly grossExposure: number;
   readonly openPositions: number;
+  readonly observedAt: number;
 }
 
 export interface RiskPolicy {
@@ -34,11 +35,13 @@ export interface RiskPolicy {
   readonly maxOpenPositions: number;
   readonly minFreeMarginPercent: number;
   readonly maxQuoteAgeMs: number;
+  readonly maxAccountSnapshotAgeMs: number;
 }
 
 export type RiskRejectionCode =
   | "INVALID_INTENT"
   | "INVALID_ACCOUNT_SNAPSHOT"
+  | "ACCOUNT_SNAPSHOT_STALE"
   | "INVALID_QUOTE"
   | "QUOTE_EPIC_MISMATCH"
   | "QUOTE_NOT_FRESH"
@@ -85,7 +88,8 @@ export class RiskEngine {
 
     if (!account || !isText(account.currency) || !isPositive(account.equity)
       || !isNonNegative(account.freeMargin) || !isNonNegative(account.grossExposure)
-      || !Number.isInteger(account.openPositions) || account.openPositions < 0) {
+      || !Number.isInteger(account.openPositions) || account.openPositions < 0
+      || !isPositive(account.observedAt)) {
       reasons.push("INVALID_ACCOUNT_SNAPSHOT");
     }
 
@@ -100,12 +104,18 @@ export class RiskEngine {
       || !isPositive(policy.maxGrossExposurePercent)
       || !Number.isInteger(policy.maxOpenPositions) || policy.maxOpenPositions < 1
       || !isNonNegative(policy.minFreeMarginPercent) || policy.minFreeMarginPercent > 100
-      || !isPositive(policy.maxQuoteAgeMs)) {
+      || !isPositive(policy.maxQuoteAgeMs)
+      || !isPositive(policy.maxAccountSnapshotAgeMs)) {
       reasons.push("INVALID_POLICY");
     }
 
     if (reasons.length > 0) return decision(intent?.intentId ?? "", evaluatedAt, reasons);
 
+    if (intent.requestedAt > evaluatedAt) reasons.push("INVALID_INTENT");
+    if (evaluatedAt < account.observedAt
+      || evaluatedAt - account.observedAt > policy.maxAccountSnapshotAgeMs) {
+      reasons.push("ACCOUNT_SNAPSHOT_STALE");
+    }
     if (intent.epic !== quote.epic) reasons.push("QUOTE_EPIC_MISMATCH");
 
     const quoteAge = quote.receivedAt - quote.brokerTimestamp;
