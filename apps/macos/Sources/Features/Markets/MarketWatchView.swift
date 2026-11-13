@@ -152,7 +152,7 @@ struct MarketWatchTableView: View {
                 .buttonStyle(.plain)
                 .help("Remove instrument from Market Watch")
             } else {
-                priceText(quote?.spread, tint: AtheerColors.info).frame(width: 66, alignment: .trailing)
+                priceText(liveQuote?.spread, tint: AtheerColors.info).frame(width: 66, alignment: .trailing)
                 ageText(quote).frame(width: 50, alignment: .trailing)
             }
         }
@@ -206,7 +206,7 @@ struct MarketWatchTableView: View {
             .font(.system(size: 10, weight: .semibold, design: .monospaced))
             .foregroundColor(tint)
             .lineLimit(1)
-            .help("Capital.com netChange/percentageChange is preferred when supplied; otherwise this shows movement since the previous quote.")
+            .help("Quote-to-quote movement only; hidden until consecutive fresh broker quotes are available.")
     }
 
     private func tickText(_ instrument: MarketWatchInstrument, quote: MarketQuoteSnapshot?) -> some View {
@@ -220,7 +220,7 @@ struct MarketWatchTableView: View {
         return Text(ticks)
             .font(.system(size: 10, weight: .medium, design: .monospaced))
             .foregroundColor(AtheerColors.textSecondary)
-            .help("Net price change divided by the broker-provided tickSize.")
+            .help("Fresh quote-to-quote movement divided by the broker-provided tickSize.")
     }
 
     private func volumeText() -> some View {
