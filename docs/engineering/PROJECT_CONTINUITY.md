@@ -262,3 +262,8 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - Added native IPC event receipt timestamp capture and distinct model deltas for backend-to-client delivery and broker-timestamp-to-backend receipt. The latter is not calibrated until Capital.com server-time offset is measured.
 - Capital.com WebSocket quote contract includes bidQty/ofrQty, not executed volume. REST historical candles expose optional lastTradedVolume. One-minute volume monitor/IPC/UI is still pending; UI continues to withhold a value rather than misrepresent quote quantities or search results as traded volume.
 - Source/doc changes only through GitHub. No Xcode build, Demo quote-parity test, server-time calibration, or volume monitor verification is claimed. PR #40 remains draft; do not merge or release before the outstanding checks.
+
+
+### 2026-11-13 — ATP-MD-QUALITY-002 compile correction
+
+Resolved the undefined `movementTint` reference in `MarketWatchView.swift` by using the existing `movementColor(liveQuote?.changeFromPrevious)` helper for MID-price directional coloring. BID/ASK execution-side colors remain invariant (BID red, ASK green). Commit: `dabf08e1d777546a161a1d7873bacb554d118999`. Local Xcode build remains pending.
