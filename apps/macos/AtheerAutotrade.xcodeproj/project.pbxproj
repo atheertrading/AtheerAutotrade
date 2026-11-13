@@ -25,6 +25,8 @@
 		A1000000000000000000000D /* CapitalComCredentialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000D /* CapitalComCredentialStore.swift */; };
 		A1000000000000000000000E /* CapitalComBrokerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000E /* CapitalComBrokerView.swift */; };
 		A1000000000000000000000F /* IPCSecretChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* IPCSecretChannel.swift */; };
+		A10000000000000000000010 /* MarketDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* MarketDataStore.swift */; };
+		A10000000000000000000011 /* MarketWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* MarketWatchView.swift */; };
 		CAF55FDB30A50EB5002CBC33 /* WorkspacePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */; };
 		CAF55FDD30A50F84002CBC33 /* WorkspaceRegionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */; };
 		CAF55FDF30A51065002CBC33 /* WorkspaceLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDE30A51065002CBC33 /* WorkspaceLayoutView.swift */; };
@@ -51,6 +53,8 @@
 		A2000000000000000000000D /* CapitalComCredentialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapitalComCredentialStore.swift; sourceTree = "<group>"; };
 		A2000000000000000000000E /* CapitalComBrokerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CapitalComBrokerView.swift; sourceTree = "<group>"; };
 		A2000000000000000000000F /* IPCSecretChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCSecretChannel.swift; sourceTree = "<group>"; };
+		A20000000000000000000010 /* MarketDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketDataStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000011 /* MarketWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketWatchView.swift; sourceTree = "<group>"; };
 		A30000000000000000000001 /* AtheerAutotrade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtheerAutotrade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspacePanelView.swift; sourceTree = "<group>"; };
 		CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceRegionView.swift; sourceTree = "<group>"; };
@@ -121,6 +125,7 @@
 				A5000000000000000000000B /* Workspace */,
 				A5000000000000000000000C /* Backend */,
 				A5000000000000000000000D /* Security */,
+				A5000000000000000000000F /* MarketData */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -131,6 +136,7 @@
 				CAF55FD930A50E85002CBC33 /* Workspace */,
 				A50000000000000000000009 /* Dashboard */,
 				A5000000000000000000000E /* Brokers */,
+				A50000000000000000000010 /* Markets */,
 			);
 			path = Features;
 			sourceTree = "<group>";
@@ -170,12 +176,28 @@
 			path = Security;
 			sourceTree = "<group>";
 		};
+		A5000000000000000000000F /* MarketData */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000010 /* MarketDataStore.swift */,
+			);
+			path = MarketData;
+			sourceTree = "<group>";
+		};
 		A5000000000000000000000E /* Brokers */ = {
 			isa = PBXGroup;
 			children = (
 				A2000000000000000000000E /* CapitalComBrokerView.swift */,
 			);
 			path = Brokers;
+			sourceTree = "<group>";
+		};
+		A50000000000000000000010 /* Markets */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000011 /* MarketWatchView.swift */,
+			);
+			path = Markets;
 			sourceTree = "<group>";
 		};
 		A50000000000000000000009 /* Dashboard */ = {
@@ -321,6 +343,8 @@
 				A1000000000000000000000D /* CapitalComCredentialStore.swift in Sources */,
 				A1000000000000000000000E /* CapitalComBrokerView.swift in Sources */,
 				A1000000000000000000000F /* IPCSecretChannel.swift in Sources */,
+				A10000000000000000000010 /* MarketDataStore.swift in Sources */,
+				A10000000000000000000011 /* MarketWatchView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
