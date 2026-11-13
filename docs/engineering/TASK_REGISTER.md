@@ -191,7 +191,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-ARCH-OOP-003 | Remove concrete broker-runtime construction from stdio IPC and establish an explicit composition-root boundary | Introduce a narrow broker capability contract, inject the broker runtime into the IPC transport, compose CapitalComRuntime in server.ts, and cover the boundary with deterministic test doubles | IMPLEMENTED IN SOURCE — PENDING BACKEND CI |
+| ATP-ARCH-OOP-003 | Remove concrete broker-runtime construction from stdio IPC and establish an explicit composition-root boundary | Introduce a narrow broker capability contract, inject the broker runtime into the IPC transport, compose CapitalComRuntime in server.ts, and cover the boundary with deterministic test doubles | IMPLEMENTED IN SOURCE — BACKEND CI VERIFIED; PR #47 OPEN, NOT MERGED |
 
 - Branch: `refactor/atp-arch-oop-003-stdio-composition`, based on `main`.
 - Changed source: `services/backend/src/api/stdio-ipc.ts`, `services/backend/src/server.ts`.
@@ -200,5 +200,5 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - The transport no longer constructs a concrete CapitalComRuntime or hides that dependency in a default parameter. The composition root owns construction and lifecycle handoff.
 - IPC protocol v2, method names, payload validation, capability negotiation, encrypted one-shot credentials, read-only broker methods, and disconnect-on-session-exit behavior are preserved.
 - No order/dealing method, RiskEngine bypass, LIVE capability, or trading permission was added.
-- Verification is pending: run Backend CI (Node.js 24 TypeScript build and all Node tests). No local build or test has been run by this GitHub-only change.
+- GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed; 51/51 Node tests passed. No local build or test has been run by this GitHub-only change.
 - Next: inspect CI evidence and resolve any failures before starting the next bounded remediation.
