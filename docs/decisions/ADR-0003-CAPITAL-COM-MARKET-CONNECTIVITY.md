@@ -26,10 +26,10 @@ Capital.com's official Public API documents:
 7. Use Capital.com Demo as the initial integration environment. Live base URL support in the adapter does not authorize live trading or live account onboarding.
 8. Maintain WebSocket and REST session activity, reconnect with bounded backoff, and re-subscribe after reconnect.
 9. Treat transport reconnection as insufficient evidence of market-data continuity. A separate ingestion layer must validate quote age, timestamps, gaps, and candle integrity before consumers can treat the feed as operational.
-10. Do not expose broker adapter methods through unauthenticated HTTP routes. Add a secured local application-to-backend boundary and Keychain-backed credential provider before enabling desktop-initiated account authentication.
+10. Do not expose broker adapter methods through HTTP routes. Desktop-initiated authentication must use native Keychain ownership and encrypted protocol v2 over parent-owned anonymous stdio pipes. The current IPC allowlist is limited to Demo session connect/disconnect/status, market search, and historical prices.
 
 ## Consequences
 
-The repository now contains a read-only REST client, quote/OHLC WebSocket stream, and mock-based tests. This is an implementation foundation, not a connected broker account. Credential retrieval, secure desktop/backend integration, live Demo connection, sustained stream observation, stale-data detection, and end-to-end verification remain outstanding.
+The repository contains a read-only REST client, quote/OHLC WebSocket adapter, mock-based tests, encrypted IPC v2 credential transfer, a CapitalComRuntime session service, and native macOS Connect/Disconnect and market-search controls. The Xcode project includes a build phase for the bundled Node runtime/backend. WebSocket quote/OHLC events are now routed through IPC v2 to the macOS UI. These are source-level implementations only: actual Demo authentication, market search/history responses, live WebSocket subscription acknowledgements, sustained stream observation, stale-data detection, and end-to-end verification remain outstanding.
 
 The backend currently requires Node.js 24 and uses its built-in Fetch and WebSocket APIs; no new package dependency is introduced.

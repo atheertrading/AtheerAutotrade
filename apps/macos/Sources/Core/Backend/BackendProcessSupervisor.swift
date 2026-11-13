@@ -7,9 +7,11 @@ import Foundation
 /// - Contents/Resources/Backend/dist/server.js
 ///
 /// The runtime is resolved only from the app bundle. PATH lookup and shell
-/// invocation are deliberately prohibited. The credential provider is not
-/// part of this component.
+/// invocation are deliberately prohibited. Keychain credentials are encrypted
+/// with a per-process ephemeral key before crossing the supervised IPC pipe.
 final class BackendProcessSupervisor {
+    static let shared = BackendProcessSupervisor()
+
     typealias Completion = (Result<[String: Any], Error>) -> Void
     typealias StartCompletion = (Result<Void, Error>) -> Void
 
@@ -28,6 +30,8 @@ final class BackendProcessSupervisor {
     private var startCompletions: [StartCompletion] = []
     private var isReady = false
     private var isStopping = false
+    private var secretChannel: IPCSecretChannel?
+    private var eventHandler: ((String, [String: Any]) -> Void)?
 
     func start(completion: @escaping StartCompletion) {
         queue.async {
@@ -69,6 +73,145 @@ final class BackendProcessSupervisor {
         }
     }
 
+    /// Synchronously requests child termination during NSApplication shutdown.
+    /// The child is never allowed to outlive the owning desktop application by design.
+    func stopForApplicationTermination() {
+        queue.sync {
+            self.terminateChild(with: LocalIPCError.processTerminated)
+        }
+    }
+
+    func setEventHandler(_ handler: ((String, [String: Any]) -> Void)?) {
+        queue.async {
+            self.eventHandler = handler
+        }
+    }
+
+    func startCapitalComMarketData(
+        epic: String,
+        completion: @escaping Completion
+    ) {
+        request(
+            method: "broker.stream.start",
+            payload: [
+                "epics": [epic],
+                "resolutions": ["MINUTE"],
+                "candleType": "classic"
+            ],
+            timeout: 20,
+            completion: completion
+        )
+    }
+
+    func stopCapitalComMarketData(completion: @escaping Completion) {
+        request(method: "broker.stream.stop", payload: [:], timeout: 10, completion: completion)
+    }
+
+    /// Loads credentials from Keychain, encrypts them with the per-process
+    /// X25519/AES-GCM channel, and requests a read-only Capital.com Demo session.
+    func connectCapitalCom(completion: @escaping Completion) {
+        let credentials: CapitalComCredentials
+        do {
+            guard let saved = try CapitalComCredentialStore.load() else {
+                completion(.failure(LocalIPCError.credentialsNotFound))
+                return
+            }
+            credentials = saved
+        } catch {
+            completion(.failure(error))
+            return
+        }
+
+        start { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success:
+                self.queue.async {
+                    guard let channel = self.secretChannel else {
+                        completion(.failure(LocalIPCError.handshakeRejected))
+                        return
+                    }
+
+                    do {
+                        var plaintext = try JSONEncoder().encode(credentials)
+                        defer { plaintext.resetBytes(in: 0..<plaintext.count) }
+                        let envelope = try channel.encrypt(plaintext)
+                        self.send(
+                            method: "broker.credentials.submit",
+                            payload: ["envelope": envelope],
+                            timeout: 10
+                        ) { submitResult in
+                            switch submitResult {
+                            case .failure(let error):
+                                completion(.failure(error))
+                            case .success:
+                                self.send(
+                                    method: "broker.connect",
+                                    payload: ["environment": "demo"],
+                                    timeout: 30
+                                ) { connectResult in
+                                    if case .failure(let error) = connectResult {
+                                        completion(.failure(error))
+                                        self.stop()
+                                    } else {
+                                        completion(connectResult)
+                                    }
+                                }
+                            }
+                        }
+                    } catch {
+                        completion(.failure(error))
+                    }
+                }
+            }
+        }
+    }
+
+    func disconnectCapitalCom(completion: @escaping Completion) {
+        request(method: "broker.disconnect", payload: [:], timeout: 10) { result in
+            completion(result)
+            self.stop()
+        }
+    }
+
+    func capitalComStatus(completion: @escaping Completion) {
+        start { result in
+            switch result {
+            case .failure(let error):
+                completion(.failure(error))
+            case .success:
+                self.request(method: "broker.status", payload: [:], timeout: 10, completion: completion)
+            }
+        }
+    }
+
+    func getCapitalComHistoricalPrices(
+        epic: String,
+        resolution: String = "MINUTE",
+        max: Int = 100,
+        completion: @escaping Completion
+    ) {
+        request(
+            method: "broker.historicalPrices",
+            payload: ["epic": epic, "resolution": resolution, "max": max],
+            timeout: 20,
+            completion: completion
+        )
+    }
+
+    func searchCapitalComMarkets(
+        _ searchTerm: String,
+        completion: @escaping Completion
+    ) {
+        request(
+            method: "broker.marketSearch",
+            payload: ["searchTerm": searchTerm],
+            timeout: 20,
+            completion: completion
+        )
+    }
+
     private func launchChild() {
         let resources = Bundle.main.bundleURL
             .appendingPathComponent("Contents", isDirectory: true)
@@ -106,6 +249,8 @@ final class BackendProcessSupervisor {
         outputPipe = childOutput
         errorPipe = childError
         decoder.reset()
+        let channel = IPCSecretChannel()
+        secretChannel = channel
 
         childOutput.fileHandleForReading.readabilityHandler = { [weak self] handle in
             let data = handle.availableData
@@ -140,7 +285,10 @@ final class BackendProcessSupervisor {
             try child.run()
             send(
                 method: "system.hello",
-                payload: ["clientVersion": LocalIPCProtocol.clientVersion],
+                payload: [
+                    "clientVersion": LocalIPCProtocol.clientVersion,
+                    "clientPublicKey": channel.clientPublicKey
+                ],
                 timeout: 5
             ) { result in
                 switch result {
@@ -152,8 +300,27 @@ final class BackendProcessSupervisor {
                     guard
                         protocolVersion == LocalIPCProtocol.version,
                         service == "atheerautotrade-backend",
-                        capabilities.contains("system.ping")
+                        capabilities.contains("system.ping"),
+                        capabilities.contains("broker.credentials.submit"),
+                        capabilities.contains("broker.connect"),
+                        capabilities.contains("broker.status"),
+                        capabilities.contains("broker.marketSearch"),
+                        capabilities.contains("broker.historicalPrices"),
+                        capabilities.contains("broker.stream.start"),
+                        capabilities.contains("broker.stream.stop"),
+                        let keyAgreement = response["keyAgreement"] as? [String: Any],
+                        keyAgreement["algorithm"] as? String == "X25519-HKDF-SHA256-AES-256-GCM",
+                        let serverPublicKey = keyAgreement["publicKey"] as? String,
+                        let salt = keyAgreement["salt"] as? String
                     else {
+                        self.stopAfterProtocolFailure()
+                        self.finishStart(.failure(LocalIPCError.handshakeRejected))
+                        return
+                    }
+
+                    do {
+                        try channel.establish(serverPublicKey: serverPublicKey, salt: salt)
+                    } catch {
                         self.stopAfterProtocolFailure()
                         self.finishStart(.failure(LocalIPCError.handshakeRejected))
                         return
@@ -171,6 +338,8 @@ final class BackendProcessSupervisor {
             detachHandlers()
             closePipes()
             process = nil
+            secretChannel?.reset()
+            secretChannel = nil
             finishStart(.failure(LocalIPCError.processLaunchFailed(error.localizedDescription)))
         }
     }
@@ -223,6 +392,15 @@ final class BackendProcessSupervisor {
         do {
             let frames = try decoder.append(data)
             for frame in frames {
+                if
+                    let envelope = try JSONSerialization.jsonObject(with: frame) as? [String: Any],
+                    envelope["kind"] as? String == "event"
+                {
+                    let event = try LocalIPCProtocol.event(from: frame)
+                    eventHandler?(event.name, event.payload)
+                    continue
+                }
+
                 let response = try LocalIPCProtocol.response(from: frame)
                 guard let pendingRequest = pending.removeValue(forKey: response.id) else {
                     throw LocalIPCError.invalidResponse
@@ -260,6 +438,8 @@ final class BackendProcessSupervisor {
         closePipes()
         process = nil
         decoder.reset()
+        secretChannel?.reset()
+        secretChannel = nil
         isStopping = false
         finishStart(.failure(LocalIPCError.processTerminated))
         _ = status
@@ -288,6 +468,8 @@ final class BackendProcessSupervisor {
         closePipes()
         process = nil
         decoder.reset()
+        secretChannel?.reset()
+        secretChannel = nil
         isStopping = false
         finishStart(.failure(error))
     }

@@ -51,3 +51,53 @@ declare const console: {
 
 declare function setTimeout(callback: () => void, milliseconds?: number): { unref(): void };
 declare function clearTimeout(timeout: { unref(): void }): void;
+
+declare module "node:crypto" {
+  export interface KeyObject {
+    export(options: { format: "der"; type: "spki" }): Buffer;
+  }
+
+  export interface DecipherGCM {
+    setAuthTag(tag: Uint8Array): void;
+    update(data: Uint8Array): Buffer;
+    final(): Buffer;
+  }
+
+  export function generateKeyPairSync(type: "x25519"): {
+    privateKey: KeyObject;
+    publicKey: KeyObject;
+  };
+  export function createPublicKey(options: {
+    key: Uint8Array;
+    format: "der";
+    type: "spki";
+  }): KeyObject;
+  export function diffieHellman(options: {
+    privateKey: KeyObject;
+    publicKey: KeyObject;
+  }): Buffer;
+  export function hkdfSync(
+    digest: "sha256",
+    key: Uint8Array,
+    salt: Uint8Array,
+    info: Uint8Array,
+    keyLength: number
+  ): ArrayBuffer;
+  export function randomBytes(size: number): Buffer;
+  export function createDecipheriv(
+    algorithm: "aes-256-gcm",
+    key: Uint8Array,
+    iv: Uint8Array
+  ): DecipherGCM;
+}
+
+interface Buffer extends Uint8Array {
+  toString(encoding?: "utf8" | "base64" | "hex"): string;
+  subarray(begin?: number, end?: number): Buffer;
+}
+
+declare const Buffer: {
+  from(value: string, encoding?: "utf8" | "base64" | "hex"): Buffer;
+  from(value: ArrayBuffer): Buffer;
+  concat(values: readonly Uint8Array[]): Buffer;
+};

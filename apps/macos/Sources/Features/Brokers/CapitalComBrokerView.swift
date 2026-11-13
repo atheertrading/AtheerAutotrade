@@ -5,6 +5,17 @@ struct CapitalComBrokerView: View {
     @State private var identifier = ""
     @State private var password = ""
     @State private var hasSavedCredentials = CapitalComCredentialStore.hasSavedCredentials
+    @State private var isConnecting = false
+    @State private var isConnected = false
+    @State private var connectionDetail = "No active broker session"
+    @State private var marketSearchTerm = ""
+    @State private var marketResults: [MarketRow] = []
+    @State private var isSearchingMarkets = false
+    @State private var isStreaming = false
+    @State private var streamingStatus = "Stopped"
+    @State private var selectedEpic: String?
+    @State private var latestQuote: QuoteSnapshot?
+    @State private var latestCandleSummary = ""
     @State private var feedback: Feedback?
     @State private var showingDeleteConfirmation = false
 
@@ -13,22 +24,57 @@ struct CapitalComBrokerView: View {
         case error(String)
     }
 
+    private struct MarketRow: Identifiable {
+        let id: String
+        let name: String
+        let instrumentType: String
+        let status: String
+    }
+
+    private struct QuoteSnapshot {
+        let epic: String
+        let bid: Double
+        let ask: Double
+        let timestamp: Double
+    }
+
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 24) {
+            VStack(alignment: .leading, spacing: 20) {
                 pageHeader
-                connectionOverview
-                credentialsCard
-                securityNotice
-                integrationStatus
+
+                HStack(alignment: .top, spacing: 18) {
+                    VStack(spacing: 18) {
+                        connectionOverview
+                        credentialsCard
+                        securityNotice
+                    }
+                    .frame(width: 350)
+
+                    VStack(spacing: 18) {
+                        marketDiscoveryCard
+                        integrationStatus
+                    }
+                    .frame(maxWidth: .infinity)
+                }
             }
             .frame(maxWidth: 1040, alignment: .leading)
-            .padding(.horizontal, 34)
-            .padding(.vertical, 30)
+            .padding(.horizontal, 28)
+            .padding(.vertical, 26)
             .frame(maxWidth: .infinity, alignment: .topLeading)
         }
         .background(AtheerColors.canvas)
-        .onAppear(perform: restoreCredentials)
+        .onAppear {
+            installMarketDataEventHandler()
+            restoreCredentials()
+            refreshConnectionStatus()
+        }
+        .onDisappear {
+            BackendProcessSupervisor.shared.setEventHandler(nil)
+            if isStreaming {
+                BackendProcessSupervisor.shared.stopCapitalComMarketData { _ in }
+            }
+        }
         .alert("Remove saved credentials?", isPresented: $showingDeleteConfirmation) {
             Button("Cancel", role: .cancel) {}
             Button("Remove Credentials", role: .destructive) {
@@ -89,9 +135,9 @@ struct CapitalComBrokerView: View {
                 Spacer(minLength: 12)
 
                 statusPill(
-                    title: "NOT CONNECTED",
-                    color: AtheerColors.warning,
-                    symbol: "circle.dashed"
+                    title: isConnected ? "DEMO CONNECTED" : (isConnecting ? "CONNECTING" : "NOT CONNECTED"),
+                    color: isConnected ? AtheerColors.positive : AtheerColors.warning,
+                    symbol: isConnected ? "checkmark.circle.fill" : (isConnecting ? "arrow.triangle.2.circlepath" : "circle.dashed")
                 )
             }
         }
@@ -111,10 +157,10 @@ struct CapitalComBrokerView: View {
 
             overviewMetric(
                 title: "AUTHENTICATION",
-                value: hasSavedCredentials ? "CREDENTIALS SAVED" : "NOT CONFIGURED",
-                detail: hasSavedCredentials ? "Stored in macOS Keychain" : "API credentials required",
-                symbol: "key.horizontal",
-                tint: hasSavedCredentials ? AtheerColors.positive : AtheerColors.warning
+                value: isConnected ? "AUTHENTICATED" : (hasSavedCredentials ? "CREDENTIALS SAVED" : "NOT CONFIGURED"),
+                detail: isConnected ? connectionDetail : (hasSavedCredentials ? "Stored in macOS Keychain" : "API credentials required"),
+                symbol: isConnected ? "checkmark.shield" : "key.horizontal",
+                tint: isConnected ? AtheerColors.positive : (hasSavedCredentials ? AtheerColors.accent : AtheerColors.warning)
             )
 
             metricDivider
@@ -129,6 +175,141 @@ struct CapitalComBrokerView: View {
         }
         .padding(.vertical, 20)
         .padding(.horizontal, 22)
+        .background(AtheerColors.surface)
+        .overlay {
+            RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
+                .stroke(AtheerColors.border, lineWidth: 1)
+        }
+        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous))
+    }
+
+    private var marketDiscoveryCard: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("MARKET DISCOVERY")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .tracking(1.1)
+                        .foregroundColor(AtheerColors.textPrimary)
+                    Text("Search instruments directly from Capital.com.")
+                        .font(.system(size: 11))
+                        .foregroundColor(AtheerColors.textSecondary)
+                }
+                Spacer()
+                statusPill(
+                    title: isConnected ? "BROKER API" : "SESSION REQUIRED",
+                    color: isConnected ? AtheerColors.positive : AtheerColors.textTertiary,
+                    symbol: "magnifyingglass"
+                )
+            }
+
+            HStack(spacing: 10) {
+                TextField("Search markets, e.g. EUR/USD or Gold", text: $marketSearchTerm)
+                    .textFieldStyle(.roundedBorder)
+                    .disabled(!isConnected || isSearchingMarkets)
+                    .onSubmit(searchMarkets)
+
+                Button(action: searchMarkets) {
+                    HStack(spacing: 7) {
+                        if isSearchingMarkets {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: "magnifyingglass")
+                        }
+                        Text("Search")
+                    }
+                }
+                .disabled(!isConnected || isSearchingMarkets || marketSearchTerm.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
+
+            if isStreaming || latestQuote != nil {
+                VStack(alignment: .leading, spacing: 7) {
+                    HStack {
+                        Text("LIVE MARKET DATA")
+                            .font(.system(size: 9, weight: .bold, design: .rounded))
+                            .tracking(0.8)
+                            .foregroundColor(AtheerColors.textTertiary)
+                        Spacer()
+                        Text(streamingStatus.uppercased())
+                            .font(.system(size: 9, weight: .bold))
+                            .foregroundColor(streamingStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
+                    }
+                    if let quote = latestQuote {
+                        HStack(spacing: 18) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("BID").font(.system(size: 9, weight: .bold)).foregroundColor(AtheerColors.textTertiary)
+                                Text(quote.bid, format: .number.precision(.fractionLength(2...6)))
+                                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                            }
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text("ASK").font(.system(size: 9, weight: .bold)).foregroundColor(AtheerColors.textTertiary)
+                                Text(quote.ask, format: .number.precision(.fractionLength(2...6)))
+                                    .font(.system(size: 14, weight: .semibold, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                            }
+                            Spacer()
+                            Text(Date(timeIntervalSince1970: quote.timestamp / 1000), style: .time)
+                                .font(.system(size: 10, design: .monospaced))
+                                .foregroundColor(AtheerColors.textSecondary)
+                        }
+                    }
+                    if !latestCandleSummary.isEmpty {
+                        Text(latestCandleSummary)
+                            .font(.system(size: 10, design: .monospaced))
+                            .foregroundColor(AtheerColors.textSecondary)
+                    }
+                }
+                .padding(13)
+                .background(AtheerColors.canvas)
+                .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
+            }
+
+            if !marketResults.isEmpty {
+                VStack(spacing: 0) {
+                    ForEach(marketResults) { market in
+                        HStack(spacing: 12) {
+                            VStack(alignment: .leading, spacing: 3) {
+                                Text(market.name)
+                                    .font(.system(size: 12, weight: .semibold))
+                                    .foregroundColor(AtheerColors.textPrimary)
+                                Text(market.id)
+                                    .font(.system(size: 10, design: .monospaced))
+                                    .foregroundColor(AtheerColors.textTertiary)
+                            }
+                            Spacer()
+                            Text(market.instrumentType)
+                                .font(.system(size: 10, weight: .medium))
+                                .foregroundColor(AtheerColors.textSecondary)
+                            Text(market.status)
+                                .font(.system(size: 10, weight: .semibold))
+                                .foregroundColor(market.status == "TRADEABLE" ? AtheerColors.positive : AtheerColors.textSecondary)
+
+                            Button(selectedEpic == market.id && isStreaming ? "Stop" : "Live") {
+                                toggleMarketData(for: market)
+                            }
+                            .buttonStyle(.plain)
+                            .font(.system(size: 10, weight: .semibold))
+                            .foregroundColor(selectedEpic == market.id && isStreaming ? AtheerColors.negative : AtheerColors.accent)
+                            .disabled(!isConnected)
+                        }
+                        .padding(.vertical, 9)
+                        if market.id != marketResults.last?.id {
+                            Divider().overlay(AtheerColors.border)
+                        }
+                    }
+                }
+            } else if isConnected {
+                Text("No instruments loaded. Enter a market name or symbol to search.")
+                    .font(.system(size: 10))
+                    .foregroundColor(AtheerColors.textTertiary)
+            } else {
+                Text("Market discovery becomes available after the Demo API session is authenticated.")
+                    .font(.system(size: 10))
+                    .foregroundColor(AtheerColors.textTertiary)
+            }
+        }
+        .padding(22)
         .background(AtheerColors.surface)
         .overlay {
             RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
@@ -228,25 +409,29 @@ struct CapitalComBrokerView: View {
                     .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                 }
                 .buttonStyle(.plain)
-                .disabled(!canSave)
-                .opacity(canSave ? 1 : 0.48)
+                 .disabled(!canSave || isConnected)
+                .opacity(canSave && !isConnected ? 1 : 0.48)
+                .help(isConnected ? "Disconnect before changing stored credentials." : "Save credentials in macOS Keychain.")
 
-                Button {
-                } label: {
+                Button(action: isConnected ? disconnectFromCapitalCom : connectToCapitalCom) {
                     HStack(spacing: 7) {
-                        Image(systemName: "link")
-                        Text("Connect to Capital.com")
+                        if isConnecting {
+                            ProgressView().controlSize(.small)
+                        } else {
+                            Image(systemName: isConnected ? "link.slash" : "link")
+                        }
+                        Text(isConnected ? "Disconnect" : (isConnecting ? "Connecting…" : "Connect to Capital.com"))
                     }
                     .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AtheerColors.textSecondary)
+                    .foregroundColor(isConnected ? AtheerColors.negative : AtheerColors.canvas)
                     .padding(.horizontal, 15)
                     .frame(height: 40)
-                    .background(AtheerColors.elevated)
+                    .background(isConnected ? AtheerColors.negative.opacity(0.12) : AtheerColors.accent)
                     .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                 }
                 .buttonStyle(.plain)
-                .disabled(true)
-                .help("Connection will be enabled after the signed backend runtime and secure credential handoff are verified.")
+                .disabled(isConnecting || (!isConnected && !hasSavedCredentials))
+                .help(isConnected ? "Close the current Capital.com Demo session." : "Authenticate with Capital.com Demo using credentials stored in Keychain.")
 
                 if hasSavedCredentials {
                     Button("Remove Saved Credentials", role: .destructive) {
@@ -285,7 +470,7 @@ struct CapitalComBrokerView: View {
                     .font(.system(size: 12, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text("Credentials are stored as an encrypted macOS Keychain item. They are not written to project files, preferences, application logs, process arguments, or environment variables.")
+                Text("Credentials are encrypted at rest by macOS Keychain, encrypted again with an ephemeral X25519-derived AES-256-GCM key while crossing the private app-to-backend pipe, and sent to Capital.com over HTTPS/TLS. Broker session tokens remain in backend memory only; secrets are never placed in files, logs, process arguments, or environment variables.")
                     .font(.system(size: 11))
                     .foregroundColor(AtheerColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
@@ -315,13 +500,13 @@ struct CapitalComBrokerView: View {
             )
             readinessRow(
                 title: "Secure desktop-to-backend session handoff",
-                detail: "Pending IPC packaging and verification",
+                detail: "Ephemeral X25519 + AES-256-GCM channel and runtime packaging phase added; build verification pending",
                 complete: false
             )
             readinessRow(
-                title: "Capital.com authentication and account handshake",
-                detail: "Not yet enabled",
-                complete: false
+                title: "Capital.com Demo API session",
+                detail: isConnected ? connectionDetail : "Connect to authenticate and verify the REST session",
+                complete: isConnected
             )
             readinessRow(
                 title: "Trading and order execution",
@@ -474,6 +659,190 @@ struct CapitalComBrokerView: View {
         }
     }
 
+    private func installMarketDataEventHandler() {
+        BackendProcessSupervisor.shared.setEventHandler { name, payload in
+            DispatchQueue.main.async {
+                switch name {
+                case "broker.marketData.status":
+                    let status = payload["status"] as? String ?? "unknown"
+                    streamingStatus = status
+                    isStreaming = status != "stopped"
+                    if status == "stopped" {
+                        latestQuote = nil
+                        latestCandleSummary = ""
+                    }
+                case "broker.marketData.quote":
+                    guard
+                        let epic = payload["epic"] as? String,
+                        let bid = payload["bid"] as? Double,
+                        let ask = payload["ask"] as? Double,
+                        let timestamp = payload["timestamp"] as? Double
+                    else { return }
+                    guard selectedEpic == epic else { return }
+                    latestQuote = QuoteSnapshot(epic: epic, bid: bid, ask: ask, timestamp: timestamp)
+                case "broker.marketData.ohlc":
+                    guard
+                        let epic = payload["epic"] as? String,
+                        selectedEpic == epic,
+                        let resolution = payload["resolution"] as? String,
+                        let close = payload["close"] as? Double
+                    else { return }
+                    latestCandleSummary = "\(resolution) close: \(close)"
+                case "broker.marketData.error":
+                    streamingStatus = "error"
+                    feedback = .error(payload["message"] as? String ?? "Market data stream error.")
+                default:
+                    break
+                }
+            }
+        }
+    }
+
+    private func toggleMarketData(for market: MarketRow) {
+        if selectedEpic == market.id && isStreaming {
+            stopMarketData()
+        } else if isStreaming {
+            stopMarketData {
+                startMarketData(for: market)
+            }
+        } else {
+            startMarketData(for: market)
+        }
+    }
+
+    private func startMarketData(for market: MarketRow) {
+        selectedEpic = market.id
+        latestQuote = nil
+        latestCandleSummary = ""
+        streamingStatus = "connecting"
+        isStreaming = true
+
+        BackendProcessSupervisor.shared.startCapitalComMarketData(epic: market.id) { result in
+            DispatchQueue.main.async {
+                if case .failure(let error) = result {
+                    isStreaming = false
+                    streamingStatus = "error"
+                    feedback = .error(error.localizedDescription)
+                } else {
+                    streamingStatus = "awaiting subscription confirmation"
+                }
+            }
+        }
+    }
+
+    private func stopMarketData(completion: (() -> Void)? = nil) {
+        BackendProcessSupervisor.shared.stopCapitalComMarketData { result in
+            DispatchQueue.main.async {
+                if case .failure(let error) = result {
+                    feedback = .error(error.localizedDescription)
+                } else {
+                    isStreaming = false
+                    streamingStatus = "stopped"
+                    latestQuote = nil
+                    latestCandleSummary = ""
+                }
+                completion?()
+            }
+        }
+    }
+
+    private func refreshConnectionStatus() {
+        BackendProcessSupervisor.shared.capitalComStatus { result in
+            DispatchQueue.main.async {
+                if case .success(let response) = result {
+                    isConnected = response["connected"] as? Bool == true
+                    connectionDetail = isConnected
+                        ? "Demo API session authenticated"
+                        : "No active broker session"
+                    isStreaming = response["streaming"] as? Bool == true
+                    let activeEpics = response["streamingEpics"] as? [String] ?? []
+                    selectedEpic = activeEpics.first
+                    streamingStatus = isStreaming ? "active" : "stopped"
+                    if !isConnected {
+                        marketResults = []
+                        isStreaming = false
+                        selectedEpic = nil
+                        latestQuote = nil
+                        latestCandleSummary = ""
+                    }
+                } else {
+                    isConnected = false
+                    connectionDetail = "Backend unavailable"
+                }
+            }
+        }
+    }
+
+    private func connectToCapitalCom() {
+        guard !isConnecting, hasSavedCredentials else { return }
+        isConnecting = true
+        feedback = nil
+
+        BackendProcessSupervisor.shared.connectCapitalCom { result in
+            DispatchQueue.main.async {
+                isConnecting = false
+                switch result {
+                case .success(let response):
+                    isConnected = response["connected"] as? Bool == true
+                    connectionDetail = "Demo API session authenticated"
+                    feedback = .success("Capital.com Demo session established and verified with an authenticated ping.")
+                case .failure(let error):
+                    isConnected = false
+                    connectionDetail = "Connection failed"
+                    marketResults = []
+                    feedback = .error(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func searchMarkets() {
+        guard isConnected, !isSearchingMarkets else { return }
+        let term = marketSearchTerm.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !term.isEmpty else { return }
+        isSearchingMarkets = true
+
+        BackendProcessSupervisor.shared.searchCapitalComMarkets(term) { result in
+            DispatchQueue.main.async {
+                isSearchingMarkets = false
+                switch result {
+                case .success(let response):
+                    let records = response["markets"] as? [[String: Any]] ?? []
+                    marketResults = records.compactMap { item in
+                        guard let epic = item["epic"] as? String, !epic.isEmpty else { return nil }
+                        return MarketRow(
+                            id: epic,
+                            name: (item["instrumentName"] as? String) ?? epic,
+                            instrumentType: (item["instrumentType"] as? String) ?? "MARKET",
+                            status: (item["marketStatus"] as? String) ?? "UNKNOWN"
+                        )
+                    }
+                    feedback = .success("Capital.com returned \(marketResults.count) matching instruments.")
+                case .failure(let error):
+                    marketResults = []
+                    feedback = .error(error.localizedDescription)
+                }
+            }
+        }
+    }
+
+    private func disconnectFromCapitalCom() {
+        guard isConnected else { return }
+        BackendProcessSupervisor.shared.disconnectCapitalCom { result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    isConnected = false
+                    connectionDetail = "No active broker session"
+                    marketResults = []
+                    feedback = .success("Capital.com session closed. Keychain credentials remain saved.")
+                case .failure(let error):
+                    feedback = .error(error.localizedDescription)
+                }
+            }
+        }
+    }
+
     private func saveCredentials() {
         let credentials = CapitalComCredentials(
             apiKey: apiKey.trimmingCharacters(in: .whitespacesAndNewlines),
@@ -517,6 +886,25 @@ struct CapitalComBrokerView: View {
     }
 
     private func deleteCredentials() {
+        if isConnected {
+            BackendProcessSupervisor.shared.disconnectCapitalCom { result in
+                DispatchQueue.main.async {
+                    switch result {
+                    case .failure(let error):
+                        feedback = .error("Disconnect before removing credentials: \(error.localizedDescription)")
+                    case .success:
+                        isConnected = false
+                        marketResults = []
+                        removeCredentialsFromKeychain()
+                    }
+                }
+            }
+        } else {
+            removeCredentialsFromKeychain()
+        }
+    }
+
+    private func removeCredentialsFromKeychain() {
         do {
             try CapitalComCredentialStore.delete()
             apiKey = ""

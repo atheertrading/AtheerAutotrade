@@ -2,20 +2,34 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { spawn } from "node:child_process";
 import {
+  createCipheriv,
+  createPublicKey,
+  diffieHellman,
+  generateKeyPairSync,
+  hkdfSync,
+  randomBytes
+} from "node:crypto";
+import {
   LOCAL_IPC_MAX_FRAME_BYTES,
   serveStdioIpc
 } from "../dist/api/stdio-ipc.js";
 
 const protocol = "atheer.local-ipc";
+const testKeyPair = generateKeyPairSync("x25519");
+const clientPublicKey = testKeyPair.publicKey
+  .export({ format: "der", type: "spki" })
+  .subarray(-32)
+  .toString("base64");
 
 function request(id, method, payload = {}) {
+  const requestPayload = method === "system.hello" ? { ...payload, clientPublicKey } : payload;
   return JSON.stringify({
     protocol,
-    version: 1,
+    version: 2,
     kind: "request",
     id,
     method,
-    payload
+    payload: requestPayload
   }) + "\n";
 }
 
@@ -55,9 +69,72 @@ test("handshake and ping work across fragmented UTF-8 input", async () => {
 
   assert.equal(responses.length, 2);
   assert.equal(responses[0].ok, true);
-  assert.deepEqual(responses[0].result.capabilities, ["system.ping"]);
+  assert.ok(responses[0].result.capabilities.includes("system.ping"));
+  assert.ok(responses[0].result.capabilities.includes("broker.connect"));
+  assert.ok(responses[0].result.capabilities.includes("broker.stream.start"));
+  assert.ok(responses[0].result.capabilities.includes("broker.stream.stop"));
+  assert.equal(responses[0].result.keyAgreement.algorithm, "X25519-HKDF-SHA256-AES-256-GCM");
   assert.equal(responses[1].ok, true);
   assert.deepEqual(responses[1].result, { status: "alive" });
+});
+
+test("accepts only one encrypted credential submission per child session", async () => {
+  const output = {
+    value: "",
+    write(chunk) { this.value += chunk; return true; },
+    once() { throw new Error("drain should not be requested by the test writer"); }
+  };
+
+  async function* input() {
+    yield encoder.encode(request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133", "system.hello", {
+      clientVersion: "0.1.0"
+    }));
+
+    const hello = JSON.parse(output.value.split("\n")[0]);
+    const agreement = hello.result.keyAgreement;
+    const peer = createPublicKey({
+      key: Buffer.concat([
+        Buffer.from("302a300506032b656e032100", "hex"),
+        Buffer.from(agreement.publicKey, "base64")
+      ]),
+      format: "der",
+      type: "spki"
+    });
+    const shared = diffieHellman({ privateKey: testKeyPair.privateKey, publicKey: peer });
+    const key = Buffer.from(hkdfSync(
+      "sha256",
+      shared,
+      Buffer.from(agreement.salt, "base64"),
+      Buffer.from("atheer.local-ipc.capitalcom.credentials.v1", "utf8"),
+      32
+    ));
+    const nonce = randomBytes(12);
+    const plaintext = Buffer.from(JSON.stringify({
+      apiKey: "fixture-api-key",
+      identifier: "fixture@example.invalid",
+      password: "fixture-password"
+    }));
+    const cipher = createCipheriv("aes-256-gcm", key, nonce);
+    const ciphertext = Buffer.concat([cipher.update(plaintext), cipher.final()]);
+    const envelope = {
+      algorithm: "AES-256-GCM",
+      nonce: nonce.toString("base64"),
+      ciphertext: ciphertext.toString("base64"),
+      tag: cipher.getAuthTag().toString("base64")
+    };
+
+    yield encoder.encode(request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52", "broker.credentials.submit", { envelope }));
+    yield encoder.encode(request("a2d20bb2-89e6-46a2-8d5f-86a0bde87b53", "broker.credentials.submit", { envelope }));
+    key.fill(0);
+    shared.fill(0);
+    plaintext.fill(0);
+  }
+
+  await serveStdioIpc(input(), output);
+  const responses = output.value.split("\n").filter(Boolean).map((line) => JSON.parse(line));
+  assert.equal(responses.length, 3);
+  assert.equal(responses[1].ok, true);
+  assert.equal(responses[2].error.code, "CREDENTIALS_ALREADY_SUBMITTED");
 });
 
 test("rejects application methods before handshake and closes the session", async () => {
@@ -164,7 +241,7 @@ test("production stdio transport serves child-process requests with protocol-onl
   assert.equal(diagnostics, "");
   const responses = output.split("\n").filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(responses.length, 2);
-  assert.equal(responses[0].result.protocolVersion, 1);
+  assert.equal(responses[0].result.protocolVersion, 2);
   assert.deepEqual(responses[1].result, { status: "alive" });
 });
 
