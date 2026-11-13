@@ -1,6 +1,14 @@
 import Foundation
 
 /// Immutable broker-authoritative account state shared by every application feature.
+///
+/// Capital.com GET /accounts semantics:
+/// - balance.deposit: Funds (realised account balance, excluding open-position P&L)
+/// - balance.balance: Equity (Funds + running P&L)
+/// - balance.profitLoss: running P&L
+/// - balance.available: available funds
+/// Margin is derived as Equity - Available, matching Capital.com's platform definition.
+/// Do not interpret the API field named "deposit" as used margin.
 struct BrokerAccountSnapshot: Identifiable, Equatable {
     let accountID: String
     let accountName: String
@@ -10,15 +18,16 @@ struct BrokerAccountSnapshot: Identifiable, Equatable {
     let currencySymbol: String
     let isPreferred: Bool
     let funds: Decimal
+    let equity: Decimal
     let available: Decimal
     let profitLoss: Decimal
-    let margin: Decimal
+    /// Derived from broker-reported Equity and Available, not API balance.deposit.
+    var margin: Decimal { equity - available }
     /// Broker/backend observation timestamp; transport freshness is tracked separately by BrokerAccountStore.
     let observedAt: Date
 
     var id: String { accountID }
     var balance: Decimal { funds }
-    var equity: Decimal { funds + profitLoss }
     var marginLevel: Decimal? {
         guard margin > 0 else { return nil }
         return equity / margin * 100
@@ -38,10 +47,11 @@ struct BrokerAccountSnapshot: Identifiable, Equatable {
             let status = payload["status"] as? String,
             let currency = payload["currency"] as? String,
             let balance = payload["balance"] as? [String: Any],
-            let funds = Self.decimal(balance["balance"]),
-            let margin = Self.decimal(balance["deposit"]),
+            let equity = Self.decimal(balance["balance"]),
+            let funds = Self.decimal(balance["deposit"]),
             let profitLoss = Self.decimal(balance["profitLoss"]),
-            let available = Self.decimal(balance["available"])
+            let available = Self.decimal(balance["available"]),
+            equity >= available
         else { return nil }
 
         self.accountID = accountID
@@ -52,9 +62,9 @@ struct BrokerAccountSnapshot: Identifiable, Equatable {
         self.currencySymbol = payload["symbol"] as? String ?? currency
         self.isPreferred = payload["preferred"] as? Bool ?? false
         self.funds = funds
+        self.equity = equity
         self.available = available
         self.profitLoss = profitLoss
-        self.margin = margin
         self.observedAt = Self.date(payload["observedAt"] as? String) ?? fallbackDate
     }
 
