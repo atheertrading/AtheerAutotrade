@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-11-13  
 **Latest observed main baseline:** `794e9c5854bba45c5b007b44de697b030f3b72a8` (PR #29 merge)  
-**Active branch:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation)
+**Active implementation branches:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation); `feat/atp-dashboard-001-operational-dashboard` (Dashboard UI)
 
 ## Status definitions
 
@@ -90,7 +90,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
 | ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
-| ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Enable selection/copy for static text across all screens and retain native paste/edit behavior for editable controls; no per-label patches | PLANNED |
+| ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Root `NavigationSplitView` applies `.textSelection(.enabled)`; native editable controls retain paste/edit behavior; PR #34 merged | DONE — MERGED; per-row/context copy remains feature-specific |
 | ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | DONE — MERGED in PR #29; 46/46 Node tests passed |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
 | ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
@@ -149,3 +149,17 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Draft PR #29: https://github.com/atheertrading/AtheerAutotrade/pull/29.
 - GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript build passed; 46 tests passed, 0 failed, 0 skipped.
 - No local Node run, Xcode build, target-Mac runtime, or real Capital.com Demo account read is claimed.
+
+
+## UI milestone — ATP-UI-DASHBOARD-001
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-UI-DASHBOARD-001 | Operational Dashboard presentation | Feature branch `feat/atp-dashboard-001-operational-dashboard`; `DashboardView.swift` reorganized into Account Overview, Market Watch, Operational Status and System Activity; implementation record `docs/engineering/ATP-UI-DASHBOARD-001.md` | IMPLEMENTED — PENDING XCODE BUILD AND TARGET-MAC VERIFICATION |
+
+- Dashboard uses existing `MarketDataStore` values for broker session, stream status, watchlist and quotes.
+- Account Balance, Equity, Available Margin and Exposure are explicitly unavailable until account snapshots are wired into the UI; no placeholder financial values are fabricated.
+- Automated execution and PostgreSQL runtime are explicitly shown as not connected.
+- Existing Capital.com connection, credential, IPC and quote subscription source paths were not changed.
+- Dashboard text selection is enabled; application-wide text selection was already merged in PR #34.
+- This feature branch does not modify `main`. Merge only after review and target-Mac build/runtime verification.
