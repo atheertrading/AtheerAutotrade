@@ -1,6 +1,6 @@
 # ATP-UI-DASHBOARD-002 — Account Metrics, Market Watch Presentation, and Settings Navigation
 
-**Status:** IMPLEMENTED IN SOURCE — PENDING LOCAL XCODE BUILD AND DEMO DATA VERIFICATION  
+**Status:** IMPLEMENTED IN SOURCE — ACCOUNT POLLING DESIGN SUPERSEDED BY ATP-BROKER-ACCOUNT-001  
 **Branch:** `feat/atp-dashboard-002-account-marketwatch-settings`  
 **Base:** `feat/atp-dashboard-001-operational-dashboard`  
 **Scope:** Read-only account presentation, quote-side visual distinction, broker-provided market metadata, instrument classification icons, and broker setup navigation.
@@ -9,8 +9,8 @@
 
 ### Account overview
 - Added a native IPC consumer for the existing read-only `broker.accounts` method.
-- Selects the broker-preferred account, falling back to the first returned account only when no preferred account is marked.
-- Refreshes account values when the broker connection becomes authenticated and every 15 seconds while the Dashboard is visible.
+- Initial implementation selected the broker-preferred account. ATP-BROKER-ACCOUNT-001 now selects the authenticated session's active account ID first, then falls back to the preferred account.
+- Initial implementation used a one-time broker read plus Dashboard-scoped 15-second refresh. This was superseded by the application-wide backend account monitor documented in ATP-BROKER-ACCOUNT-001.
 - Presents Funds/Balance, Available, Equity, P&L, Margin, and Margin Level.
 - Equity is calculated as Funds + running P&L. Margin Level is Equity / Margin × 100 and is unavailable when Margin is zero.
 - Uses Capital.com field semantics: `balance.balance` = Funds, `balance.deposit` = Margin, `balance.profitLoss` = running P&L, and `balance.available` = Available Funds.
@@ -75,3 +75,8 @@
 4. Verify Bid/Ask semantic colors, market net/percentage change, tick size, instrument icons, and compatibility with previously saved watchlists.
 5. Verify Settings → Broker Connections navigation and connection persistence.
 6. Implement daily volume from historical candle `lastTradedVolume` only after defining its timeframe and refresh policy; do not present an ambiguous volume figure as exchange-wide volume.
+
+
+## Superseding account synchronization milestone
+
+The Dashboard-scoped 15-second polling described above is no longer the intended account-state architecture. See [ATP-BROKER-ACCOUNT-001](ATP-BROKER-ACCOUNT-001.md) for the backend-owned 3-second account/positions/working-orders monitor, application-wide `BrokerAccountStore`, active-account selection, freshness handling, and OOP directory structure.
