@@ -1,367 +1,331 @@
-
 import SwiftUI
 
+/// Operational dashboard for the ATHEER Trading Pro macOS workstation.
+///
+/// Data integrity rule: account values and operational events are never fabricated.
+/// A missing service is presented as unavailable until a typed, authoritative
+/// snapshot is connected to this view.
 struct DashboardView: View {
     @EnvironmentObject private var marketDataStore: MarketDataStore
 
-    private var statusItems: [DashboardStatusItem] {
-        let streaming = marketDataStore.streamStatus == "connected"
-        let marketStatus: String
-        let marketDetail: String
-        if streaming {
-            marketStatus = "Streaming"
-            marketDetail = "\(marketDataStore.quotes.count) of \(marketDataStore.watchlist.count) watched instruments have broker quotes."
-        } else if marketDataStore.isBrokerConnected {
-            marketStatus = "Demo Connected"
-            marketDetail = marketDataStore.watchlist.isEmpty
-                ? "Search and add instruments in Brokers to start receiving prices."
-                : "Waiting for broker quote events."
-        } else {
-            marketStatus = "Not connected"
-            marketDetail = "Connect Capital.com Demo and add instruments to Market Watch."
-        }
+    private let statusColumns = [
+        GridItem(.adaptive(minimum: 220), spacing: 14, alignment: .top)
+    ]
 
-        return [
-            DashboardStatusItem(
-                title: "MARKET DATA",
-                symbol: "waveform.path.ecg",
-                status: marketStatus,
-                detail: marketDetail,
-                statusColor: streaming ? AtheerColors.positive : AtheerColors.warning,
-                indicatorColor: streaming ? AtheerColors.positive : AtheerColors.warning
-            ),
-            DashboardStatusItem(
-                title: "BROKER CONNECTION",
-                symbol: "building.2",
-                status: marketDataStore.isBrokerConnected ? "Demo Connected" : "Not connected",
-                detail: marketDataStore.isBrokerConnected
-                    ? "Capital.com Demo session authenticated."
-                    : "Open Brokers to connect your Capital.com Demo account.",
-                statusColor: marketDataStore.isBrokerConnected ? AtheerColors.positive : AtheerColors.warning,
-                indicatorColor: marketDataStore.isBrokerConnected ? AtheerColors.positive : AtheerColors.warning
-            ),
-            DashboardStatusItem(
-                title: "AUTOMATION",
-                symbol: "slider.horizontal.3",
-                status: "Disabled",
-                detail: "Automated trading remains unavailable until Risk Engine and execution controls are implemented.",
-                statusColor: AtheerColors.warning,
-                indicatorColor: AtheerColors.warning
-            )
-        ]
+    private var isStreaming: Bool {
+        marketDataStore.streamStatus == "connected"
     }
 
-    private let statusColumns = [
-        GridItem(
-            .adaptive(minimum: 190),
-            spacing: AtheerSpacing.medium,
-            alignment: .top
-        )
-    ]
+    private var marketFeedDescription: String {
+        if let error = marketDataStore.streamError, !error.isEmpty {
+            return error
+        }
+        if isStreaming {
+            return "\(marketDataStore.quotes.count) quoted / \(marketDataStore.watchlist.count) watched instruments"
+        }
+        if marketDataStore.isBrokerConnected {
+            return "Broker session authenticated; quote stream is not confirmed."
+        }
+        return "Connect Capital.com Demo to begin receiving broker prices."
+    }
 
     var body: some View {
         GeometryReader { geometry in
             ScrollView(.vertical, showsIndicators: true) {
-                VStack(alignment: .leading, spacing: AtheerSpacing.large) {
+                VStack(alignment: .leading, spacing: 24) {
                     header
-
-                    foundationNotice
-
-                    LazyVGrid(
-                        columns: statusColumns,
-                        alignment: .leading,
-                        spacing: AtheerSpacing.medium
-                    ) {
-                        ForEach(statusItems) { item in
-                            DashboardStatusCard(item: item)
-                        }
-                    }
-
-                    livePricesPanel
-
-                    activityPanel
-
-                    Spacer(minLength: 0)
+                    accountOverview
+                    marketWatchSection
+                    operationalStatusSection
+                    activitySection
                 }
-                .padding(AtheerSpacing.extraLarge)
-                .frame(
-                    maxWidth: .infinity,
-                    minHeight: geometry.size.height,
-                    alignment: .topLeading
-                )
+                .padding(28)
+                .frame(maxWidth: .infinity, minHeight: geometry.size.height, alignment: .topLeading)
             }
-            .frame(
-                width: geometry.size.width,
-                height: geometry.size.height
-            )
             .background(AtheerColors.canvas)
         }
         .background(AtheerColors.canvas)
+        .textSelection(.enabled)
     }
 
     // MARK: - Header
 
     private var header: some View {
-        HStack(alignment: .top, spacing: AtheerSpacing.medium) {
-            VStack(alignment: .leading, spacing: 7) {
-                Text("Workspace Overview")
-                    .font(.system(size: 27, weight: .semibold, design: .rounded))
+        HStack(alignment: .center, spacing: 16) {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Trading Dashboard")
+                    .font(.system(size: 28, weight: .semibold))
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text("System readiness and connected service status")
+                Text("Account overview, market activity and system readiness")
                     .font(.system(size: 13))
                     .foregroundColor(AtheerColors.textSecondary)
             }
 
-            Spacer(minLength: AtheerSpacing.small)
+            Spacer(minLength: 12)
 
             HStack(spacing: 8) {
                 Circle()
-                    .fill(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
+                    .fill(isStreaming ? AtheerColors.positive : AtheerColors.warning)
                     .frame(width: 7, height: 7)
-
-                Text(marketDataStore.streamStatus == "connected" ? "LIVE MARKET FEED" : "SYSTEM FOUNDATION")
-                    .font(.system(size: 9, weight: .semibold, design: .rounded))
-                    .tracking(0.8)
+                Text(isStreaming ? "MARKET FEED ACTIVE" : "MARKET FEED INACTIVE")
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .tracking(0.5)
                     .foregroundColor(AtheerColors.textSecondary)
             }
-            .padding(.horizontal, 11)
+            .padding(.horizontal, 12)
             .padding(.vertical, 9)
             .background(AtheerColors.surface)
             .clipShape(Capsule())
-            .overlay(
-                Capsule().stroke(AtheerColors.border, lineWidth: 1)
-            )
+            .overlay(Capsule().stroke(AtheerColors.border, lineWidth: 1))
             .accessibilityElement(children: .combine)
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private var noticeTitle: String {
-        if marketDataStore.streamStatus == "connected" {
-            return marketDataStore.quotes.isEmpty
-                ? "Capital.com subscription is active"
-                : "Capital.com market data is streaming"
+    // MARK: - Account Overview
+
+    private var accountOverview: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeading(
+                title: "Account Overview",
+                subtitle: "Broker-authoritative account metrics"
+            )
+
+            LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
+                AccountMetricPanel(
+                    title: "BALANCE",
+                    symbol: "creditcard",
+                    value: "—",
+                    detail: "Account snapshot is not connected to the dashboard."
+                )
+                AccountMetricPanel(
+                    title: "EQUITY",
+                    symbol: "chart.line.uptrend.xyaxis",
+                    value: "—",
+                    detail: "Waiting for an authoritative broker account snapshot."
+                )
+                AccountMetricPanel(
+                    title: "AVAILABLE MARGIN",
+                    symbol: "speedometer",
+                    value: "—",
+                    detail: "Margin values will appear when account data is exposed."
+                )
+                AccountMetricPanel(
+                    title: "OPEN EXPOSURE",
+                    symbol: "arrow.left.and.right",
+                    value: "—",
+                    detail: "Position and exposure aggregation is not connected."
+                )
+            }
         }
-        if marketDataStore.isBrokerConnected {
-            return "Capital.com Demo session is connected"
-        }
-        return "Connect Capital.com Demo to load prices"
     }
 
-    private var noticeDetail: String {
-        if let error = marketDataStore.streamError {
-            return error
-        }
-        if marketDataStore.streamStatus == "connected" {
-            return marketDataStore.quotes.isEmpty
-                ? "Subscription acknowledgement received; waiting for the first broker Bid/Ask quote."
-                : "Broker Bid/Ask quotes are arriving. Prices below update as new observations are received."
-        }
-        if marketDataStore.isBrokerConnected {
-            return marketDataStore.watchlist.isEmpty
-                ? "Search for instruments in Brokers and add them to Market Watch."
-                : "The session is authenticated; the quote stream is not yet confirmed."
-        }
-        return "Open Brokers, authenticate your Demo session, then add instruments to Market Watch."
-    }
+    // MARK: - Market Watch
 
-    // MARK: - Foundation Notice
+    private var marketWatchSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .firstTextBaseline) {
+                sectionHeading(
+                    title: "Market Watch",
+                    subtitle: "Live broker Bid / Ask observations"
+                )
+                Spacer()
+                Text("\(marketDataStore.watchlist.count) INSTRUMENTS")
+                    .font(.system(size: 10, weight: .semibold, design: .monospaced))
+                    .foregroundColor(AtheerColors.textTertiary)
+            }
 
-    private var foundationNotice: some View {
-        HStack(alignment: .top, spacing: 11) {
-            Image(systemName: "info.circle.fill")
-                .font(.system(size: 15))
-                .foregroundColor(AtheerColors.accent)
-                .padding(.top, 1)
+            MarketWatchTableView(compact: true)
 
-            VStack(alignment: .leading, spacing: 4) {
-                Text(noticeTitle)
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AtheerColors.textPrimary)
-
-                Text(noticeDetail)
+            HStack(spacing: 7) {
+                Circle()
+                    .fill(isStreaming ? AtheerColors.positive : AtheerColors.warning)
+                    .frame(width: 6, height: 6)
+                Text(marketFeedDescription)
                     .font(.system(size: 11))
+                    .foregroundColor(AtheerColors.textSecondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
+    // MARK: - Operational Status
+
+    private var operationalStatusSection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeading(
+                title: "Operational Status",
+                subtitle: "Service state is shown separately from trading authorization"
+            )
+
+            LazyVGrid(columns: statusColumns, alignment: .leading, spacing: 14) {
+                OperationalStatusPanel(
+                    title: "CAPITAL.COM",
+                    symbol: "building.2",
+                    value: marketDataStore.isBrokerConnected ? "Demo connected" : "Disconnected",
+                    detail: marketDataStore.isBrokerConnected
+                        ? "Broker session is authenticated."
+                        : "No authenticated broker session is available.",
+                    tint: marketDataStore.isBrokerConnected ? AtheerColors.positive : AtheerColors.warning
+                )
+
+                OperationalStatusPanel(
+                    title: "MARKET DATA",
+                    symbol: "waveform.path.ecg",
+                    value: isStreaming ? "Streaming" : "Not streaming",
+                    detail: marketFeedDescription,
+                    tint: isStreaming ? AtheerColors.positive : AtheerColors.warning
+                )
+
+                OperationalStatusPanel(
+                    title: "AUTOMATED EXECUTION",
+                    symbol: "shield.lefthalf.filled",
+                    value: "Disabled",
+                    detail: "OMS, mandatory RiskEngine authorization and execution controls are not yet integrated.",
+                    tint: AtheerColors.warning
+                )
+
+                OperationalStatusPanel(
+                    title: "LOCAL DATABASE",
+                    symbol: "externaldrive",
+                    value: "Not connected",
+                    detail: "The local PostgreSQL runtime and application repositories are not yet integrated.",
+                    tint: AtheerColors.warning
+                )
+            }
+        }
+    }
+
+    // MARK: - Activity
+
+    private var activitySection: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            sectionHeading(
+                title: "System Activity",
+                subtitle: "Timestamped operational and audit events"
+            )
+
+            HStack(spacing: 12) {
+                Image(systemName: "clock.arrow.circlepath")
+                    .font(.system(size: 18, weight: .regular))
+                    .foregroundColor(AtheerColors.textTertiary)
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Activity stream is not connected")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(AtheerColors.textPrimary)
+                    Text("This panel will display broker, market-data, risk and order lifecycle events when the event journal is integrated.")
+                        .font(.system(size: 11))
+                        .foregroundColor(AtheerColors.textSecondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 0)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AtheerColors.surface)
+            .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous))
+            .overlay {
+                RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous)
+                    .stroke(AtheerColors.border, lineWidth: 1)
+            }
+        }
+    }
+
+    // MARK: - Shared Components
+
+    private func sectionHeading(title: String, subtitle: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.system(size: 15, weight: .semibold))
+                .foregroundColor(AtheerColors.textPrimary)
+            Text(subtitle)
+                .font(.system(size: 11))
+                .foregroundColor(AtheerColors.textTertiary)
+        }
+    }
+}
+
+private struct AccountMetricPanel: View {
+    let title: String
+    let symbol: String
+    let value: String
+    let detail: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(spacing: 8) {
+                Image(systemName: symbol)
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(AtheerColors.accent)
+                Text(title)
+                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .tracking(0.6)
+                    .foregroundColor(AtheerColors.textSecondary)
+            }
+
+            Text(value)
+                .font(.system(size: 25, weight: .medium, design: .rounded))
+                .foregroundColor(AtheerColors.textPrimary)
+
+            Text(detail)
+                .font(.system(size: 10))
+                .foregroundColor(AtheerColors.textTertiary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 124, alignment: .leading)
+        .background(AtheerColors.surface)
+        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous))
+        .overlay {
+            RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous)
+                .stroke(AtheerColors.border, lineWidth: 1)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct OperationalStatusPanel: View {
+    let title: String
+    let symbol: String
+    let value: String
+    let detail: String
+    let tint: Color
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: symbol)
+                .font(.system(size: 15, weight: .medium))
+                .foregroundColor(tint)
+                .frame(width: 22)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text(title)
+                    .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                    .tracking(0.6)
+                    .foregroundColor(AtheerColors.textTertiary)
+
+                Text(value)
+                    .font(.system(size: 13, weight: .semibold))
+                    .foregroundColor(tint)
+
+                Text(detail)
+                    .font(.system(size: 10))
                     .foregroundColor(AtheerColors.textSecondary)
                     .fixedSize(horizontal: false, vertical: true)
             }
 
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AtheerColors.accent.opacity(0.07))
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.medium,
-                style: .continuous
-            )
-        )
-        .overlay {
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.medium,
-                style: .continuous
-            )
-            .stroke(AtheerColors.accent.opacity(0.16), lineWidth: 1)
-        }
-    }
-
-    // MARK: - Live Market Prices
-
-    private var livePricesPanel: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            HStack {
-                Text("Live Market Prices")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AtheerColors.textPrimary)
-                Spacer()
-                Text(marketDataStore.streamStatus.uppercased())
-                    .font(.system(size: 9, weight: .bold, design: .monospaced))
-                    .foregroundColor(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
-            }
-
-            MarketWatchTableView(compact: true)
-        }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .padding(16)
+        .frame(maxWidth: .infinity, minHeight: 112, alignment: .leading)
         .background(AtheerColors.surface)
-        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous))
+        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous))
         .overlay {
-            RoundedRectangle(cornerRadius: AtheerRadius.large, style: .continuous)
+            RoundedRectangle(cornerRadius: AtheerRadius.medium, style: .continuous)
                 .stroke(AtheerColors.border, lineWidth: 1)
-        }
-    }
-
-    // MARK: - System Activity
-
-    private var activityPanel: some View {
-        VStack(alignment: .leading, spacing: 15) {
-            HStack {
-                Text("System Activity")
-                    .font(.system(size: 14, weight: .semibold))
-                    .foregroundColor(AtheerColors.textPrimary)
-
-                Spacer()
-
-                Text("No events")
-                    .font(.system(size: 11))
-                    .foregroundColor(AtheerColors.textSecondary)
-            }
-
-            Rectangle()
-                .fill(AtheerColors.border)
-                .frame(height: 1)
-
-            VStack(spacing: 9) {
-                Image(systemName: "tray")
-                    .font(.system(size: 23, weight: .light))
-                    .foregroundColor(AtheerColors.textTertiary)
-
-                Text("No system activity to display")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(AtheerColors.textSecondary)
-
-                Text(
-                    "Events will appear here when application services are implemented and connected."
-                )
-                .font(.system(size: 11))
-                .foregroundColor(AtheerColors.textTertiary)
-                .multilineTextAlignment(.center)
-                .fixedSize(horizontal: false, vertical: true)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(.vertical, 34)
-        }
-        .padding(18)
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .background(AtheerColors.surface)
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.large,
-                style: .continuous
-            )
-        )
-        .overlay {
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.large,
-                style: .continuous
-            )
-            .stroke(AtheerColors.border, lineWidth: 1)
-        }
-    }
-}
-
-// MARK: - Dashboard Models
-
-private struct DashboardStatusItem: Identifiable {
-    let title: String
-    let symbol: String
-    let status: String
-    let detail: String
-    let statusColor: Color
-    let indicatorColor: Color
-
-    var id: String { title }
-}
-
-// MARK: - Dashboard Status Card
-
-private struct DashboardStatusCard: View {
-    let item: DashboardStatusItem
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Image(systemName: item.symbol)
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(AtheerColors.accent)
-
-                Spacer()
-
-                Circle()
-                    .fill(item.indicatorColor)
-                    .frame(width: 6, height: 6)
-                    .accessibilityHidden(true)
-            }
-
-            VStack(alignment: .leading, spacing: 6) {
-                Text(item.title)
-                    .font(.system(size: 9, weight: .semibold, design: .rounded))
-                    .tracking(1.1)
-                    .foregroundColor(AtheerColors.textSecondary)
-
-                Text(item.status)
-                    .font(.system(size: 15, weight: .semibold, design: .rounded))
-                    .foregroundColor(item.statusColor)
-
-                Text(item.detail)
-                    .font(.system(size: 10))
-                    .foregroundColor(AtheerColors.textTertiary)
-                    .fixedSize(horizontal: false, vertical: true)
-            }
-        }
-        .padding(17)
-        .frame(
-            maxWidth: .infinity,
-            minHeight: 142,
-            alignment: .leading
-        )
-        .background(AtheerColors.surface)
-        .clipShape(
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.medium,
-                style: .continuous
-            )
-        )
-        .overlay {
-            RoundedRectangle(
-                cornerRadius: AtheerRadius.medium,
-                style: .continuous
-            )
-            .stroke(AtheerColors.border, lineWidth: 1)
         }
         .accessibilityElement(children: .combine)
     }
 }
-
