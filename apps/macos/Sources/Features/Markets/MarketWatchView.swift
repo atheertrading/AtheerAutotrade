@@ -71,6 +71,7 @@ struct MarketWatchTableView: View {
             Text("BID").frame(width: 94, alignment: .trailing)
             Text("ASK").frame(width: 94, alignment: .trailing)
             if !compact {
+                Text("MID").frame(width: 78, alignment: .trailing)
                 Text("SPREAD").frame(width: 78, alignment: .trailing)
                 Text("AGE").frame(width: 58, alignment: .trailing)
                 Text("STATUS").frame(width: 82, alignment: .trailing)
@@ -107,6 +108,7 @@ struct MarketWatchTableView: View {
             priceText(quote?.ask).frame(width: 94, alignment: .trailing)
 
             if !compact {
+                priceText(quote?.mid).frame(width: 78, alignment: .trailing)
                 priceText(quote?.spread).frame(width: 78, alignment: .trailing)
                 ageText(quote).frame(width: 58, alignment: .trailing)
                 freshnessText(quote).frame(width: 82, alignment: .trailing)
