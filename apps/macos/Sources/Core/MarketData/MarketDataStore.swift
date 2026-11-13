@@ -60,6 +60,12 @@ final class MarketDataStore: ObservableObject {
     private var isObserving = false
     private var isStartingStream = false
 
+    // Market Watch is a presentation consumer: retain the newest quote per epic
+    // and publish batches at a bounded rate instead of flooding the main queue.
+    private let quoteBufferLock = NSLock()
+    private var pendingQuotePayloads: [String: [String: Any]] = [:]
+    private var quoteFlushScheduled = false
+
     private init() {
         restoreWatchlist()
     }
@@ -69,8 +75,14 @@ final class MarketDataStore: ObservableObject {
         isObserving = true
 
         BackendProcessSupervisor.shared.setEventHandler { [weak self] name, payload in
-            DispatchQueue.main.async {
-                self?.consume(event: name, payload: payload)
+            guard let self else { return }
+
+            if name == "broker.marketData.quote" {
+                self.enqueueQuote(payload)
+            } else {
+                DispatchQueue.main.async {
+                    self.consume(event: name, payload: payload)
+                }
             }
         }
     }
@@ -151,11 +163,39 @@ final class MarketDataStore: ObservableObject {
         }
     }
 
-    private func consume(event name: String, payload: [String: Any]) {
-        switch name {
-        case "broker.marketData.status":
-            streamStatus = payload["status"] as? String ?? "unknown"
-        case "broker.marketData.quote":
+    private func enqueueQuote(_ payload: [String: Any]) {
+        guard let epic = payload["epic"] as? String else { return }
+
+        quoteBufferLock.lock()
+        pendingQuotePayloads[epic] = payload
+        let shouldScheduleFlush = !quoteFlushScheduled
+        if shouldScheduleFlush {
+            quoteFlushScheduled = true
+        }
+        quoteBufferLock.unlock()
+
+        guard shouldScheduleFlush else { return }
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + .milliseconds(100)) { [weak self] in
+            self?.flushPendingQuotes()
+        }
+    }
+
+    private func flushPendingQuotes() {
+        quoteBufferLock.lock()
+        let batch = Array(pendingQuotePayloads.values)
+        pendingQuotePayloads.removeAll(keepingCapacity: true)
+        quoteFlushScheduled = false
+        quoteBufferLock.unlock()
+
+        consumeQuoteBatch(batch)
+    }
+
+    private func consumeQuoteBatch(_ payloads: [[String: Any]]) {
+        var updatedQuotes = quotes
+        var didUpdate = false
+
+        for payload in payloads {
             guard
                 let epic = payload["epic"] as? String,
                 contains(epic: epic),
@@ -166,9 +206,9 @@ final class MarketDataStore: ObservableObject {
                 let brokerTimestamp = payload["brokerTimestamp"] as? Double,
                 let receivedAt = payload["receivedAt"] as? Double,
                 let quality = payload["quality"] as? String
-            else { return }
+            else { continue }
 
-            quotes[epic] = MarketQuoteSnapshot(
+            updatedQuotes[epic] = MarketQuoteSnapshot(
                 epic: epic,
                 bid: bid,
                 ask: ask,
@@ -178,7 +218,20 @@ final class MarketDataStore: ObservableObject {
                 receivedAt: receivedAt,
                 qualityAtReceipt: quality
             )
-            streamError = nil
+            didUpdate = true
+        }
+
+        guard didUpdate else { return }
+        quotes = updatedQuotes
+        streamError = nil
+    }
+
+    private func consume(event name: String, payload: [String: Any]) {
+        switch name {
+        case "broker.marketData.status":
+            streamStatus = payload["status"] as? String ?? "unknown"
+        case "broker.marketData.quote":
+            consumeQuoteBatch([payload])
         case "broker.marketData.error":
             streamError = payload["message"] as? String ?? "Market data stream error."
         default:
