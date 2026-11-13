@@ -281,13 +281,13 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - This reconciles the semantic fields; exact synchronized broker parity still needs a live Demo capture.
 
 ### Implemented in source on GitHub
-- Draft PR #42: https://github.com/atheertrading/AtheerAutotrade/pull/42 (base: `feat/atp-broker-001-continuous-account-sync`; head: `fix/atp-account-semantics-001-rebased`). It is open, unmerged, and GitHub reports it mergeable. Earlier PR #41 was closed as superseded after the branch was rebased directly onto the broker-sync baseline. Xcode, XCTest, and Demo verification remain pending.
+- Draft PR #42: https://github.com/atheertrading/AtheerAutotrade/pull/42 (base: `feat/atp-broker-001-continuous-account-sync`; head: `fix/atp-account-semantics-001-rebased`). It is open and unmerged. The branch comparison confirms it is directly based on the broker-sync baseline (12 commits ahead, zero behind); latest PR metadata reports `mergeable=false`, so do not merge and recheck that status later. Earlier PR #41 was closed as superseded after the branch was rebased directly onto the broker-sync baseline. Xcode, XCTest, and Demo verification remain pending.
 - Branch: `fix/atp-account-semantics-001-rebased`, created from `f24cc7bae69eaa50f19e7694e8abdff01772bc70`.
 - Updated `apps/macos/Sources/Core/Broker/Models/BrokerAccountSnapshot.swift` to map Funds/Equity correctly and derive Margin = Equity − Available.
 - Added XCTest regression coverage to `apps/macos/Tests/LocalIPCProtocolTests.swift` for the screenshot values and negative-margin rejection.
 - Added `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` with screenshot evidence, field contract, diagnosis, code changes, and acceptance criteria.
 - Updated `docs/engineering/TASK_REGISTER.md`.
-- Latest implementation commit at handoff: `c65328e36aacdf32225131429086d344a3692bd6` (continuity update; preceding source/test/doc commits are on the same branch).
+- Latest implementation commit at handoff: `68d48c274d7d47262c4d02d9b541fa086573626b` (continuity update; preceding source/test/doc commits are on the same branch).
 
 ### Latency assessment
 - Account state uses a one-second-target REST polling monitor, not account WebSocket events.
