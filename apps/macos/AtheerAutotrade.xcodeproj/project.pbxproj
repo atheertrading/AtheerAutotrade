@@ -369,7 +369,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/bash;
-			shellScript = "\"$SRCROOT/Scripts/package-backend.sh\"\n";
+			shellScript = "/bin/bash \"$SRCROOT/Scripts/package-backend.sh\"\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
