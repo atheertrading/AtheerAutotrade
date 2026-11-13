@@ -8,6 +8,7 @@ export interface RiskOrderIntent {
   readonly quantity: number;
   readonly contractMultiplier: number;
   readonly stopLossPrice: number;
+  readonly estimatedInitialMargin: number;
   readonly requestedAt: number;
 }
 
@@ -77,7 +78,8 @@ export class RiskEngine {
     if (!intent || !isText(intent.intentId) || !isText(intent.idempotencyKey)
       || !isText(intent.epic) || (intent.side !== "BUY" && intent.side !== "SELL")
       || !isPositive(intent.quantity) || !isPositive(intent.contractMultiplier)
-      || !isPositive(intent.stopLossPrice) || !isPositive(intent.requestedAt)) {
+      || !isPositive(intent.stopLossPrice) || !isNonNegative(intent.estimatedInitialMargin)
+      || !isPositive(intent.requestedAt)) {
       reasons.push("INVALID_INTENT");
     }
 
@@ -134,7 +136,7 @@ export class RiskEngine {
       reasons.push("POSITION_LIMIT_EXCEEDED");
     }
     const requiredFreeMargin = account.equity * policy.minFreeMarginPercent / 100;
-    if (account.freeMargin - estimatedGrossExposure < requiredFreeMargin) {
+    if (account.freeMargin - intent.estimatedInitialMargin < requiredFreeMargin) {
       reasons.push("INSUFFICIENT_FREE_MARGIN");
     }
 
