@@ -37,6 +37,7 @@ final class BrokerAccountStore: ObservableObject {
     var freshnessLabel: String {
         guard accountSnapshot != nil else { return "WAITING" }
         if isStale { return "STALE" }
+        if syncStatus == "degraded" { return "DEGRADED" }
         if isDelayed { return "DELAYED" }
         return "LIVE"
     }
