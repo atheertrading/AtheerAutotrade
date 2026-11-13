@@ -73,7 +73,11 @@ final class BrokerAccountStore: ObservableObject {
         let snapshots = accounts.compactMap {
             BrokerAccountSnapshot(payload: $0, observedAt: observedAt)
         }
-        guard let selected = snapshots.first(where: \.isPreferred) ?? snapshots.first else {
+        let activeAccountID = payload["activeAccountId"] as? String
+        guard let selected =
+            snapshots.first(where: { $0.accountID == activeAccountID }) ??
+            snapshots.first(where: \.isPreferred) ??
+            snapshots.first else {
             lastSyncError = "Capital.com returned no usable financial account."
             return
         }
