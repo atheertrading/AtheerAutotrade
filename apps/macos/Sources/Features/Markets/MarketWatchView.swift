@@ -135,7 +135,7 @@ struct MarketWatchTableView: View {
             volumeText().frame(width: 48, alignment: .trailing)
 
             if !compact {
-                priceText(liveQuote?.mid, tint: movementTint).frame(width: 76, alignment: .trailing)
+                priceText(liveQuote?.mid, tint: movementColor(liveQuote?.changeFromPrevious)).frame(width: 76, alignment: .trailing)
                 priceText(liveQuote?.spread, tint: AtheerColors.info).frame(width: 72, alignment: .trailing)
                 ageText(quote).frame(width: 54, alignment: .trailing)
                 freshnessText(quote).frame(width: 76, alignment: .trailing)
