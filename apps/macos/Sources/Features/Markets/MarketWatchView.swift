@@ -27,7 +27,7 @@ struct MarketWatchView: View {
 
             MarketWatchTableView()
 
-            Text("Execution reference: Capital.com Bid/Ask. Mid and Spread are derived values; they are not substitutes for executable prices. Green indicates upward quote movement; red indicates downward movement.")
+            Text("Execution sides are fixed: SELL / BID is red and BUY / ASK is green. Directional movement is shown separately in the delta columns. Mid and Spread are derived values, not executable prices.")
                 .font(.system(size: 11))
                 .foregroundColor(AtheerColors.textTertiary)
                 .textSelection(.enabled)
@@ -80,7 +80,7 @@ struct MarketWatchTableView: View {
             Text("Δ PX").frame(width: 72, alignment: .trailing)
             Text("Δ %").frame(width: 58, alignment: .trailing)
             Text("TICKS").frame(width: 52, alignment: .trailing)
-            Text("VOL").frame(width: 48, alignment: .trailing)
+            Text("1M VOL").frame(width: 48, alignment: .trailing)
             if !compact {
                 Text("MID").frame(width: 76, alignment: .trailing)
                 Text("SPREAD").frame(width: 72, alignment: .trailing)
@@ -225,7 +225,7 @@ struct MarketWatchTableView: View {
         Text("—")
             .font(.system(size: 10, weight: .medium, design: .monospaced))
             .foregroundColor(AtheerColors.textTertiary)
-            .help("Volume is withheld until the live Capital.com stream supplies a current volume observation.")
+            .help("Capital.com quote streaming supplies Bid/Ask quantities, not traded volume. One-minute traded volume requires the historical candle endpoint and is not yet integrated.")
     }
 
     private func instrumentSymbol(_ instrumentType: String) -> String {
