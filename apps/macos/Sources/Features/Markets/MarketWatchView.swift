@@ -75,17 +75,20 @@ struct MarketWatchTableView: View {
     private var headerRow: some View {
         HStack(spacing: 10) {
             Text("INSTRUMENT").frame(maxWidth: .infinity, alignment: .leading)
-            Text("BID").frame(width: 94, alignment: .trailing)
-            Text("ASK").frame(width: 94, alignment: .trailing)
+            Text("SELL / BID").frame(width: 82, alignment: .trailing)
+            Text("BUY / ASK").frame(width: 82, alignment: .trailing)
+            Text("Δ PX").frame(width: 72, alignment: .trailing)
+            Text("Δ %").frame(width: 58, alignment: .trailing)
             if !compact {
-                Text("MID").frame(width: 78, alignment: .trailing)
-                Text("SPREAD").frame(width: 78, alignment: .trailing)
-                Text("AGE").frame(width: 58, alignment: .trailing)
-                Text("STATUS").frame(width: 82, alignment: .trailing)
+                Text("MID").frame(width: 76, alignment: .trailing)
+                Text("SPREAD").frame(width: 72, alignment: .trailing)
+                Text("VOL").frame(width: 44, alignment: .trailing)
+                Text("AGE").frame(width: 54, alignment: .trailing)
+                Text("STATUS").frame(width: 76, alignment: .trailing)
                 Color.clear.frame(width: 22)
             } else {
-                Text("SPREAD").frame(width: 72, alignment: .trailing)
-                Text("AGE").frame(width: 54, alignment: .trailing)
+                Text("SPREAD").frame(width: 66, alignment: .trailing)
+                Text("AGE").frame(width: 50, alignment: .trailing)
             }
         }
         .font(.system(size: 9, weight: .bold, design: .monospaced))
@@ -99,26 +102,41 @@ struct MarketWatchTableView: View {
         let quote = marketDataStore.quotes[instrument.epic]
 
         return HStack(spacing: 10) {
-            VStack(alignment: .leading, spacing: 3) {
-                Text(instrument.name)
-                    .font(.system(size: 11, weight: .semibold))
-                    .foregroundColor(AtheerColors.textPrimary)
-                    .lineLimit(1)
-                Text(instrument.epic)
-                    .font(.system(size: 9, design: .monospaced))
-                    .foregroundColor(AtheerColors.textTertiary)
-                    .lineLimit(1)
+            HStack(spacing: 8) {
+                Image(systemName: instrumentSymbol(instrument.instrumentType))
+                    .font(.system(size: 13, weight: .medium))
+                    .foregroundColor(AtheerColors.accent)
+                    .frame(width: 20)
+                    .accessibilityHidden(true)
+
+                VStack(alignment: .leading, spacing: 3) {
+                    Text(instrument.name)
+                        .font(.system(size: 11, weight: .semibold))
+                        .foregroundColor(AtheerColors.textPrimary)
+                        .lineLimit(1)
+                    Text(instrument.epic)
+                        .font(.system(size: 9, design: .monospaced))
+                        .foregroundColor(AtheerColors.textTertiary)
+                        .lineLimit(1)
+                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            priceText(quote?.bid).frame(width: 94, alignment: .trailing)
-            priceText(quote?.ask).frame(width: 94, alignment: .trailing)
+            priceText(quote?.bid, tint: AtheerColors.negative).frame(width: 82, alignment: .trailing)
+            priceText(quote?.ask, tint: AtheerColors.positive).frame(width: 82, alignment: .trailing)
+            movementText(quote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
+            movementText(quote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
 
             if !compact {
-                priceText(quote?.mid).frame(width: 78, alignment: .trailing)
-                priceText(quote?.spread).frame(width: 78, alignment: .trailing)
-                ageText(quote).frame(width: 58, alignment: .trailing)
-                freshnessText(quote).frame(width: 82, alignment: .trailing)
+                priceText(quote?.mid).frame(width: 76, alignment: .trailing)
+                priceText(quote?.spread).frame(width: 72, alignment: .trailing)
+                Text("—")
+                    .font(.system(size: 10, design: .monospaced))
+                    .foregroundColor(AtheerColors.textTertiary)
+                    .frame(width: 44, alignment: .trailing)
+                    .help("Volume is not included in the current Capital.com quote snapshot.")
+                ageText(quote).frame(width: 54, alignment: .trailing)
+                freshnessText(quote).frame(width: 76, alignment: .trailing)
 
                 Button {
                     marketDataStore.removeInstrument(epic: instrument.epic)
@@ -131,8 +149,8 @@ struct MarketWatchTableView: View {
                 .buttonStyle(.plain)
                 .help("Remove instrument from Market Watch")
             } else {
-                priceText(quote?.spread).frame(width: 72, alignment: .trailing)
-                ageText(quote).frame(width: 54, alignment: .trailing)
+                priceText(quote?.spread).frame(width: 66, alignment: .trailing)
+                ageText(quote).frame(width: 50, alignment: .trailing)
             }
         }
         .padding(.horizontal, 14)
@@ -153,13 +171,47 @@ struct MarketWatchTableView: View {
         .padding(18)
     }
 
-    private func priceText(_ value: Double?) -> some View {
+    private func priceText(_ value: Double?, tint: Color = AtheerColors.textPrimary) -> some View {
         Text(value.map { $0.formatted(.number.precision(.fractionLength(2...6))) } ?? "—")
-            .font(.system(size: 11, weight: .medium, design: .monospaced))
-            .foregroundColor(AtheerColors.textPrimary)
+            .font(.system(size: 11, weight: .semibold, design: .monospaced))
+            .foregroundColor(tint)
             .lineLimit(1)
             .minimumScaleFactor(0.8)
             .textSelection(.enabled)
+    }
+
+    private func movementText(_ value: Double?, percent: Bool) -> some View {
+        let tint: Color
+        if let value {
+            tint = value > 0 ? AtheerColors.positive : (value < 0 ? AtheerColors.negative : AtheerColors.textTertiary)
+        } else {
+            tint = AtheerColors.textTertiary
+        }
+
+        let label: String
+        if let value {
+            let prefix = value > 0 ? "+" : ""
+            label = prefix + value.formatted(.number.precision(.fractionLength(2...4))) + (percent ? "%" : "")
+        } else {
+            label = "—"
+        }
+
+        return Text(label)
+            .font(.system(size: 10, weight: .semibold, design: .monospaced))
+            .foregroundColor(tint)
+            .lineLimit(1)
+            .help("Movement since the previous received quote; not a daily/session change or exchange tick count.")
+    }
+
+    private func instrumentSymbol(_ instrumentType: String) -> String {
+        switch instrumentType.uppercased() {
+        case "CURRENCIES": return "arrow.left.arrow.right"
+        case "INDICES": return "chart.xyaxis.line"
+        case "COMMODITIES": return "cube"
+        case "SHARES": return "building.2"
+        case "CRYPTOCURRENCIES": return "bitcoinsign.circle"
+        default: return "chart.line.uptrend.xyaxis"
+        }
     }
 
     private func ageText(_ quote: MarketQuoteSnapshot?) -> some View {
