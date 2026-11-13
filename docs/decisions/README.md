@@ -13,3 +13,8 @@ Decision records document consequential architecture choices and their trade-off
 ADR-0004 establishes the product identity and reconciles the modular-monolith target architecture, execution authority, broker/data lifecycle, security boundary, and runtime readiness model. Earlier ADRs remain applicable except where ADR-0004 explicitly reconciles their context.
 
 ADR-0005 selects parent-owned anonymous standard-I/O pipes for the macOS desktop/backend process boundary. It does not authorize broker credential transfer or trading operations.
+
+
+- [ADR-0006 — Object-Oriented Design Standard Across ATHEER Trading Pro](ADR-0006-OBJECT-ORIENTED-DESIGN-STANDARD.md)
+
+ADR-0006 establishes OOP as the default design paradigm across the complete repository, with idiomatic Swift/TypeScript rules, explicit object contracts, and incremental conformance. It does not mandate class-per-file or class-per-function design.
