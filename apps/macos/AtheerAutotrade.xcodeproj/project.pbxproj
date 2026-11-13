@@ -31,6 +31,7 @@
 		A10000000000000000000013 /* BrokerPositionSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* BrokerPositionSnapshot.swift */; };
 		A10000000000000000000014 /* BrokerWorkingOrderSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* BrokerWorkingOrderSnapshot.swift */; };
 		A10000000000000000000015 /* BrokerAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* BrokerAccountStore.swift */; };
+		A10000000000000000000016 /* BrokerAccountStatusBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000016 /* BrokerAccountStatusBar.swift */; };
 		CAF55FDB30A50EB5002CBC33 /* WorkspacePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */; };
 		CAF55FDD30A50F84002CBC33 /* WorkspaceRegionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */; };
 		CAF55FDF30A51065002CBC33 /* WorkspaceLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDE30A51065002CBC33 /* WorkspaceLayoutView.swift */; };
@@ -63,6 +64,7 @@
 		A20000000000000000000013 /* BrokerPositionSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerPositionSnapshot.swift; sourceTree = "<group>"; };
 		A20000000000000000000014 /* BrokerWorkingOrderSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerWorkingOrderSnapshot.swift; sourceTree = "<group>"; };
 		A20000000000000000000015 /* BrokerAccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerAccountStore.swift; sourceTree = "<group>"; };
+		A20000000000000000000016 /* BrokerAccountStatusBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerAccountStatusBar.swift; sourceTree = "<group>"; };
 		A30000000000000000000001 /* AtheerAutotrade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtheerAutotrade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspacePanelView.swift; sourceTree = "<group>"; };
 		CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceRegionView.swift; sourceTree = "<group>"; };
@@ -220,10 +222,11 @@
 			path = Services;
 			sourceTree = "<group>";
 		};
-		A5000000000000000000000E /* Brokers */ = {
+A5000000000000000000000E /* Brokers */ = {
 			isa = PBXGroup;
 			children = (
 				A2000000000000000000000E /* CapitalComBrokerView.swift */,
+				A20000000000000000000016 /* BrokerAccountStatusBar.swift */,
 			);
 			path = Brokers;
 			sourceTree = "<group>";
@@ -385,6 +388,7 @@
 				A10000000000000000000013 /* BrokerPositionSnapshot.swift in Sources */,
 				A10000000000000000000014 /* BrokerWorkingOrderSnapshot.swift in Sources */,
 				A10000000000000000000015 /* BrokerAccountStore.swift in Sources */,
+				A10000000000000000000016 /* BrokerAccountStatusBar.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
