@@ -102,42 +102,42 @@ struct DashboardView: View {
                     AccountMetricPanel(
                         title: "BALANCE / FUNDS",
                         symbol: "creditcard",
-                        value: formatMoney(account.funds, account: account),
+                        value: formatLiveMoney(account.funds, account: account),
                         detail: "Capital.com broker balance",
-                        tint: AtheerColors.accent
+                        tint: accountMetricTint(AtheerColors.accent)
                     )
                     AccountMetricPanel(
                         title: "AVAILABLE",
                         symbol: "creditcard",
-                        value: formatMoney(account.available, account: account),
+                        value: formatLiveMoney(account.available, account: account),
                         detail: "Broker-reported available funds",
-                        tint: AtheerColors.info
+                        tint: accountMetricTint(AtheerColors.info)
                     )
                     AccountMetricPanel(
                         title: "EQUITY",
                         symbol: "chart.line.uptrend.xyaxis",
-                        value: formatMoney(account.equity, account: account),
+                        value: formatLiveMoney(account.equity, account: account),
                         detail: "Funds + broker-reported running P&L",
-                        tint: AtheerColors.accent
+                        tint: accountMetricTint(AtheerColors.accent)
                     )
                     AccountMetricPanel(
                         title: "P&L",
                         symbol: "chart.xyaxis.line",
-                        value: formatMoney(account.profitLoss, account: account),
+                        value: formatLiveMoney(account.profitLoss, account: account),
                         detail: "Broker-reported account P&L",
-                        tint: account.profitLoss > 0 ? AtheerColors.positive : (account.profitLoss < 0 ? AtheerColors.negative : AtheerColors.textSecondary)
+                        tint: brokerAccountStore.isDelayed ? AtheerColors.warning : (account.profitLoss > 0 ? AtheerColors.positive : (account.profitLoss < 0 ? AtheerColors.negative : AtheerColors.textSecondary))
                     )
                     AccountMetricPanel(
                         title: "MARGIN",
                         symbol: "speedometer",
-                        value: formatMoney(account.margin, account: account),
+                        value: formatLiveMoney(account.margin, account: account),
                         detail: "Broker-reported used margin",
-                        tint: AtheerColors.warning
+                        tint: accountMetricTint(AtheerColors.warning)
                     )
                     AccountMetricPanel(
                         title: "MARGIN LEVEL",
                         symbol: "speedometer",
-                        value: account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—",
+                        value: brokerAccountStore.isStale ? "—" : (account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—"),
                         detail: "Equity ÷ Margin · visual guidance only",
                         tint: marginLevelTint(account.marginLevel)
                     )
@@ -147,8 +147,13 @@ struct DashboardView: View {
                     Text("Account: \(account.accountName) · \(account.currency) · \(account.status)")
                     Text("Updated: \(account.observedAt.formatted(date: .omitted, time: .standard))")
                     Text("SYNC: \(brokerAccountStore.syncStatus.uppercased())")
+                    Text("FEED: \(brokerAccountStore.freshnessLabel)")
+                    Text("AGE: \(String(format: "%.1fs", brokerAccountStore.accountSnapshotAge))")
                     if brokerAccountStore.isStale {
-                        Text("STALE")
+                        Text("STALE · VALUES WITHHELD")
+                            .foregroundColor(AtheerColors.negative)
+                    } else if brokerAccountStore.isDelayed {
+                        Text("DELAYED")
                             .foregroundColor(AtheerColors.warning)
                     }
                 }
@@ -290,7 +295,16 @@ struct DashboardView: View {
 
     // MARK: - Shared Components
 
+    private func accountMetricTint(_ preferred: Color) -> Color {
+        brokerAccountStore.isDelayed ? AtheerColors.warning : preferred
+    }
+
+    private func formatLiveMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
+        brokerAccountStore.isStale ? "—" : formatMoney(value, account: account)
+    }
+
     private func marginLevelTint(_ value: Decimal?) -> Color {
+        if brokerAccountStore.isDelayed { return AtheerColors.warning }
         guard let value else { return AtheerColors.textTertiary }
         if value < 100 { return AtheerColors.negative }
         if value < 200 { return AtheerColors.warning }
