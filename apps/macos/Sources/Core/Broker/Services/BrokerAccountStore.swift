@@ -57,6 +57,8 @@ final class BrokerAccountStore: ObservableObject {
             case "broker.account.sync.error":
                 self.lastSyncError = payload["message"] as? String ?? "Broker account synchronization failed."
                 self.syncStatus = "degraded"
+            case "system.backend.disconnected":
+                self.consumeSyncStatus(["status": "disconnected"])
             default:
                 break
             }
