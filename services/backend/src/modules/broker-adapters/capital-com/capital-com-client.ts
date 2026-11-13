@@ -50,6 +50,45 @@ export interface CapitalComMarketSearchResult {
   readonly markets: readonly unknown[];
 }
 
+export interface CapitalComAccount {
+  readonly accountId: string; readonly accountName: string; readonly status: string;
+  readonly accountType: string; readonly preferred: boolean; readonly currency: string;
+  readonly symbol: string;
+  readonly balance: { readonly balance: number; readonly deposit: number; readonly profitLoss: number; readonly available: number };
+}
+export interface CapitalComAccountsSnapshot { readonly observedAt: string; readonly accounts: readonly CapitalComAccount[]; }
+export interface CapitalComPosition {
+  readonly position: {
+    readonly dealId: string; readonly dealReference?: string; readonly size: number;
+    readonly direction: "BUY" | "SELL"; readonly level: number; readonly currency: string;
+    readonly leverage?: number; readonly upl?: number; readonly createdDateUTC?: string; readonly guaranteedStop?: boolean;
+  };
+  readonly market: {
+    readonly epic: string; readonly instrumentName: string; readonly instrumentType?: string;
+    readonly marketStatus?: string; readonly bid?: number; readonly offer?: number;
+    readonly lotSize?: number; readonly updateTimeUTC?: string;
+  };
+}
+export interface CapitalComPositionsSnapshot { readonly observedAt: string; readonly positions: readonly CapitalComPosition[]; }
+export interface CapitalComWorkingOrder {
+  readonly workingOrderData: {
+    readonly dealId: string; readonly direction: "BUY" | "SELL"; readonly epic: string;
+    readonly orderSize: number; readonly orderLevel: number; readonly orderType: string;
+    readonly timeInForce: string; readonly currencyCode: string; readonly leverage?: number;
+    readonly createdDateUTC?: string; readonly goodTillDateUTC?: string; readonly guaranteedStop?: boolean;
+  };
+  readonly marketData: {
+    readonly epic: string; readonly instrumentName: string; readonly instrumentType?: string;
+    readonly marketStatus?: string; readonly bid?: number; readonly offer?: number;
+    readonly lotSize?: number; readonly updateTimeUTC?: string;
+  };
+}
+export interface CapitalComWorkingOrdersSnapshot { readonly observedAt: string; readonly workingOrders: readonly CapitalComWorkingOrder[]; }
+export interface CapitalComAccountPreferences {
+  readonly observedAt: string; readonly hedgingMode: boolean;
+  readonly leverages: Readonly<Record<string, { readonly current: number; readonly available: readonly number[] }>>;
+}
+
 export class CapitalComApiError extends Error {
   constructor(
     readonly status: number,
@@ -166,11 +205,107 @@ function parseHistoricalSnapshot(value: unknown): CapitalComPriceSnapshot {
   });
 }
 
+function requiredRecord(value: unknown, field: string): Record<string, unknown> {
+  if (!isRecord(value)) throw new CapitalComProtocolError(`Capital.com response omitted ${field}.`);
+  return value;
+}
+function requiredString(value: unknown, field: string): string {
+  if (typeof value !== "string" || value.trim().length === 0) throw new CapitalComProtocolError(`Capital.com response contains an invalid ${field}.`);
+  return value;
+}
+function requiredFiniteNumber(value: unknown, field: string): number {
+  if (typeof value !== "number" || !Number.isFinite(value)) throw new CapitalComProtocolError(`Capital.com response contains an invalid ${field}.`);
+  return value;
+}
+function optionalFiniteNumber(value: unknown, field: string): number | undefined {
+  return value === undefined ? undefined : requiredFiniteNumber(value, field);
+}
+function optionalString(value: unknown, field: string): string | undefined {
+  return value === undefined ? undefined : requiredString(value, field);
+}
+function optionalBoolean(value: unknown, field: string): boolean | undefined {
+  if (value === undefined) return undefined;
+  if (typeof value !== "boolean") throw new CapitalComProtocolError(`Capital.com response contains an invalid ${field}.`);
+  return value;
+}
+function parseDirection(value: unknown, field: string): "BUY" | "SELL" {
+  if (value !== "BUY" && value !== "SELL") throw new CapitalComProtocolError(`Capital.com response contains an invalid ${field}.`);
+  return value;
+}
+function parseAccount(value: unknown): CapitalComAccount {
+  const account = requiredRecord(value, "account"), balance = requiredRecord(account.balance, "account.balance");
+  if (typeof account.preferred !== "boolean") throw new CapitalComProtocolError("Capital.com response contains an invalid account.preferred.");
+  return Object.freeze({
+    accountId: requiredString(account.accountId, "account.accountId"),
+    accountName: requiredString(account.accountName, "account.accountName"),
+    status: requiredString(account.status, "account.status"),
+    accountType: requiredString(account.accountType, "account.accountType"),
+    preferred: account.preferred,
+    currency: requiredString(account.currency, "account.currency"),
+    symbol: requiredString(account.symbol, "account.symbol"),
+    balance: Object.freeze({
+      balance: requiredFiniteNumber(balance.balance, "account.balance.balance"),
+      deposit: requiredFiniteNumber(balance.deposit, "account.balance.deposit"),
+      profitLoss: requiredFiniteNumber(balance.profitLoss, "account.balance.profitLoss"),
+      available: requiredFiniteNumber(balance.available, "account.balance.available")
+    })
+  });
+}
+function parsePosition(value: unknown): CapitalComPosition {
+  const item = requiredRecord(value, "position item"), p = requiredRecord(item.position, "position"), m = requiredRecord(item.market, "market");
+  const leverage=optionalFiniteNumber(p.leverage,"position.leverage"), upl=optionalFiniteNumber(p.upl,"position.upl");
+  const created=optionalString(p.createdDateUTC,"position.createdDateUTC"), guaranteed=optionalBoolean(p.guaranteedStop,"position.guaranteedStop");
+  const instrumentType=optionalString(m.instrumentType,"market.instrumentType"), marketStatus=optionalString(m.marketStatus,"market.marketStatus");
+  const bid=optionalFiniteNumber(m.bid,"market.bid"), offer=optionalFiniteNumber(m.offer,"market.offer");
+  const lotSize=optionalFiniteNumber(m.lotSize,"market.lotSize"), update=optionalString(m.updateTimeUTC,"market.updateTimeUTC");
+  return Object.freeze({
+    position:Object.freeze({
+      dealId:requiredString(p.dealId,"position.dealId"),
+      ...(p.dealReference===undefined?{}:{dealReference:requiredString(p.dealReference,"position.dealReference")}),
+      size:requiredFiniteNumber(p.size,"position.size"), direction:parseDirection(p.direction,"position.direction"),
+      level:requiredFiniteNumber(p.level,"position.level"), currency:requiredString(p.currency,"position.currency"),
+      ...(leverage===undefined?{}:{leverage}), ...(upl===undefined?{}:{upl}),
+      ...(created===undefined?{}:{createdDateUTC:created}), ...(guaranteed===undefined?{}:{guaranteedStop:guaranteed})
+    }),
+    market:Object.freeze({
+      epic:requiredString(m.epic,"market.epic"), instrumentName:requiredString(m.instrumentName,"market.instrumentName"),
+      ...(instrumentType===undefined?{}:{instrumentType}), ...(marketStatus===undefined?{}:{marketStatus}),
+      ...(bid===undefined?{}:{bid}), ...(offer===undefined?{}:{offer}),
+      ...(lotSize===undefined?{}:{lotSize}), ...(update===undefined?{}:{updateTimeUTC:update})
+    })
+  });
+}
+function parseWorkingOrder(value: unknown): CapitalComWorkingOrder {
+  const item=requiredRecord(value,"working order item"), o=requiredRecord(item.workingOrderData,"workingOrderData"), m=requiredRecord(item.marketData,"marketData");
+  const leverage=optionalFiniteNumber(o.leverage,"workingOrderData.leverage");
+  const created=optionalString(o.createdDateUTC,"workingOrderData.createdDateUTC");
+  const goodTill=optionalString(o.goodTillDateUTC,"workingOrderData.goodTillDateUTC");
+  const guaranteed=optionalBoolean(o.guaranteedStop,"workingOrderData.guaranteedStop");
+  const instrumentType=optionalString(m.instrumentType,"marketData.instrumentType"), marketStatus=optionalString(m.marketStatus,"marketData.marketStatus");
+  const bid=optionalFiniteNumber(m.bid,"marketData.bid"), offer=optionalFiniteNumber(m.offer,"marketData.offer");
+  const lotSize=optionalFiniteNumber(m.lotSize,"marketData.lotSize"), update=optionalString(m.updateTimeUTC,"marketData.updateTimeUTC");
+  return Object.freeze({
+    workingOrderData:Object.freeze({
+      dealId:requiredString(o.dealId,"workingOrderData.dealId"), direction:parseDirection(o.direction,"workingOrderData.direction"),
+      epic:requiredString(o.epic,"workingOrderData.epic"), orderSize:requiredFiniteNumber(o.orderSize,"workingOrderData.orderSize"),
+      orderLevel:requiredFiniteNumber(o.orderLevel,"workingOrderData.orderLevel"), orderType:requiredString(o.orderType,"workingOrderData.orderType"),
+      timeInForce:requiredString(o.timeInForce,"workingOrderData.timeInForce"), currencyCode:requiredString(o.currencyCode,"workingOrderData.currencyCode"),
+      ...(leverage===undefined?{}:{leverage}), ...(created===undefined?{}:{createdDateUTC:created}),
+      ...(goodTill===undefined?{}:{goodTillDateUTC:goodTill}), ...(guaranteed===undefined?{}:{guaranteedStop:guaranteed})
+    }),
+    marketData:Object.freeze({
+      epic:requiredString(m.epic,"marketData.epic"), instrumentName:requiredString(m.instrumentName,"marketData.instrumentName"),
+      ...(instrumentType===undefined?{}:{instrumentType}), ...(marketStatus===undefined?{}:{marketStatus}),
+      ...(bid===undefined?{}:{bid}), ...(offer===undefined?{}:{offer}),
+      ...(lotSize===undefined?{}:{lotSize}), ...(update===undefined?{}:{updateTimeUTC:update})
+    })
+  });
+}
+
 /**
- * Read-only Capital.com REST adapter foundation.
- *
- * This class intentionally exposes no dealing, order, position, or account
- * mutation methods. Session tokens remain in memory and are never logged.
+ * Read-only Capital.com REST adapter. Account, position, and working-order
+ * retrieval is permitted; no dealing or account/position mutation is exposed.
+ * Session tokens remain in memory and are never logged.
  */
 export class CapitalComClient {
   private session: CapitalComSession | undefined;
@@ -327,6 +462,39 @@ export class CapitalComClient {
         ? { instrumentType: result.instrumentType }
         : {})
     });
+  }
+
+  async getAccounts(): Promise<CapitalComAccountsSnapshot> {
+    const result=await this.authenticatedJson<unknown>("/api/v1/accounts","accounts");
+    if (!isRecord(result)||!Array.isArray(result.accounts)) throw new CapitalComProtocolError("Capital.com accounts returned an unexpected payload.");
+    return Object.freeze({observedAt:new Date().toISOString(),accounts:Object.freeze(result.accounts.map(parseAccount))});
+  }
+
+  async getAccountPreferences(): Promise<CapitalComAccountPreferences> {
+    const result=await this.authenticatedJson<unknown>("/api/v1/accounts/preferences","account-preferences");
+    if (!isRecord(result)||typeof result.hedgingMode!=="boolean"||!isRecord(result.leverages)) throw new CapitalComProtocolError("Capital.com account preferences returned an unexpected payload.");
+    const leverages:Record<string,{readonly current:number;readonly available:readonly number[]}>={};
+    for(const [assetClass,value] of Object.entries(result.leverages)){
+      const item=requiredRecord(value,`leverages.${assetClass}`);
+      if(!Array.isArray(item.available)) throw new CapitalComProtocolError(`Capital.com response contains invalid leverages.${assetClass}.available.`);
+      leverages[assetClass]=Object.freeze({
+        current:requiredFiniteNumber(item.current,`leverages.${assetClass}.current`),
+        available:Object.freeze(item.available.map((v,i)=>requiredFiniteNumber(v,`leverages.${assetClass}.available[${i}]`)))
+      });
+    }
+    return Object.freeze({observedAt:new Date().toISOString(),hedgingMode:result.hedgingMode,leverages:Object.freeze(leverages)});
+  }
+
+  async getPositions(): Promise<CapitalComPositionsSnapshot> {
+    const result=await this.authenticatedJson<unknown>("/api/v1/positions","positions");
+    if(!isRecord(result)||!Array.isArray(result.positions)) throw new CapitalComProtocolError("Capital.com positions returned an unexpected payload.");
+    return Object.freeze({observedAt:new Date().toISOString(),positions:Object.freeze(result.positions.map(parsePosition))});
+  }
+
+  async getWorkingOrders(): Promise<CapitalComWorkingOrdersSnapshot> {
+    const result=await this.authenticatedJson<unknown>("/api/v1/workingorders","working-orders");
+    if(!isRecord(result)||!Array.isArray(result.workingOrders)) throw new CapitalComProtocolError("Capital.com working orders returned an unexpected payload.");
+    return Object.freeze({observedAt:new Date().toISOString(),workingOrders:Object.freeze(result.workingOrders.map(parseWorkingOrder))});
   }
 
   invalidateSession(): void {
