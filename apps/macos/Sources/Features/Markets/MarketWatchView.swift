@@ -27,7 +27,7 @@ struct MarketWatchView: View {
 
             MarketWatchTableView()
 
-            Text("Execution reference: Capital.com Bid/Ask. Mid and Spread are derived values; they are not substitutes for executable prices.")
+            Text("Execution reference: Capital.com Bid/Ask. Mid and Spread are derived values; they are not substitutes for executable prices. Green indicates upward quote movement; red indicates downward movement.")
                 .font(.system(size: 11))
                 .foregroundColor(AtheerColors.textTertiary)
                 .textSelection(.enabled)
@@ -101,6 +101,9 @@ struct MarketWatchTableView: View {
 
     private func instrumentRow(_ instrument: MarketWatchInstrument) -> some View {
         let quote = marketDataStore.quotes[instrument.epic]
+        // Side labels define execution direction; price tint defines movement.
+        // Do not permanently color every bid red and every ask green.
+        let movementTint = movementColor(quote?.changeFromPrevious)
 
         return HStack(spacing: 10) {
             HStack(spacing: 8) {
@@ -123,16 +126,16 @@ struct MarketWatchTableView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            priceText(quote?.bid, tint: AtheerColors.negative).frame(width: 82, alignment: .trailing)
-            priceText(quote?.ask, tint: AtheerColors.positive).frame(width: 82, alignment: .trailing)
+            priceText(quote?.bid, tint: movementTint).frame(width: 82, alignment: .trailing)
+            priceText(quote?.ask, tint: movementTint).frame(width: 82, alignment: .trailing)
             movementText(instrument.netChange ?? quote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
             movementText(instrument.percentageChange ?? quote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
             tickText(instrument).frame(width: 52, alignment: .trailing)
             volumeText(instrument).frame(width: 48, alignment: .trailing)
 
             if !compact {
-                priceText(quote?.mid).frame(width: 76, alignment: .trailing)
-                priceText(quote?.spread).frame(width: 72, alignment: .trailing)
+                priceText(quote?.mid, tint: movementTint).frame(width: 76, alignment: .trailing)
+                priceText(quote?.spread, tint: AtheerColors.info).frame(width: 72, alignment: .trailing)
                 ageText(quote).frame(width: 54, alignment: .trailing)
                 freshnessText(quote).frame(width: 76, alignment: .trailing)
 
@@ -147,12 +150,13 @@ struct MarketWatchTableView: View {
                 .buttonStyle(.plain)
                 .help("Remove instrument from Market Watch")
             } else {
-                priceText(quote?.spread).frame(width: 66, alignment: .trailing)
+                priceText(quote?.spread, tint: AtheerColors.info).frame(width: 66, alignment: .trailing)
                 ageText(quote).frame(width: 50, alignment: .trailing)
             }
         }
         .padding(.horizontal, 14)
         .frame(height: 49)
+        .animation(.easeOut(duration: 0.12), value: quote?.mid)
     }
 
     private var emptyState: some View {
@@ -169,6 +173,13 @@ struct MarketWatchTableView: View {
         .padding(18)
     }
 
+    private func movementColor(_ value: Double?) -> Color {
+        guard let value else { return AtheerColors.textPrimary }
+        if value > 0 { return AtheerColors.positive }
+        if value < 0 { return AtheerColors.negative }
+        return AtheerColors.textSecondary
+    }
+
     private func priceText(_ value: Double?, tint: Color = AtheerColors.textPrimary) -> some View {
         Text(value.map { $0.formatted(.number.precision(.fractionLength(2...6))) } ?? "—")
             .font(.system(size: 11, weight: .semibold, design: .monospaced))
@@ -179,17 +190,12 @@ struct MarketWatchTableView: View {
     }
 
     private func movementText(_ value: Double?, percent: Bool) -> some View {
-        let tint: Color
-        if let value {
-            tint = value > 0 ? AtheerColors.positive : (value < 0 ? AtheerColors.negative : AtheerColors.textTertiary)
-        } else {
-            tint = AtheerColors.textTertiary
-        }
-
+        let tint = movementColor(value)
         let label: String
         if let value {
+            let marker = value > 0 ? "▲ " : (value < 0 ? "▼ " : "")
             let prefix = value > 0 ? "+" : ""
-            label = prefix + value.formatted(.number.precision(.fractionLength(2...4))) + (percent ? "%" : "")
+            label = marker + prefix + value.formatted(.number.precision(.fractionLength(2...4))) + (percent ? "%" : "")
         } else {
             label = "—"
         }
@@ -198,7 +204,7 @@ struct MarketWatchTableView: View {
             .font(.system(size: 10, weight: .semibold, design: .monospaced))
             .foregroundColor(tint)
             .lineLimit(1)
-            .help("Uses Capital.com netChange/percentageChange when supplied; otherwise shows movement since the previous quote.")
+            .help("Capital.com netChange/percentageChange is preferred when supplied; otherwise this shows movement since the previous quote.")
     }
 
     private func tickText(_ instrument: MarketWatchInstrument) -> some View {
