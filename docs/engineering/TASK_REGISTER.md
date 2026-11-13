@@ -1,8 +1,9 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-14  
-**Latest observed main baseline:** `bf884b57f11619472ea5d6c1aaca23534d9d781e` (main head observed during ATP-UI-DASHBOARD-001)  
-**Active implementation branches:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation); `feat/atp-dashboard-001-operational-dashboard` (Dashboard UI)
+**Latest observed main baseline:** `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (PR #47 merge, 2026-11-14)  
+**Open implementation PR branches:** `feat/atp-ux-001-clipboard-and-broker-polish` (PR #31); `fix/atp-persist-003-local-postgres-runner` (PR #35).  
+**Local worktree:** not inspected in this GitHub review; preserve all local changes and stashes until its branch/commit/status are explicitly reconciled.
 
 ## Status definitions
 
@@ -191,7 +192,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-ARCH-OOP-003 | Remove concrete broker-runtime construction from stdio IPC and establish an explicit composition-root boundary | Introduce a narrow broker capability contract, inject the broker runtime into the IPC transport, compose CapitalComRuntime in server.ts, and cover the boundary with deterministic test doubles | IMPLEMENTED IN SOURCE — BACKEND CI VERIFIED; PR #47 OPEN, NOT MERGED |
+| ATP-ARCH-OOP-003 | Remove concrete broker-runtime construction from stdio IPC and establish an explicit composition-root boundary | Introduce a broker capability contract, inject the runtime, compose CapitalComRuntime in server.ts, and cover the boundary with deterministic test doubles | DONE — MERGED in PR #47 at `64025fd`; Backend CI 51/51 passed; target-Mac verification pending |
 
 - Branch: `refactor/atp-arch-oop-003-stdio-composition`, based on `main`.
 - Changed source: `services/backend/src/api/stdio-ipc.ts`, `services/backend/src/server.ts`.
@@ -202,3 +203,21 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - No order/dealing method, RiskEngine bypass, LIVE capability, or trading permission was added.
 - GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed; 51/51 Node tests passed. No local build or test has been run by this GitHub-only change.
 - Next: inspect CI evidence and resolve any failures before starting the next bounded remediation.
+
+
+## Current open implementation work — reconciled 2026-11-14
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-BASELINE-001 | Source-of-truth and engineering-record reconciliation | Documentation-only branch `docs/atp-baseline-reconciliation-001`; reconcile current main, accepted ADRs, source inventory, open PRs, owner-reported runtime evidence, and stale status records | IN PROGRESS — draft documentation changes; not merged |
+| ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #31; branch `feat/atp-ux-001-clipboard-and-broker-polish`; backend CI run 43430341371 passed; branch is 20 commits ahead and 54 behind current main; no target-Mac Xcode acceptance evidence | IN PROGRESS — rebase/reconciliation and Xcode verification required |
+| ATP-PERSIST-003 | Enforce local PostgreSQL and correct migration execution | PR #35; branch `fix/atp-persist-003-local-postgres-runner`; branch is 1 commit ahead and 39 behind current main; CI run 43453512269 failed 1 of 52 tests because generated SQL lost the required backslash before psql `gexec`; no real PostgreSQL execution | IN PROGRESS — fix and rerun CI, rebase, then local PostgreSQL integration tests |
+
+### Current branch and architecture notes
+
+- PR #45 (ADR-0006), PR #46 (initial ATP-ARCH-OOP-002 audit), and PR #47 (ATP-ARCH-OOP-003) are merged.
+- ATP-ARCH-OOP-002 remains IN PROGRESS; the initial review is not a whole-repository conformance result.
+- PR #31 is currently open and GitHub reports `draft=false`, although its description says it must remain draft until target-Mac acceptance checks pass. Reconcile this state before merge.
+- PR #35 is open as a draft. Its failed CI is a real failure, not a passing or merely pending check.
+- Current-main source contains a pure RiskEngine evaluator but no integrated RiskEngine → OMS → Execution Gateway path.
+- No real order/dealing method or LIVE capability is present in main.
