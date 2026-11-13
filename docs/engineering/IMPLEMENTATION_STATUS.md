@@ -76,7 +76,8 @@
 - PR #16 merged native Swift IPC supervisor source as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
 - PR #17 merged Capital.com screen and Keychain store as 9297f28fd2079dc5801cd89baf2b4723ed625a75.
 - PR #18 merged Keychain load/read-back verification and field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
-- Current branch feat/atp-capitalcom-operational-connection adds IPC v2 encrypted secret transfer, broker runtime methods, Xcode backend packaging phase, functional Demo connect/disconnect and market search UI, tests, CI, and documentation. No build/test result is claimed for that branch.
+- PR #19 merged feat/atp-capitalcom-operational-connection into main as `b673d639bf5440ddd52085815bf7cf2a4fd54167`. It adds IPC v2 encrypted secret transfer, read-only Demo broker methods, Xcode backend packaging, market search/history, and WebSocket quote/OHLC event IPC. Target-Mac build, crypto interoperability, packaged runtime, and real Demo verification remain pending.
+- Branch feat/atp-market-data-watchlist-main adds shared Market Watch, multi-epic subscriptions, quote normalization/freshness, and the application-level market-data store. Backend CI and target-Mac verification are pending.
 - Stacked branch feat/atp-market-data-watchlist adds shared persistent Market Watch, multi-epic subscriptions, quote normalization, Bid/Ask/Mid/Spread, and freshness display. Backend CI and target-Mac Xcode/runtime verification are pending.
 - Apple Silicon arm64 runtime remains unverified.
 
