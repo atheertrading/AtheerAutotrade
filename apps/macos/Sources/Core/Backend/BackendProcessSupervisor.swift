@@ -462,6 +462,7 @@ final class BackendProcessSupervisor {
         guard process === child else { return }
         isStopping = true
         isReady = false
+        additionalEventHandlers.values.forEach { $0("system.backend.disconnected", [:]) }
         failAll(with: LocalIPCError.processTerminated)
         detachHandlers()
         closePipes()
