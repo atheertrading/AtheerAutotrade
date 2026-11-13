@@ -14,6 +14,7 @@ Protocol v2 implements:
 - one credential submission per backend child session, with credentials retained in process memory only;
 - read-only Capital.com Demo session creation and authenticated ping;
 - broker session status, market search, and historical OHLC retrieval;
+- read-only account list/preferences, open positions, and working-order snapshots with local observation timestamps;
 - safe error mapping and an explicit method allowlist.
 
 The backend does not access macOS Keychain. The native app loads credentials from Keychain and encrypts them before submitting them to the backend. The backend sends REST requests to Capital.com over HTTPS/TLS and keeps CST/X-SECURITY-TOKEN in memory only.
@@ -29,7 +30,7 @@ The adapter contains:
 - WebSocket quote and OHLC stream components with keepalive, bounded reconnect, and re-subscription;
 - strict response and market-data payload validation.
 
-The current runtime composes the REST client with the encrypted IPC broker lifecycle. WebSocket streaming is surfaced through IPC v2 event frames and the macOS broker screen can start/stop a selected epic's quote and one-minute OHLC subscriptions. Actual broker-originated event delivery is not yet verified. Market-data freshness/gap detection is not yet integrated. Account/position endpoints, orders, dealing, and execution are deliberately absent from the current IPC allowlist.
+The current runtime composes the REST client with the encrypted IPC broker lifecycle. WebSocket streaming is surfaced through IPC v2 event frames and the macOS broker screen can start/stop a selected epic's quote and one-minute OHLC subscriptions. Actual broker-originated event delivery is not yet verified. Market-data freshness/gap detection is not yet integrated. Read-only account, account-preferences, open-position, and working-order endpoints are exposed through explicit IPC allowlist methods. Account `balance.available` is preserved as documented and is not relabelled as RiskEngine free margin. Account mutation, order creation, dealing, and execution remain absent.
 
 Do not treat source implementation, a successful process handshake, or an IPC ping as proof of a real broker session. Actual Capital.com Demo authentication and broker-originated market data remain unverified until tested against a real Demo account.
 
@@ -50,5 +51,5 @@ The Xcode project invokes the backend build during app packaging and copies the 
 - Credential payloads are encrypted over the local IPC pipe with ephemeral X25519/HKDF-SHA256/AES-256-GCM.
 - Credentials and session tokens are never passed in process arguments, environment variables, files, stdout, or logs.
 - No production TCP listener or filesystem socket is part of the desktop IPC design.
-- Only read-only Demo broker methods are exposed. Live, account mutation, orders, dealing, and execution remain disabled.
+- Only read-only Demo broker methods are exposed. Account and position data are read-only. Account mutation, order creation, dealing, and execution remain disabled.
 - Every future exposure-increasing intent must pass through the centralized Risk Engine; the Execution Gateway remains the only dealing path.

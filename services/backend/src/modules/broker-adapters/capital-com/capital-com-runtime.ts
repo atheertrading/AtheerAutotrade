@@ -3,7 +3,11 @@ import {
   type CapitalComCredentials,
   type CapitalComEnvironment,
   type CapitalComHistoricalPrices,
-  type CapitalComMarketSearchResult
+  type CapitalComMarketSearchResult,
+  type CapitalComAccountsSnapshot,
+  type CapitalComAccountPreferences,
+  type CapitalComPositionsSnapshot,
+  type CapitalComWorkingOrdersSnapshot
 } from "./capital-com-client.js";
 import { normalizeMarketQuote } from "../../market-data/market-data-quality.js";
 import {
@@ -120,6 +124,11 @@ export class CapitalComRuntime {
       max
     });
   }
+
+  async getAccounts(): Promise<CapitalComAccountsSnapshot> { return this.requireClient().getAccounts(); }
+  async getAccountPreferences(): Promise<CapitalComAccountPreferences> { return this.requireClient().getAccountPreferences(); }
+  async getPositions(): Promise<CapitalComPositionsSnapshot> { return this.requireClient().getPositions(); }
+  async getWorkingOrders(): Promise<CapitalComWorkingOrdersSnapshot> { return this.requireClient().getWorkingOrders(); }
 
   disconnect(): void {
     this.stopMarketDataStream();

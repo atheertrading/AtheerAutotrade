@@ -188,3 +188,35 @@ Not verified:
 5. Implement the full Market Data Engine and read-only account/position reconciliation.
 6. Implement Risk Engine, OMS, and Execution Gateway before enabling Demo order submission. LIVE must remain disabled until all required controls, reconciliation, authorization, and explicit approval are satisfied.
 7. Implement ATP-UX-CLIPBOARD-001 as a separate application-wide UI milestone; review the independent style-guide repository once GitHub access is available.
+
+
+## Latest handoff — ATP-CAP-ACCOUNT-001 (2026-11-13)
+
+### Verified repository baseline
+- PR #27 (ATP-EXEC-001 Batch 1: centralized pre-trade Risk Engine) is merged into `main`.
+- Merge commit: `df85a423b30ce72d4106c281566cf9797031dfef`.
+- RiskEngine source and tests are in main. It remains a pure evaluator, not an operational OMS/execution path.
+- The earlier manual-market-order workflow branch/PR is a documentation/design baseline only; it does not implement order execution.
+
+### Active implementation
+- Branch: `feat/atp-cap-account-001-readonly-snapshots`.
+- ATP-CAP-ACCOUNT-001 extends the existing CapitalComClient and CapitalComRuntime; it does not recreate the adapter or replace existing session/market-data functionality.
+- Read-only endpoints: `GET /api/v1/accounts`, `GET /api/v1/accounts/preferences`, `GET /api/v1/positions`, and `GET /api/v1/workingorders`.
+- IPC additions: `broker.accounts`, `broker.accountPreferences`, `broker.positions`, and `broker.workingOrders`.
+- Account `balance.available` is preserved under its broker field name; do not assume it is RiskEngine free margin without authoritative semantics and validation.
+- Each snapshot includes a local `observedAt` timestamp. Broker source timestamps remain separate where supplied.
+
+### Safety boundaries
+- No account switching/settings mutation, order creation, dealing, position amendment/closure, or broker mutation method.
+- No durable reconciliation or SwiftUI display integration in this batch.
+- No real Demo order is submitted by tests or implementation.
+- LIVE remains disabled; RiskEngine, OMS authorization, Execution Gateway, explicit operator confirmation, audit, and reconciliation remain mandatory before future dealing.
+
+### Verification state
+- GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript compilation passed; 46 tests passed, 0 failed, 0 skipped.
+- Draft PR #29: https://github.com/atheertrading/AtheerAutotrade/pull/29.
+- No local build, target-Mac runtime, or real Demo account read is claimed.
+- Credentials remain on the user's Mac and must never be sent in ChatGPT.
+
+### Next implementation step
+After CI passes and the branch is reviewed, implement the durable OMS intent journal/state machine and idempotency boundary. Do not expose a broker dealing method until OMS and Execution Gateway are integrated with the merged RiskEngine and broker-state reconciliation.

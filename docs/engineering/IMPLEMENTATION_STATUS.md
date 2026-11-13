@@ -17,7 +17,7 @@
 - Historical user evidence: Xcode Build Succeeded on 2026-11-12; four XCTest cases and signing checks were reported passing on x86_64. These results predate the current IPC v2 changes and do not verify this branch.
 
 ### Backend foundation
-- `risk-engine.ts` now implements a pure pre-trade evaluation boundary for BUY/SELL exposure-increasing intents: validates intent/account/quote/policy inputs; checks quote and account-snapshot freshness; computes stop-loss monetary risk and gross exposure; enforces per-trade risk, aggregate exposure, position-count, and free-margin-reserve limits; returns immutable rejection reason codes. It requires broker-supplied contract multiplier, account-currency monetary inputs, and estimated initial margin. Source implementation is present on PR #27; it is not yet wired into OMS, IPC, strategies, UI, or broker dealing.
+- `risk-engine.ts` now implements a pure pre-trade evaluation boundary for BUY/SELL exposure-increasing intents: validates intent/account/quote/policy inputs; checks quote and account-snapshot freshness; computes stop-loss monetary risk and gross exposure; enforces per-trade risk, aggregate exposure, position-count, and free-margin-reserve limits; returns immutable rejection reason codes. It requires broker-supplied contract multiplier, account-currency monetary inputs, and estimated initial margin. PR #27 is merged to main; the evaluator is not yet wired into OMS, IPC, strategies, UI, or broker dealing.
 - Node.js/TypeScript modular backend with diagnostic-only HTTP mode and production desktop stdio transport.
 - Protocol v2 supports bounded NDJSON framing, strict envelopes, UUID request IDs, duplicate detection, request limits, and safe errors.
 - IpcSecretChannel implements per-child-session X25519/HKDF-SHA256/AES-256-GCM decryption. Credential submission is one-shot per child session; mutable plaintext buffers are cleared after parsing where feasible.
@@ -46,9 +46,9 @@
 
 - Capital.com WebSocket quote/OHLC stream is wired through IPC v2 events and the shared Market Watch UI, but actual broker-originated quote/OHLC delivery has not been verified.
 - Full Market Data ingestion lifecycle remains incomplete: ordering, deduplication, gap detection, candle integrity, durable storage, stale-event propagation, and recovery. The current quote normalizer is an initial component, not a completed Market Data Engine.
-- Broker account and position snapshots/reconciliation.
+- Durable broker account/position/order reconciliation and persistence. Read-only API snapshot methods are being implemented in ATP-CAP-ACCOUNT-001; no SwiftUI consumer is wired yet.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
-- Risk Engine integration into an enforced order-intake/OMS path; the pure pre-trade evaluator exists on open PR #27 but is not merged or operationally integrated.
+- Risk Engine integration into an enforced order-intake/OMS path; the pure pre-trade evaluator is merged but not operationally integrated.
 - Order Management System and durable intent state machine.
 - Execution Gateway and broker dealing integration.
 - Portfolio/account/position reconciliation.
@@ -79,6 +79,7 @@
 - PR #18 merged Keychain load/read-back verification and field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
 - PR #19 merged feat/atp-capitalcom-operational-connection into main as `b673d639bf5440ddd52085815bf7cf2a4fd54167`. It adds IPC v2 encrypted secret transfer, read-only Demo broker methods, Xcode backend packaging, market search/history, and WebSocket quote/OHLC event IPC. Target-Mac build, crypto interoperability, packaged runtime, and real Demo verification remain pending.
 - Branch feat/atp-market-data-watchlist-main adds shared Market Watch, multi-epic subscriptions, quote normalization/freshness, and the application-level market-data store. Backend CI and target-Mac verification are pending.
+- ATP-EXEC-001 RiskEngine is merged to main through PR #27 (`df85a423b30ce72d4106c281566cf9797031dfef`); it remains a pure evaluator, not connected to OMS or execution.
 - Stacked branch feat/atp-market-data-watchlist adds shared persistent Market Watch, multi-epic subscriptions, quote normalization, Bid/Ask/Mid/Spread, and freshness display. Backend CI and target-Mac Xcode/runtime verification are pending.
 - Apple Silicon arm64 runtime remains unverified.
 
@@ -100,3 +101,23 @@
 - Added `services/backend/src/modules/risk-engine/risk-engine.ts` and `services/backend/tests/risk-engine.test.mjs`.
 - Initial GitHub Actions run 43350570347 passed the Backend CI job (TypeScript build and backend test command). A later commit strengthened account-snapshot freshness and future-intent validation; its CI run is pending.
 - No local Node execution, Xcode build, broker Demo order, or live trade is claimed.
+
+
+## ATP-CAP-ACCOUNT-001 — read-only broker state implementation
+
+**Branch:** `feat/atp-cap-account-001-readonly-snapshots`  
+**Base commit:** `df85a423b30ce72d4106c281566cf9797031dfef` (PR #27 merged)
+
+Implemented on this branch:
+- Typed Capital.com account snapshots: balance, deposit, profit/loss, available funds, currency, account status/type, and preferred account.
+- Typed account preferences: hedging mode and leverage availability.
+- Typed open-position snapshots: broker deal identifiers, side, size, entry level, P&L, leverage, and market metadata.
+- Typed working-order snapshots: identifiers, side, epic, quantity, order level/type, time-in-force, and market metadata.
+- Local receipt timestamps for each snapshot.
+- Read-only IPC methods: `broker.accounts`, `broker.accountPreferences`, `broker.positions`, and `broker.workingOrders`.
+- Mock-based REST and IPC tests.
+
+Limitations:
+- Capital.com documents the account balance field as `available`; it is not asserted to equal RiskEngine `freeMargin`.
+- No order creation, dealing, position mutation, account mutation, SwiftUI consumer, durable reconciliation, or LIVE capability is included.
+- GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript compilation passed and Node test output reported 46 passed, 0 failed, 0 skipped. No local build or real Demo account observation is claimed.
