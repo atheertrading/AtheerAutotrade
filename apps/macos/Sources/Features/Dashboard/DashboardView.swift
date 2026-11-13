@@ -91,7 +91,8 @@ struct DashboardView: View {
     // MARK: - Account Overview
 
     private var accountOverview: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            VStack(alignment: .leading, spacing: 14) {
             sectionHeading(
                 title: "Account Overview",
                 subtitle: "Live broker account telemetry · source-stamped"
@@ -177,6 +178,7 @@ struct DashboardView: View {
                             ? "Receiving the first live account snapshot…"
                             : "Connect Capital.com Demo to receive broker account data.")
                 )
+            }
             }
         }
     }
