@@ -1,4 +1,13 @@
-import { CapitalComRuntime } from "../modules/broker-adapters/capital-com/capital-com-runtime.js";
+import type {
+  CapitalComAccountPreferences,
+  CapitalComAccountsSnapshot,
+  CapitalComEnvironment,
+  CapitalComHistoricalPrices,
+  CapitalComMarketSearchResult,
+  CapitalComPositionsSnapshot,
+  CapitalComWorkingOrdersSnapshot
+} from "../modules/broker-adapters/capital-com/capital-com-client.js";
+import type { CapitalComStreamOptions } from "../modules/broker-adapters/capital-com/capital-com-market-data-stream.js";
 import { IpcSecretChannel } from "../security/ipc-secret-channel.js";
 
 export const LOCAL_IPC_PROTOCOL = "atheer.local-ipc";
@@ -9,6 +18,24 @@ export const LOCAL_IPC_MAX_SESSION_REQUESTS = 4_096;
 export interface IpcWritable {
   write(chunk: string): boolean;
   once(event: "drain", listener: () => void): unknown;
+}
+
+export interface StdioIpcBroker {
+  setCredentials(value: unknown): void;
+  connect(environment: CapitalComEnvironment): Promise<Record<string, unknown>>;
+  status(): Record<string, unknown>;
+  disconnect(): void;
+  searchMarkets(searchTerm: string): Promise<CapitalComMarketSearchResult>;
+  getHistoricalPrices(epic: string, resolution: string, max: number): Promise<CapitalComHistoricalPrices>;
+  getAccounts(): Promise<CapitalComAccountsSnapshot>;
+  getAccountPreferences(): Promise<CapitalComAccountPreferences>;
+  getPositions(): Promise<CapitalComPositionsSnapshot>;
+  getWorkingOrders(): Promise<CapitalComWorkingOrdersSnapshot>;
+  startMarketDataStream(
+    options: CapitalComStreamOptions,
+    emit: (event: string, payload: Record<string, unknown>) => void
+  ): Promise<void>;
+  stopMarketDataStream(): void;
 }
 
 type JsonObject = Record<string, unknown>;
@@ -82,7 +109,7 @@ function safeError(error: unknown): { code: string; message: string } {
 export async function serveStdioIpc(
   input: AsyncIterable<Uint8Array>,
   output: IpcWritable,
-  broker = new CapitalComRuntime()
+  broker: StdioIpcBroker
 ): Promise<void> {
   const seenRequestIds = new Set<string>();
   const secretChannel = new IpcSecretChannel();
