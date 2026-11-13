@@ -1,8 +1,8 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `df85a423b30ce72d4106c281566cf9797031dfef` (PR #27 merge)  
-**Active branch:** `feat/atp-cap-account-001-readonly-snapshots` (read-only Capital.com account state)
+**Latest observed main baseline:** `794e9c5854bba45c5b007b44de697b030f3b72a8` (PR #29 merge)  
+**Active branch:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation)
 
 ## Status definitions
 
@@ -32,7 +32,7 @@
 | ATP-ARCH-REBASE-001 | Establish ATHEER Trading Pro product identity and modular-monolith architecture baseline | ADR-0004 and aligned architecture/security/engineering docs; PR #14 squash-merged as `9445a749d78c63030e9125041a6103dca0eabafc` | DONE — MERGED; no runtime build required |
 | ATP-SEC-IPC-001-B1B2 | Backend stdio protocol and production transport mode | PR #15 merged as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`; backend build/tests remain unverified | DONE — MERGED; PENDING VERIFICATION |
 | ATP-CAP-UI-001 | Capital.com broker screen and Keychain credential entry | PR #17 merged as `9297f28fd2079dc5801cd89baf2b4723ed625a75`; Xcode/UI/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
-| ATP-CAP-UI-002 | Keychain credential restoration and read-back verification | PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`; Xcode/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |
+| ATP-CAP-UI-002 | Keychain credential restoration and read-back verification | PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`; Xcode/Keychain runtime verification pending | DONE — MERGED; PENDING VERIFICATION |\n| ATP-CAP-SESSION-001 | Capital.com encrypted Demo session and market-data bridge | PR #19 merged as `b673d639bf5440ddd52085815bf7cf2a4fd54167`; Node CI 31/31; target-Mac, crypto interoperability, packaged runtime, and real Demo verification pending | DONE — MERGED; PENDING VERIFICATION |\n| ATP-MD-WATCH-001 | Shared multi-instrument Market Watch and quote freshness | PR #21 merged as `3fed5711393059d4e089a5209b55f5fef5d8860b`; Node CI and target-Mac/Demo verification pending | DONE — MERGED; PENDING VERIFICATION |\n| ATP-CAP-ACCOUNT-001 | Read-only Capital.com account, preferences, positions, and working orders | PR #29 merged as `794e9c5854bba45c5b007b44de697b030f3b72a8`; CI 46/46 | DONE — MERGED; MOCK-TESTED |
 
 ## Active milestone
 
@@ -90,7 +90,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
 | ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Enable selection/copy for static text across all screens and retain native paste/edit behavior for editable controls; no per-label patches | PLANNED |
-| ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | IN PROGRESS — feature branch; CI pending |
+| ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | DONE — MERGED in PR #29; 46/46 Node tests passed |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
 | ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
 | ATP-OMS-001 | Order Management System | Durable lifecycle, outbox/idempotency, unknown outcomes, broker reconciliation | PLANNED |
