@@ -20,7 +20,7 @@ Official API:
 - Open positions: `GET /api/v1/positions`
 - Working orders: `GET /api/v1/workingorders`
 
-Capital.com documents a maximum general request rate of 10 requests per second per user and a 10-minute inactivity timeout for REST and WebSocket sessions. The monitor polls account, positions, and working orders concurrently every 2 seconds (three snapshot requests per cycle), renews/checks the session before each cycle, and prevents overlapping cycles. This is approximately 1.5 snapshot requests per second on average, plus one session ping per cycle, below the published general rate limit.
+Capital.com documents a maximum general request rate of 10 requests per second per user and a 10-minute inactivity timeout for REST and WebSocket sessions. The monitor polls account, positions, and working orders concurrently every 2 seconds (three snapshot requests per cycle), renews/checks the session before each cycle, and prevents overlapping cycles. This averages about 1.5 snapshot requests per second plus 0.5 session pings per second (approximately 2 requests per second total), below the published general rate limit.
 
 ## Implemented backend OOP design
 
