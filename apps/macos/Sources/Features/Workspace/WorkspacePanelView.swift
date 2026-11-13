@@ -109,7 +109,7 @@ struct WorkspacePanelView: View {
             emptyState(
                 symbol: "chart.xyaxis.line",
                 title: "Chart Workspace",
-                message: "Connect a market data provider to load instrument prices and chart history."
+                message: "Capital.com market data is connected. Interactive chart rendering and historical-series integration are not implemented yet."
             )
 
         case .marketWatch:
@@ -119,21 +119,21 @@ struct WorkspacePanelView: View {
             emptyState(
                 symbol: "arrow.left.arrow.right",
                 title: "Order Entry",
-                message: "Broker connection is not configured. Order submission is unavailable."
+                message: "Capital.com market data is connected, but order submission is not implemented. No broker dealing endpoint is exposed."
             )
 
         case .positions:
             emptyState(
                 symbol: "rectangle.stack",
                 title: "Positions",
-                message: "Position information will appear when an authorized broker account is connected."
+                message: "Broker account and position snapshots are not yet displayed in this workspace panel."
             )
 
         case .orders:
             emptyState(
                 symbol: "list.bullet",
                 title: "Orders",
-                message: "No broker order data is currently available."
+                message: "Order lifecycle monitoring is not implemented yet. This panel cannot create or submit broker orders."
             )
 
         case .news:
