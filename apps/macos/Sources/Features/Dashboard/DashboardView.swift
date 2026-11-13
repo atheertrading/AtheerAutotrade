@@ -137,7 +137,7 @@ struct DashboardView: View {
                     AccountMetricPanel(
                         title: "MARGIN LEVEL",
                         symbol: "speedometer",
-                        value: brokerAccountStore.isStale ? "—" : (account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—"),
+                        value: brokerAccountStore.isDelayed ? "—" : (account.marginLevel.map { String(format: "%.1f%%", NSDecimalNumber(decimal: $0).doubleValue) } ?? "—"),
                         detail: "Equity ÷ Margin · visual guidance only",
                         tint: marginLevelTint(account.marginLevel)
                     )
@@ -304,7 +304,7 @@ struct DashboardView: View {
     }
 
     private func formatLiveMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
-        brokerAccountStore.isStale ? "—" : formatMoney(value, account: account)
+        brokerAccountStore.isDelayed ? "—" : formatMoney(value, account: account)
     }
 
     private func marginLevelTint(_ value: Decimal?) -> Color {
