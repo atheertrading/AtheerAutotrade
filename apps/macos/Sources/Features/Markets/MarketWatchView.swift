@@ -27,7 +27,7 @@ struct MarketWatchView: View {
 
             MarketWatchTableView()
 
-            Text("Execution reference: Capital.com Bid/Ask. Mid and Spread are derived values; they are not substitutes for executable prices. Green indicates upward quote movement; red indicates downward movement.")
+            Text("Execution sides are fixed: SELL / BID is red and BUY / ASK is green. Directional movement is shown separately in the delta columns. Mid and Spread are derived values, not executable prices.")
                 .font(.system(size: 11))
                 .foregroundColor(AtheerColors.textTertiary)
                 .textSelection(.enabled)
@@ -75,12 +75,12 @@ struct MarketWatchTableView: View {
     private var headerRow: some View {
         HStack(spacing: 10) {
             Text("INSTRUMENT").frame(maxWidth: .infinity, alignment: .leading)
-            Text("SELL / BID").frame(width: 82, alignment: .trailing)
-            Text("BUY / ASK").frame(width: 82, alignment: .trailing)
+            Text("SELL / BID").foregroundColor(AtheerColors.negative).frame(width: 82, alignment: .trailing)
+            Text("BUY / ASK").foregroundColor(AtheerColors.positive).frame(width: 82, alignment: .trailing)
             Text("Δ PX").frame(width: 72, alignment: .trailing)
             Text("Δ %").frame(width: 58, alignment: .trailing)
             Text("TICKS").frame(width: 52, alignment: .trailing)
-            Text("VOL").frame(width: 48, alignment: .trailing)
+            Text("1M VOL").frame(width: 48, alignment: .trailing)
             if !compact {
                 Text("MID").frame(width: 76, alignment: .trailing)
                 Text("SPREAD").frame(width: 72, alignment: .trailing)
@@ -102,10 +102,9 @@ struct MarketWatchTableView: View {
     private func instrumentRow(_ instrument: MarketWatchInstrument) -> some View {
         let quote = marketDataStore.quotes[instrument.epic]
         let liveQuote = quote?.currentQuality == "FRESH" ? quote : nil
-        // Side labels define execution direction; price tint defines movement.
-        // Do not permanently color every bid red and every ask green.
+        // Execution-side semantics are invariant: SELL/BID is red; BUY/ASK is green.
+        // Quote direction is communicated separately in the delta columns.
         // Delayed/degraded/stale quotes are withheld from executable-price cells.
-        let movementTint = movementColor(liveQuote?.changeFromPrevious)
 
         return HStack(spacing: 10) {
             HStack(spacing: 8) {
@@ -128,8 +127,8 @@ struct MarketWatchTableView: View {
             }
             .frame(maxWidth: .infinity, alignment: .leading)
 
-            priceText(liveQuote?.bid, tint: movementTint).frame(width: 82, alignment: .trailing)
-            priceText(liveQuote?.ask, tint: movementTint).frame(width: 82, alignment: .trailing)
+            priceText(liveQuote?.bid, tint: AtheerColors.negative).frame(width: 82, alignment: .trailing)
+            priceText(liveQuote?.ask, tint: AtheerColors.positive).frame(width: 82, alignment: .trailing)
             movementText(liveQuote?.changeFromPrevious, percent: false).frame(width: 72, alignment: .trailing)
             movementText(liveQuote?.changePercentFromPrevious, percent: true).frame(width: 58, alignment: .trailing)
             tickText(instrument, quote: liveQuote).frame(width: 52, alignment: .trailing)
@@ -158,7 +157,6 @@ struct MarketWatchTableView: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 49)
-        .animation(.easeOut(duration: 0.12), value: quote?.mid)
     }
 
     private var emptyState: some View {
@@ -227,7 +225,7 @@ struct MarketWatchTableView: View {
         Text("—")
             .font(.system(size: 10, weight: .medium, design: .monospaced))
             .foregroundColor(AtheerColors.textTertiary)
-            .help("Volume is withheld until the live Capital.com stream supplies a current volume observation.")
+            .help("Capital.com quote streaming supplies Bid/Ask quantities, not traded volume. One-minute traded volume requires the historical candle endpoint and is not yet integrated.")
     }
 
     private func instrumentSymbol(_ instrumentType: String) -> String {
@@ -254,6 +252,7 @@ struct MarketWatchTableView: View {
             .foregroundColor(tint)
             .lineLimit(1)
             .textSelection(.enabled)
+            .help(quote.map { String(format: "Broker timestamp to backend receipt: %.1f ms (uncalibrated clock delta). Backend receipt to ATHEER IPC receipt: %.1f ms.", $0.sourceToBackendMilliseconds, $0.backendToClientMilliseconds) } ?? "Waiting for a broker quote.")
     }
 
     private func freshnessText(_ quote: MarketQuoteSnapshot?) -> some View {

@@ -251,3 +251,14 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - No order is submitted. LIVE remains disabled.
 - Next: review and validate the schema against ATP-ARCH-003/019; implement the pinned PostgreSQL client and checksum-verified migration runner; add PostgreSQL integration tests for atomic intent/idempotency/event creation, concurrent duplicate requests, payload mismatch, rollback, and restart recovery. Only then proceed to ATP-OMS-001 state-transition handling.
 - Preserve all local Mac work and stashes. This milestone was performed through GitHub only; no local filesystem or Xcode environment was accessed.
+
+
+## Latest handoff — ATP-MD-QUALITY-002 (2026-11-13)
+
+- Draft PR #40: https://github.com/atheertrading/AtheerAutotrade/pull/40
+- Branch: `feat/atp-md-quality-002-quote-sides-latency-volume`, based on ATP-REALTIME-001 head commit `992d6c4d91c555307332688a799013d327146ade`.
+- Restored fixed SELL/BID red and BUY/ASK green in the shared Market Watch table; directional movement remains separate in delta columns.
+- Removed the 120 ms row animation and retained 16 ms coalescing.
+- Added native IPC event receipt timestamp capture and distinct model deltas for backend-to-client delivery and broker-timestamp-to-backend receipt. The latter is not calibrated until Capital.com server-time offset is measured.
+- Capital.com WebSocket quote contract includes bidQty/ofrQty, not executed volume. REST historical candles expose optional lastTradedVolume. One-minute volume monitor/IPC/UI is still pending; UI continues to withhold a value rather than misrepresent quote quantities or search results as traded volume.
+- Source/doc changes only through GitHub. No Xcode build, Demo quote-parity test, server-time calibration, or volume monitor verification is claimed. PR #40 remains draft; do not merge or release before the outstanding checks.

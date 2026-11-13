@@ -23,6 +23,7 @@ struct MarketQuoteSnapshot: Identifiable {
     let previousMid: Double?
     let brokerTimestamp: Double
     let receivedAt: Double
+    let clientReceivedAt: Double
     let qualityAtReceipt: String
 
     var id: String { epic }
@@ -38,8 +39,21 @@ struct MarketQuoteSnapshot: Identifiable {
         return (mid - previousMid) / previousMid * 100
     }
 
+    /// End-to-end source age. The broker timestamp clock domain must be validated
+    /// against Capital.com server time before treating this as a calibrated latency.
     var ageMilliseconds: Double {
         Date().timeIntervalSince1970 * 1_000 - brokerTimestamp
+    }
+
+    /// Time from backend receipt to native IPC event receipt on the same Mac.
+    var backendToClientMilliseconds: Double {
+        clientReceivedAt - receivedAt
+    }
+
+    /// Broker timestamp to backend receipt delta; useful diagnostically but
+    /// subject to broker/workstation clock offset until server-time calibration.
+    var sourceToBackendMilliseconds: Double {
+        receivedAt - brokerTimestamp
     }
 
     var currentQuality: String {
@@ -180,8 +194,11 @@ final class MarketDataStore: ObservableObject {
     private func enqueueQuote(_ payload: [String: Any]) {
         guard let epic = payload["epic"] as? String else { return }
 
+        var stampedPayload = payload
+        stampedPayload["clientReceivedAt"] = Date().timeIntervalSince1970 * 1_000
+
         quoteBufferLock.lock()
-        pendingQuotePayloads[epic] = payload
+        pendingQuotePayloads[epic] = stampedPayload
         let shouldScheduleFlush = !quoteFlushScheduled
         if shouldScheduleFlush {
             quoteFlushScheduled = true
@@ -219,6 +236,7 @@ final class MarketDataStore: ObservableObject {
                 let spread = payload["spread"] as? Double,
                 let brokerTimestamp = payload["brokerTimestamp"] as? Double,
                 let receivedAt = payload["receivedAt"] as? Double,
+                let clientReceivedAt = payload["clientReceivedAt"] as? Double,
                 let quality = payload["quality"] as? String
             else { continue }
 
@@ -232,6 +250,7 @@ final class MarketDataStore: ObservableObject {
                 previousMid: previousMid,
                 brokerTimestamp: brokerTimestamp,
                 receivedAt: receivedAt,
+                clientReceivedAt: clientReceivedAt,
                 qualityAtReceipt: quality
             )
             didUpdate = true
