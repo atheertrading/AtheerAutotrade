@@ -1,44 +1,52 @@
 import SwiftUI
 
-/// Persistent, read-only broker account strip shared by every application destination.
+/// Persistent, read-only broker account telemetry shared by every application destination.
 struct BrokerAccountStatusBar: View {
     @EnvironmentObject private var brokerAccountStore: BrokerAccountStore
 
     var body: some View {
-        HStack(spacing: 14) {
-            connectionIdentity
+        TimelineView(.periodic(from: .now, by: 1)) { _ in
+            HStack(spacing: 14) {
+                connectionIdentity
 
-            Spacer(minLength: 12)
+                Spacer(minLength: 12)
 
-            if let account = brokerAccountStore.accountSnapshot {
-                metric("FUNDS", value: money(account.funds, account: account))
-                metric("EQUITY", value: money(account.equity, account: account))
-                metric("AVAILABLE", value: money(account.available, account: account))
-                metric("P&L", value: money(account.profitLoss, account: account))
-                metric("MARGIN", value: money(account.margin, account: account))
-            } else {
-                Text(brokerAccountStore.lastSyncError ?? "Waiting for the first broker account snapshot")
-                    .font(.system(size: 10))
-                    .foregroundColor(AtheerColors.textTertiary)
-                    .lineLimit(1)
+                if let account = brokerAccountStore.accountSnapshot {
+                    metric("BALANCE / FUNDS", value: money(account.funds, account: account), tint: AtheerColors.accent)
+                    metric("EQUITY", value: money(account.equity, account: account), tint: AtheerColors.info)
+                    metric("AVAILABLE", value: money(account.available, account: account), tint: AtheerColors.info)
+                    metric("P&L", value: money(account.profitLoss, account: account), tint: pnlColor(account.profitLoss))
+                    metric("MARGIN", value: money(account.margin, account: account), tint: AtheerColors.warning)
+
+                    VStack(alignment: .trailing, spacing: 2) {
+                        Text("FEED")
+                            .font(.system(size: 8, weight: .medium, design: .monospaced))
+                            .foregroundColor(AtheerColors.textTertiary)
+                        Text(brokerAccountStore.freshnessLabel)
+                            .font(.system(size: 9, weight: .bold, design: .monospaced))
+                            .foregroundColor(freshnessColor)
+                        Text(ageLabel)
+                            .font(.system(size: 8, weight: .medium, design: .monospaced))
+                            .foregroundColor(AtheerColors.textTertiary)
+                    }
+                } else {
+                    Text(brokerAccountStore.lastSyncError ?? "Waiting for the first broker account snapshot")
+                        .font(.system(size: 10))
+                        .foregroundColor(AtheerColors.textTertiary)
+                        .lineLimit(1)
+                }
             }
-
-            if brokerAccountStore.accountSnapshot != nil && brokerAccountStore.isStale {
-                Label("STALE", systemImage: "exclamationmark.triangle")
-                    .font(.system(size: 9, weight: .bold, design: .monospaced))
-                    .foregroundColor(AtheerColors.warning)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 9)
+            .background(AtheerColors.surface)
+            .overlay(alignment: .bottom) {
+                Rectangle()
+                    .fill(AtheerColors.border)
+                    .frame(height: 1)
             }
+            .textSelection(.enabled)
+            .accessibilityElement(children: .contain)
         }
-        .padding(.horizontal, 18)
-        .padding(.vertical, 9)
-        .background(AtheerColors.surface)
-        .overlay(alignment: .bottom) {
-            Rectangle()
-                .fill(AtheerColors.border)
-                .frame(height: 1)
-        }
-        .textSelection(.enabled)
-        .accessibilityElement(children: .contain)
     }
 
     private var connectionIdentity: some View {
@@ -55,7 +63,7 @@ struct BrokerAccountStatusBar: View {
 
                 Text(brokerAccountStore.syncStatus.uppercased())
                     .font(.system(size: 8, weight: .medium, design: .monospaced))
-                    .foregroundColor(AtheerColors.textTertiary)
+                    .foregroundColor(statusColor)
             }
         }
         .frame(minWidth: 100, alignment: .leading)
@@ -63,6 +71,7 @@ struct BrokerAccountStatusBar: View {
     }
 
     private var statusColor: Color {
+        if brokerAccountStore.isStale { return AtheerColors.negative }
         switch brokerAccountStore.syncStatus {
         case "connected": return AtheerColors.positive
         case "syncing": return AtheerColors.accent
@@ -71,14 +80,34 @@ struct BrokerAccountStatusBar: View {
         }
     }
 
-    private func metric(_ title: String, value: String) -> some View {
+    private var freshnessColor: Color {
+        switch brokerAccountStore.freshnessLabel {
+        case "LIVE": return AtheerColors.positive
+        case "DELAYED": return AtheerColors.warning
+        case "STALE": return AtheerColors.negative
+        default: return AtheerColors.textTertiary
+        }
+    }
+
+    private var ageLabel: String {
+        guard brokerAccountStore.lastSuccessfulSyncAt != nil else { return "—" }
+        return String(format: "%.1fs", brokerAccountStore.accountSnapshotAge)
+    }
+
+    private func pnlColor(_ value: Decimal) -> Color {
+        if value > 0 { return AtheerColors.positive }
+        if value < 0 { return AtheerColors.negative }
+        return AtheerColors.textSecondary
+    }
+
+    private func metric(_ title: String, value: String, tint: Color) -> some View {
         VStack(alignment: .trailing, spacing: 2) {
             Text(title)
                 .font(.system(size: 8, weight: .medium, design: .monospaced))
                 .foregroundColor(AtheerColors.textTertiary)
             Text(value)
                 .font(.system(size: 10, weight: .semibold, design: .monospaced))
-                .foregroundColor(AtheerColors.textPrimary)
+                .foregroundColor(brokerAccountStore.isStale ? AtheerColors.warning : tint)
                 .lineLimit(1)
         }
         .help(title)
