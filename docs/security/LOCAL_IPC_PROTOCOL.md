@@ -2,7 +2,7 @@
 
 **Product:** ATHEER Trading Pro  
 **Transport:** Parent-owned anonymous standard-I/O pipes  
-**Status:** Source implementation added; build and end-to-end verification pending.
+**Status:** Version 2 contract implemented in backend and macOS source; target-Mac build and end-to-end verification pending.
 
 ## 1. Transport contract
 
@@ -33,7 +33,7 @@ Required fields are exact. Unknown envelope fields are rejected. The request ID 
 
 ## 3. Ephemeral encrypted secret channel establishment
 
-Protocol v2 changes the handshake because broker credentials must be encrypted as data while crossing the local process boundary.
+Protocol v2 uses an ephemeral encrypted channel for broker credentials.
 
 1. The macOS parent creates a fresh ephemeral Curve25519/X25519 key pair for each child-process session.
 2. The parent sends `clientVersion` and its 32-byte raw X25519 public key (base64) in `system.hello`.
@@ -41,7 +41,7 @@ Protocol v2 changes the handshake because broker credentials must be encrypted a
 4. Both sides derive the same 256-bit key using X25519 shared secret and HKDF-SHA256 with the fixed context string `atheer.local-ipc.capitalcom.credentials.v1`.
 5. The backend returns its 32-byte raw public key and salt in the handshake result.
 6. The parent encrypts the credential JSON using AES-256-GCM with a fresh 96-bit nonce for each encrypted payload.
-7. The backend authenticates and decrypts the payload in memory, validates the credential structure, and accepts exactly one credential submission per child-process session. It retains the credentials only in backend process memory.
+7. The backend authenticates and decrypts the payload in memory, validates the credential structure, and accepts exactly one credential submission per child-process session. It retains credentials only in backend process memory.
 
 Handshake request:
 
@@ -59,29 +59,6 @@ Handshake request:
 }
 ```
 
-Handshake response includes:
-
-```json
-{
-  "protocolVersion": 2,
-  "service": "atheerautotrade-backend",
-  "capabilities": [
-    "system.ping",
-    "broker.credentials.submit",
-    "broker.connect",
-    "broker.status",
-    "broker.disconnect",
-    "broker.marketSearch",
-    "broker.historicalPrices"
-  ],
-  "keyAgreement": {
-    "algorithm": "X25519-HKDF-SHA256-AES-256-GCM",
-    "publicKey": "BASE64_X25519_PUBLIC_KEY",
-    "salt": "BASE64_RANDOM_SALT"
-  }
-}
-```
-
 Encrypted credential envelope:
 
 ```json
@@ -93,7 +70,7 @@ Encrypted credential envelope:
 }
 ```
 
-The public-key exchange is ephemeral and provides confidentiality/integrity for the credential payload on the inherited pipe. It does not authenticate the executable by itself and does not replace code-signature verification of the bundled backend, OS process isolation, Keychain protection at rest, or HTTPS/TLS to Capital.com. JavaScript and Swift runtime memory cannot be claimed to be perfectly zeroized.
+The ephemeral exchange protects credential confidentiality and integrity over the inherited pipe. It does not authenticate the executable by itself and does not replace code-signature verification, OS process isolation, Keychain protection at rest, or HTTPS/TLS to Capital.com. JavaScript and Swift runtime memory cannot be claimed to be perfectly zeroized.
 
 ## 4. Response envelope
 
@@ -130,21 +107,27 @@ Never include stack traces, file paths, raw provider responses, credentials, ses
 
 ## 5. Application method allowlist
 
-| Method | Purpose | State |
-|---|---|---|
-| `system.hello` | Negotiate protocol and establish ephemeral secret channel | Implemented in source |
-| `system.ping` | Confirm local IPC process responds | Implemented in source |
-| `broker.credentials.submit` | Submit exactly one encrypted credential envelope per child session; backend retains it in memory only | Implemented in source |
-| `broker.connect` | Establish and ping a Capital.com Demo REST session | Implemented in source |
-| `broker.status` | Read current broker session state | Implemented in source |
-| `broker.disconnect` | Invalidate session and clear backend credential/session state | Implemented in source |
-| `broker.marketSearch` | Search Capital.com instruments | Implemented in source |
-| `broker.historicalPrices` | Retrieve validated historical OHLC snapshots | Implemented in source |
-| `broker.stream.start` | Start real-time quote/OHLC subscriptions | Implemented in source |
-| `broker.stream.stop` | Stop real-time subscriptions | Implemented in source |
-| Account, order, position, dealing, and execution methods | No capability is exposed | Prohibited in this milestone |
+| Method | Purpose |
+|---|---|
+| `system.hello` | Negotiate protocol and establish the ephemeral secret channel |
+| `system.ping` | Confirm the local IPC process responds |
+| `broker.credentials.submit` | Submit one encrypted credential envelope per child session |
+| `broker.connect` | Establish a Capital.com Demo REST session |
+| `broker.status` | Read current broker session state |
+| `broker.disconnect` | Invalidate the session and clear backend credential/session state |
+| `broker.marketSearch` | Search Capital.com instruments |
+| `broker.historicalPrices` | Retrieve validated historical OHLC snapshots |
+| `broker.accounts` | Read broker account snapshots |
+| `broker.accountPreferences` | Read account preferences |
+| `broker.positions` | Read open positions |
+| `broker.workingOrders` | Read working orders |
+| `broker.accountSnapshots` | Capability for continuous account snapshot events |
+| `broker.positionsSnapshots` | Capability for continuous position snapshot events |
+| `broker.workingOrderSnapshots` | Capability for continuous working-order snapshot events |
+| `broker.stream.start` | Start real-time quote/OHLC subscriptions |
+| `broker.stream.stop` | Stop real-time subscriptions |
 
-All broker methods are read-only. The backend rejects Live environment selection. No generic method invocation, shell command, filesystem access, arbitrary URL fetch, or dealing operation is permitted.
+All broker operations in this milestone are read-only. The backend rejects Live environment selection. No dealing or order-submission operation is exposed.
 
 ## 6. Backend event frames
 
@@ -155,41 +138,37 @@ The backend may send unsolicited event envelopes on stdout while a request/respo
   "protocol": "atheer.local-ipc",
   "version": 2,
   "kind": "event",
-  "event": "broker.marketData.quote",
+  "event": "broker.account.snapshot",
   "payload": {
-    "epic": "MARKET_EPIC",
-    "bid": 1.2345,
-    "ask": 1.2347,
-    "timestamp": 1790000000000
+    "cycleId": 1,
+    "observedAt": "2026-11-13T10:00:00.000Z",
+    "activeAccountId": "BROKER_ACCOUNT_ID",
+    "accounts": []
   }
 }
 ```
 
-Event names are bounded strings and payloads must be JSON objects. Event frames obey the same 65,536-byte limit as request and response frames. The current event set is broker.marketData.status, broker.marketData.quote, broker.marketData.ohlc, and broker.marketData.error. Stream status is transport-connected only after the WebSocket opens and connected only after both quote and OHLC subscriptions are acknowledged.
+Every event frame must contain exactly `protocol`, `version`, `kind`, `event`, and `payload`. Payload must be a JSON object. Event names are explicitly allowlisted in both the backend and macOS parser:
+
+| Event | Payload contract |
+|---|---|
+| `broker.marketData.status` | Market stream status and subscription state |
+| `broker.marketData.quote` | Validated market quote |
+| `broker.marketData.ohlc` | Validated OHLC update |
+| `broker.marketData.error` | Sanitized market-data error |
+| `broker.account.snapshot` | `cycleId`, `observedAt`, optional `activeAccountId`, and `accounts` array |
+| `broker.positions.snapshot` | `cycleId`, `observedAt`, and `positions` array |
+| `broker.workingOrders.snapshot` | `cycleId`, `observedAt`, and `workingOrders` array |
+| `broker.account.sync.status` | `status`, `cycleId` when available, `failedSources` when available, `intervalMs` when available, and `observedAt` |
+| `broker.account.sync.error` | `source`, sanitized `message`, and `observedAt` |
+
+Event frames obey the same 65,536-byte limit as request and response frames. The account monitor emits account, positions, and working-order snapshots independently so one source failure does not suppress successful data from another source.
 
 ## 7. Protocol errors and session termination
 
-Safe error codes include:
-- `INVALID_FRAME`
-- `INVALID_ENVELOPE`
-- `INVALID_REQUEST_ID`
-- `DUPLICATE_REQUEST_ID`
-- `HANDSHAKE_REQUIRED`
-- `KEY_AGREEMENT_FAILED`
-- `PROTOCOL_VERSION_UNSUPPORTED`
-- `METHOD_NOT_FOUND`
-- `INVALID_PAYLOAD`
-- `FRAME_TOO_LARGE`
-- `SESSION_REQUEST_LIMIT`
-- `CREDENTIALS_REQUIRED`
-- `BROKER_NOT_CONNECTED`
-- `BROKER_API_ERROR`
-- `BROKER_OPERATION_FAILED`
-- `INTERNAL_ERROR`
+Safe error codes include `INVALID_FRAME`, `INVALID_ENVELOPE`, `INVALID_REQUEST_ID`, `DUPLICATE_REQUEST_ID`, `HANDSHAKE_REQUIRED`, `KEY_AGREEMENT_FAILED`, `PROTOCOL_VERSION_UNSUPPORTED`, `METHOD_NOT_FOUND`, `INVALID_PAYLOAD`, `FRAME_TOO_LARGE`, `SESSION_REQUEST_LIMIT`, `CREDENTIALS_REQUIRED`, `BROKER_NOT_CONNECTED`, `BROKER_API_ERROR`, and `BROKER_OPERATION_FAILED`.
 
-Invalid UTF-8, oversized frames, unsupported protocol versions, invalid envelopes, duplicate IDs, or session request-limit breaches terminate the IPC session. An unknown application method is a request-level error and does not by itself terminate the session.
-
-The initial implementation limits a session to 4,096 unique requests. The parent uses request timeouts and terminates a child that stops responding. No automatic replay is permitted after timeout or process restart.
+Malformed frames, unsupported protocol versions, invalid envelopes, duplicate IDs, and session request-limit breaches terminate the IPC session. An unknown application method is a request-level error and does not by itself terminate the session. An event with an unknown event name is rejected by the client parser.
 
 ## 8. Security rules
 
@@ -200,20 +179,21 @@ The initial implementation limits a session to 4,096 unique requests. The parent
 5. Encrypt credentials in transit over IPC using the ephemeral v2 secret channel.
 6. Capital.com REST uses HTTPS/TLS; CST and X-SECURITY-TOKEN remain backend-process memory only.
 7. The backend process is bundled and launched from a fixed app-bundle path; do not use arbitrary PATH resolution.
-8. A restarted child is a new session and must complete a fresh key agreement and handshake. The broker credential submission is one-shot per child session; reconnect after disconnect starts a new child session.
+8. A restarted child is a new session and must complete a fresh key agreement and credential submission.
 9. No broker account mutation, dealing, risk bypass, order, or execution capability is exposed.
 10. Demo and Live environments remain separate; Live is disabled.
 
 ## 9. Versioning policy
 
-Incompatible handshake, framing, required-field, method, or error-semantic changes require a protocol version increment. Parent and child fail closed on unsupported versions. Capability negotiation is mandatory; a client must not call a method absent from the handshake response.
+Incompatible handshake, framing, required-field, method, or error-semantic changes require a protocol version increment. Adding an explicitly allowlisted event while preserving existing envelope semantics is a backward-compatible protocol-v2 extension; the client must still reject unknown event names. Parent and child fail closed on unsupported protocol versions.
 
 ## 10. Verification status
 
-Backend TypeScript compilation and 31/31 Node tests passed in GitHub Actions on Node.js 24.22.2 (run 43332767979). Xcode build, CryptoKit/Node cross-language interoperability, packaged runtime launch, and actual Capital.com Demo authentication remain unverified on the target Mac.
+The backend account monitor has dedicated tests and Backend CI passed on implementation commit `f042c8b` (56 tests). The macOS IPC parser now has regression tests for all five account events and rejection of unknown event names. Target-Mac Xcode build and end-to-end Capital.com Demo reconciliation remain pending.
 
 ## 11. References
 
+- [ATP-BROKER-ACCOUNT-001](../engineering/ATP-BROKER-ACCOUNT-001.md)
 - [ADR-0005 — Secure macOS IPC](../decisions/ADR-0005-SECURE-MACOS-IPC.md)
 - [ADR-0004 — Production Architecture Baseline](../decisions/ADR-0004-ATHEER-PRODUCTION-ARCHITECTURE.md)
 - [Security Baseline](SECURITY_BASELINE.md)
