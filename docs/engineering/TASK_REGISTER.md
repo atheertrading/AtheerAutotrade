@@ -1,7 +1,7 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `b673d639bf5440ddd52085815bf7cf2a4fd54167`  
+**Latest observed main baseline:** `4f618e3080ed54e71b61ad94d1ad5b69deb95959`  
 **Active branch:** `feat/atp-new-batch-risk-engine-foundation` (new execution batch; PR #27)
 
 ## Status definitions
