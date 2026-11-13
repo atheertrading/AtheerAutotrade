@@ -118,7 +118,7 @@ final class MarketDataStore: ObservableObject {
     }
 
     func removeInstrument(epic: String) {
-        watchlist.removeAll { $0.epic != epic }
+        watchlist.removeAll { $0.epic == epic }
         quotes.removeValue(forKey: epic)
         persistWatchlist()
 
