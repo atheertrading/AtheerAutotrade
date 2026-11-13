@@ -27,6 +27,10 @@
 		A1000000000000000000000F /* IPCSecretChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000000000000000000000F /* IPCSecretChannel.swift */; };
 		A10000000000000000000010 /* MarketDataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000010 /* MarketDataStore.swift */; };
 		A10000000000000000000011 /* MarketWatchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000011 /* MarketWatchView.swift */; };
+		A10000000000000000000012 /* BrokerAccountSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000012 /* BrokerAccountSnapshot.swift */; };
+		A10000000000000000000013 /* BrokerPositionSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000013 /* BrokerPositionSnapshot.swift */; };
+		A10000000000000000000014 /* BrokerWorkingOrderSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000014 /* BrokerWorkingOrderSnapshot.swift */; };
+		A10000000000000000000015 /* BrokerAccountStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000000000000000000015 /* BrokerAccountStore.swift */; };
 		CAF55FDB30A50EB5002CBC33 /* WorkspacePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */; };
 		CAF55FDD30A50F84002CBC33 /* WorkspaceRegionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */; };
 		CAF55FDF30A51065002CBC33 /* WorkspaceLayoutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CAF55FDE30A51065002CBC33 /* WorkspaceLayoutView.swift */; };
@@ -55,6 +59,10 @@
 		A2000000000000000000000F /* IPCSecretChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IPCSecretChannel.swift; sourceTree = "<group>"; };
 		A20000000000000000000010 /* MarketDataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketDataStore.swift; sourceTree = "<group>"; };
 		A20000000000000000000011 /* MarketWatchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MarketWatchView.swift; sourceTree = "<group>"; };
+		A20000000000000000000012 /* BrokerAccountSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerAccountSnapshot.swift; sourceTree = "<group>"; };
+		A20000000000000000000013 /* BrokerPositionSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerPositionSnapshot.swift; sourceTree = "<group>"; };
+		A20000000000000000000014 /* BrokerWorkingOrderSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerWorkingOrderSnapshot.swift; sourceTree = "<group>"; };
+		A20000000000000000000015 /* BrokerAccountStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrokerAccountStore.swift; sourceTree = "<group>"; };
 		A30000000000000000000001 /* AtheerAutotrade.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AtheerAutotrade.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CAF55FDA30A50EB5002CBC33 /* WorkspacePanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspacePanelView.swift; sourceTree = "<group>"; };
 		CAF55FDC30A50F84002CBC33 /* WorkspaceRegionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WorkspaceRegionView.swift; sourceTree = "<group>"; };
@@ -126,6 +134,7 @@
 				A5000000000000000000000C /* Backend */,
 				A5000000000000000000000D /* Security */,
 				A5000000000000000000000F /* MarketData */,
+				B50000000000000000000001 /* Broker */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -182,6 +191,33 @@
 				A20000000000000000000010 /* MarketDataStore.swift */,
 			);
 			path = MarketData;
+			sourceTree = "<group>";
+		};
+		B50000000000000000000001 /* Broker */ = {
+			isa = PBXGroup;
+			children = (
+				B50000000000000000000002 /* Models */,
+				B50000000000000000000003 /* Services */,
+			);
+			path = Broker;
+			sourceTree = "<group>";
+		};
+		B50000000000000000000002 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000012 /* BrokerAccountSnapshot.swift */,
+				A20000000000000000000013 /* BrokerPositionSnapshot.swift */,
+				A20000000000000000000014 /* BrokerWorkingOrderSnapshot.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		B50000000000000000000003 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000015 /* BrokerAccountStore.swift */,
+			);
+			path = Services;
 			sourceTree = "<group>";
 		};
 		A5000000000000000000000E /* Brokers */ = {
@@ -345,6 +381,10 @@
 				A1000000000000000000000F /* IPCSecretChannel.swift in Sources */,
 				A10000000000000000000010 /* MarketDataStore.swift in Sources */,
 				A10000000000000000000011 /* MarketWatchView.swift in Sources */,
+				A10000000000000000000012 /* BrokerAccountSnapshot.swift in Sources */,
+				A10000000000000000000013 /* BrokerPositionSnapshot.swift in Sources */,
+				A10000000000000000000014 /* BrokerWorkingOrderSnapshot.swift in Sources */,
+				A10000000000000000000015 /* BrokerAccountStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
