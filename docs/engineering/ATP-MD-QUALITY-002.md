@@ -100,3 +100,12 @@ This monitor is not yet implemented in this branch. The UI continues to show an 
 4. Add Swift volume snapshot storage and freshness-gated 1M VOL display.
 5. Run Node 24 CI and target-Mac Xcode build.
 6. Verify Demo quote parity and one-minute volume against the Capital.com platform using the same epic/time interval.
+
+
+## Build correction — 2026-11-13
+
+- **Status:** Implemented; local Xcode verification pending.
+- **Issue:** `MarketWatchView.swift` referenced undefined `movementTint` in the MID-price cell.
+- **Correction:** Reused the existing `movementColor(liveQuote?.changeFromPrevious)` helper for MID directional coloring. BID/SELL remains fixed red and ASK/BUY remains fixed green.
+- **Commit:** `dabf08e1d777546a161a1d7873bacb554d118999`.
+- **Verification:** Source-level reference check confirms no remaining `movementTint` reference in this file. A macOS/Xcode build has not yet been run after this correction.
