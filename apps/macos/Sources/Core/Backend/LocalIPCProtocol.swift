@@ -6,6 +6,20 @@ enum LocalIPCProtocol {
     static let maximumFrameBytes = 65_536
     static let clientVersion = "0.1.0"
 
+    /// All event names emitted by the backend in IPC protocol v2.
+    /// Keep this allowlist synchronized with the backend event contract and tests.
+    static let supportedEvents: Set<String> = [
+        "broker.marketData.status",
+        "broker.marketData.quote",
+        "broker.marketData.ohlc",
+        "broker.marketData.error",
+        "broker.account.snapshot",
+        "broker.positions.snapshot",
+        "broker.workingOrders.snapshot",
+        "broker.account.sync.status",
+        "broker.account.sync.error"
+    ]
+
     static func request(
         id: String,
         method: String,
@@ -48,12 +62,7 @@ enum LocalIPCProtocol {
             envelope["version"] as? Int == version,
             envelope["kind"] as? String == "event",
             let name = envelope["event"] as? String,
-            Set([
-                "broker.marketData.status",
-                "broker.marketData.quote",
-                "broker.marketData.ohlc",
-                "broker.marketData.error"
-            ]).contains(name),
+            supportedEvents.contains(name),
             let payload = envelope["payload"] as? [String: Any]
         else {
             throw LocalIPCError.invalidResponse
