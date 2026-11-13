@@ -107,11 +107,11 @@ final class LocalIPCProtocolTests: XCTestCase {
 
         let account = try XCTUnwrap(BrokerAccountSnapshot(payload: payload))
 
-        XCTAssertEqual(account.funds, Decimal(string: "1000.20"))
-        XCTAssertEqual(account.equity, Decimal(string: "995.58"))
-        XCTAssertEqual(account.profitLoss, Decimal(string: "-4.62"))
-        XCTAssertEqual(account.available, Decimal(string: "984.59"))
-        XCTAssertEqual(account.margin, Decimal(string: "10.99"))
+        XCTAssertEqual(account.funds, Decimal(string: "1000.20")!)
+        XCTAssertEqual(account.equity, Decimal(string: "995.58")!)
+        XCTAssertEqual(account.profitLoss, Decimal(string: "-4.62")!)
+        XCTAssertEqual(account.available, Decimal(string: "984.59")!)
+        XCTAssertEqual(account.margin, Decimal(string: "10.99")!)
         XCTAssertEqual(account.equity, account.funds + account.profitLoss)
     }
 
