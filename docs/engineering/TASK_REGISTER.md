@@ -54,7 +54,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 - Backend stdio transport and protocol framing are merged through PR #15.
 - Native Swift child-process supervisor and protocol codec are merged through PR #16.
-- Protocol v2 on the active branch adds per-child ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM encrypted credential transfer, and one-shot credential submission.
+- Merged Protocol v2 uses per-child ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM encrypted credential transfer, and one-shot credential submission.
 - The backend exposes only read-only Demo session connect/disconnect/status, market search, historical-price, and quote/OHLC stream start/stop methods.
 - No account mutation, order, dealing, execution, or LIVE method is exposed.
 
@@ -64,7 +64,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 - Keychain load/read-back verification and restoration of saved fields were merged in PR #18.
 - Both remain pending target-Mac Xcode and Keychain runtime verification.
 
-### ATP-CAP-SESSION-001 — active implementation
+### ATP-CAP-SESSION-001 — merged implementation
 
 - services/backend/src/security/ipc-secret-channel.ts — ephemeral X25519 key agreement, HKDF-SHA256, AES-256-GCM decryption, and in-memory key handling.
 - services/backend/src/modules/broker-adapters/capital-com/capital-com-runtime.ts — in-memory credentials, Demo session creation, authenticated ping, status, market search, historical prices, and disconnect.
@@ -78,9 +78,9 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ### Remaining scope and safety boundaries
 
-- WebSocket quote/OHLC adapter is wired through IPC v2 event frames and the macOS UI; actual quote/OHLC delivery and sustained stream behavior remain unverified.
+- WebSocket quote events are wired through IPC v2 and the macOS Market Watch UI; the owner confirms quote delivery in the local app. OHLC IPC events are not yet consumed by MarketDataStore, and sustained feed continuity remains unverified.
 - Initial quote normalization and 5/10/15-second freshness classification are now present in source; end-to-end Demo delivery remains unverified. Full ordering/deduplication, gap detection, OHLC integrity, persistence, and recovery remain unimplemented.
-- Read-only Capital.com account, account-preferences, open-position, and working-order retrieval is being added in ATP-CAP-ACCOUNT-001; durable reconciliation/persistence remain unimplemented.
+- Read-only Capital.com account, account-preferences, open-position, and working-order retrieval merged in PR #29 (46/46 backend tests); SwiftUI presentation, durable reconciliation, and persistence remain unimplemented.
 - LIVE, order, dealing, and execution methods remain absent. All future exposure-increasing intents must pass through centralized Risk Engine and OMS authorization.
 
 ## Planned implementation sequence after the initial broker session
@@ -88,14 +88,14 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ID | Milestone | Dependency / scope | Status |
 |---|---|---|---|
 | ATP-BE-RUNTIME-001 | Backend runtime and composition root | Lifecycle, configuration validation, dependency construction, startup/shutdown, readiness aggregation | PLANNED |
-| ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
+| ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift quote-event consumption | DONE — MERGED IN PR #19/#21; OWNER-REPORTED QUOTE DELIVERY; OHLC CONSUMER PENDING |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
 | ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Implemented through root `.textSelection(.enabled)`, native macOS Edit commands, native editable-field paste, and Market Watch row context-menu copy on `feat/atp-ux-001-clipboard-and-broker-polish` | IMPLEMENTED — XCODE VERIFICATION PENDING |
-| ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | IN PROGRESS — feature branch; CI pending |
+| ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | DONE — MERGED IN PR #29; 46/46 MOCK-BASED TESTS PASSED |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
-| ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
+| ATP-PERSIST-001 | PostgreSQL persistence foundation | Initial OMS intent, event, idempotency, and outbox schema; checksum migration runner and PostgreSQL integration verification | IN PROGRESS — draft PR #30; schema source authored, database not provisioned/applied |
 | ATP-OMS-001 | Order Management System | Durable lifecycle, outbox/idempotency, unknown outcomes, broker reconciliation | PLANNED |
-| ATP-EXEC-001 | Controlled Execution Gateway | Broker dealing only after OMS + Risk authorization; explicit user approval and safety gates | PLANNED |
+| ATP-EXEC-002 | Controlled Execution Gateway | Broker dealing only after OMS + Risk authorization; explicit user approval and safety gates | PLANNED |
 | ATP-STRAT-001 | Strategy Runtime | Signals only; no direct execution authority | PLANNED |
 | ATP-PORT-INTEL-001 | Portfolio, reconciliation, and advisory intelligence | Broker-authoritative state and advisory-only AI | PLANNED |
 | ATP-SYSTEM-VERIFY-001 | End-to-end operational validation | Integration, recovery, security, safety, performance, and sustained broker evidence | PLANNED |
@@ -105,7 +105,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ID | Item | Evidence | Status |
 |---|---|---|---|
 | ATP-CAP-001-BUILD | Compile adapter and run focused tests | Adapter source/tests merged; current result not observed in this session | PENDING VERIFICATION |
-| ATP-CAP-001-DEMO | Verify actual Capital.com Demo authentication and market data | No real session or broker-originated quote/candle evidence | PLANNED |
+| ATP-CAP-001-DEMO | Verify actual Capital.com Demo authentication and market data | Owner confirms local Demo authentication and quote delivery; no independent reproduction in this review; OHLC remains unverified | OWNER-REPORTED RUNTIME; INDEPENDENT VERIFICATION PENDING |
 | ATP-MAC-ARM64-001 | Validate native app runtime on Apple Silicon | Prior runtime verification was x86_64 | PLANNED |
 
 ## Preservation and safety constraints
@@ -122,7 +122,7 @@ Review and complete PR for ATP-UX-001, then build and run the macOS app on the t
 
 ## Change log
 
-- 2026-11-13: Added ATP-MD-WATCH-001 on `feat/atp-market-data-watchlist-main`, based directly on main after PR #19 was merged. Draft PR #21 is open; the earlier stacked PR #20 was closed as superseded. Added shared persisted watchlist, multi-epic subscriptions, cross-screen Market Watch display, quote normalization/freshness classification, and corrected the Xcode SRCROOT script expansion. CI, target-Mac Xcode build, and real Demo quote delivery remain pending. Added ATP-UX-CLIPBOARD-001 as a separate planned milestone.
+- 2026-11-13: ATP-MD-WATCH-001 merged through PR #21 as `3fed5711393059d4e089a5209b55f5fef5d8860b`; shared watchlist, multi-epic subscriptions, cross-screen quote display, and freshness classification are on main. Owner confirms local quote delivery. Target-Mac verification and full stream continuity/OHLC consumption remain separate gates.
 
 - 2026-11-13: PR #18 merged as `675ea4af4d54610539218858e3d2f99c4c9a1985`. ATP-CAP-SESSION-001 was merged through PR #19 as `b673d639bf5440ddd52085815bf7cf2a4fd54167`; encrypted IPC v2, Demo REST session lifecycle, market search/history, WebSocket event IPC, and Xcode backend packaging are now in main. Target-Mac, crypto interoperability, packaged runtime, and real Demo verification remain pending.
 
@@ -146,6 +146,6 @@ Review and complete PR for ATP-UX-001, then build and run the macOS app on the t
 - Official API endpoints: `GET /api/v1/accounts`, `GET /api/v1/accounts/preferences`, `GET /api/v1/positions`, and `GET /api/v1/workingorders`.
 - Account `balance.available` is preserved as-is and is not assumed to equal RiskEngine free margin.
 - No account mutation, order creation, dealing, position amendment/closure, OMS, persistence, SwiftUI display, or LIVE capability is added in this batch.
-- Draft PR #29: https://github.com/atheertrading/AtheerAutotrade/pull/29.
+- PR #29 merged as `794e9c5854bba45c5b007b44de697b030f3b72a8`; Backend CI passed 46/46 mock-based tests.
 - GitHub Actions Backend CI run 43358303256 passed on Node.js 24.22.2: TypeScript build passed; 46 tests passed, 0 failed, 0 skipped.
-- No local Node run, Xcode build, target-Mac runtime, or real Capital.com Demo account read is claimed.
+- No target-Mac build or independent real-account read was executed by this GitHub review; the owner separately confirms local Demo connectivity and quote delivery.
