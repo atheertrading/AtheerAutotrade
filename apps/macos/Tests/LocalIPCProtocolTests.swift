@@ -87,4 +87,51 @@ final class LocalIPCProtocolTests: XCTestCase {
 
         XCTAssertThrowsError(try LocalIPCProtocol.response(from: frame))
     }
+
+    func testCapitalComAccountFieldsUsePlatformFundsEquityAndMarginSemantics() throws {
+        let payload: [String: Any] = [
+            "accountId": "demo-account",
+            "accountName": "ATHEER Trading",
+            "accountType": "CFD",
+            "status": "ENABLED",
+            "currency": "USD",
+            "symbol": "$",
+            "preferred": true,
+            "balance": [
+                "balance": 995.58,
+                "deposit": 1_000.20,
+                "profitLoss": -4.62,
+                "available": 984.59
+            ]
+        ]
+
+        let account = try XCTUnwrap(BrokerAccountSnapshot(payload: payload))
+
+        XCTAssertEqual(account.funds, Decimal(string: "1000.20"))
+        XCTAssertEqual(account.equity, Decimal(string: "995.58"))
+        XCTAssertEqual(account.profitLoss, Decimal(string: "-4.62"))
+        XCTAssertEqual(account.available, Decimal(string: "984.59"))
+        XCTAssertEqual(account.margin, Decimal(string: "10.99"))
+        XCTAssertEqual(account.equity, account.funds + account.profitLoss)
+    }
+
+    func testCapitalComAccountSnapshotRejectsNegativeDerivedMargin() {
+        let payload: [String: Any] = [
+            "accountId": "demo-account",
+            "accountName": "ATHEER Trading",
+            "accountType": "CFD",
+            "status": "ENABLED",
+            "currency": "USD",
+            "symbol": "$",
+            "preferred": true,
+            "balance": [
+                "balance": 100.00,
+                "deposit": 100.00,
+                "profitLoss": 0.00,
+                "available": 100.01
+            ]
+        ]
+
+        XCTAssertNil(BrokerAccountSnapshot(payload: payload))
+    }
 }
