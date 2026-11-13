@@ -1,7 +1,7 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `794e9c5854bba45c5b007b44de697b030f3b72a8` (PR #29 merge)  
+**Latest observed main baseline:** `bf884b57f11619472ea5d6c1aaca23534d9d781e` (main head observed during ATP-UI-DASHBOARD-001)  
 **Active implementation branches:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation); `feat/atp-dashboard-001-operational-dashboard` (Dashboard UI)
 
 ## Status definitions
