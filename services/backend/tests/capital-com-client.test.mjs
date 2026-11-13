@@ -164,3 +164,39 @@ test("historical prices reject malformed OHLC bounds", async () => {
     /invalid bid OHLC bounds/
   );
 });
+
+
+test("read-only account, preferences, positions, and working orders use authenticated GET endpoints", async () => {
+  const requests=[];
+  const client=new CapitalComClient("demo",credentialsProvider(),async(url,init)=>{
+    requests.push({url,init});
+    if(init.method==="POST") return response({}, {CST:"cst-test","X-SECURITY-TOKEN":"security-test"});
+    if(url.endsWith("/api/v1/accounts")) return response({accounts:[{accountId:"demo-account-1",accountName:"USD",status:"ENABLED",accountType:"CFD",preferred:true,currency:"USD",symbol:"$",balance:{balance:1000,deposit:950,profitLoss:50,available:800}}]});
+    if(url.endsWith("/api/v1/accounts/preferences")) return response({hedgingMode:false,leverages:{COMMODITIES:{current:5,available:[1,2,5,10]}}});
+    if(url.endsWith("/api/v1/positions")) return response({positions:[{position:{dealId:"position-1",dealReference:"p-reference-1",size:2,direction:"BUY",level:75.5,currency:"USD",leverage:5,upl:12.5,createdDateUTC:"2026-11-13T10:00:00.000",guaranteedStop:false},market:{epic:"OIL_CRUDE",instrumentName:"Crude Oil",instrumentType:"COMMODITIES",marketStatus:"TRADEABLE",bid:75.4,offer:75.6,lotSize:1,updateTimeUTC:"2026-11-13T10:01:00.000"}}]});
+    if(url.endsWith("/api/v1/workingorders")) return response({workingOrders:[{workingOrderData:{dealId:"working-order-1",direction:"SELL",epic:"OIL_CRUDE",orderSize:1,orderLevel:80,orderType:"LIMIT",timeInForce:"GOOD_TILL_CANCELLED",currencyCode:"USD",leverage:5,guaranteedStop:false},marketData:{epic:"OIL_CRUDE",instrumentName:"Crude Oil",instrumentType:"COMMODITIES",marketStatus:"TRADEABLE",bid:75.4,offer:75.6}}]});
+    throw new Error("Unexpected endpoint: "+url);
+  });
+  await client.createSession();
+  const accounts=await client.getAccounts(), prefs=await client.getAccountPreferences();
+  const positions=await client.getPositions(), orders=await client.getWorkingOrders();
+  assert.equal(accounts.accounts[0].balance.available,800);
+  assert.equal(prefs.hedgingMode,false);
+  assert.deepEqual(prefs.leverages.COMMODITIES.available,[1,2,5,10]);
+  assert.equal(positions.positions[0].position.direction,"BUY");
+  assert.equal(positions.positions[0].market.epic,"OIL_CRUDE");
+  assert.equal(orders.workingOrders[0].workingOrderData.direction,"SELL");
+  assert.equal(orders.workingOrders[0].workingOrderData.orderType,"LIMIT");
+  assert.ok(accounts.observedAt&&positions.observedAt&&orders.observedAt);
+  assert.deepEqual(requests.slice(1).map(x=>new URL(x.url).pathname),["/api/v1/accounts","/api/v1/accounts/preferences","/api/v1/positions","/api/v1/workingorders"]);
+  for(const x of requests.slice(1)){assert.equal(x.init.method,"GET");assert.equal(x.init.headers.CST,"cst-test");assert.equal(x.init.headers["X-SECURITY-TOKEN"],"security-test");}
+});
+
+test("account snapshot parser rejects missing broker balance fields", async () => {
+  const client=new CapitalComClient("demo",credentialsProvider(),async(url,init)=>{
+    if(init.method==="POST") return response({}, {CST:"cst-test","X-SECURITY-TOKEN":"security-test"});
+    return response({accounts:[{accountId:"a",accountName:"USD",status:"ENABLED",accountType:"CFD",preferred:true,currency:"USD",symbol:"$",balance:{balance:1000,deposit:950,profitLoss:50}}]});
+  });
+  await client.createSession();
+  await assert.rejects(client.getAccounts(),/account.balance.available/);
+});
