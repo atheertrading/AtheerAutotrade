@@ -16,17 +16,20 @@ The target topology consists of:
 
 The desktop client must not own broker protocol logic, risk decisions, order lifecycle, or execution authority. In desktop deployment, the macOS application launches and supervises the backend child process; the two communicate over parent-owned anonymous standard-I/O pipes using the versioned NDJSON contract. The backend owns broker protocol, domain orchestration, persistence, risk, OMS, and execution through typed interfaces and explicit application/domain events. Keep modules in one deployable backend until concrete operational or scaling evidence justifies extraction.
 
-## Current implementation — verified repository state, not runtime claims
+## Current implementation — source state and runtime evidence
 
-- The macOS application is a SwiftUI navigation and workspace shell.
-- The backend currently exposes a local process health endpoint and structured 404 handling.
-- The provider-neutral Trading Domain Instrument model is merged.
-- A read-only Capital.com REST client and WebSocket quote/OHLC transport are merged into the repository. Their integration into the backend runtime and desktop app is not complete.
-- No concrete Keychain credential provider or integrated desktop/backend process client is implemented. The stdio IPC handler is wired into the backend's explicit `--transport=stdio` startup mode; the native Swift process client is not yet integrated.
-- No actual Capital.com Demo session, broker-originated quote, or candle has been verified from this implementation.
-- No production order, Risk Engine, OMS, Execution Gateway, portfolio reconciliation, or automated strategy path is implemented.
+- The native SwiftUI macOS client contains the navigation shell, Dashboard, Markets, Capital.com broker screen, configurable Trading Workspace, shared Market Watch, and encrypted child-process IPC client.
+- The desktop app launches and supervises the bundled Node.js backend over parent-owned anonymous stdio pipes. IPC protocol v2 negotiates an ephemeral X25519/HKDF-SHA256/AES-256-GCM channel for one-shot credential transfer from macOS Keychain.
+- The backend contains a read-only Capital.com Demo session runtime, authenticated REST ping, market search, historical prices, WebSocket quote/OHLC transport, and normalized quote events.
+- The SwiftUI MarketDataStore consumes broker quote events and shares the watchlist/quote state across Dashboard, Markets, Brokers, and the Trading Workspace.
+- **Owner-reported runtime evidence (2026-11-13):** the owner confirms that the Capital.com Demo connection is working in the local Xcode application and asset prices are being received. This is not independently reproduced by this repository review; retain the distinction between owner-confirmed runtime behavior and independently executed tests.
+- The current MarketDataStore does not yet consume or persist OHLC events. Quote ordering/deduplication, gap detection, durable market-data storage, and reconnect continuity validation remain incomplete.
+- Read-only broker account, account-preferences, positions, and working-order backend endpoints are merged; full UI presentation and durable reconciliation remain outstanding.
+- A pure pre-trade RiskEngine evaluator is merged, but it is not yet integrated into an OMS or an enforced order-intake path.
+- PostgreSQL persistence schema foundation is under review in draft PR #30; no database migration has yet been applied or verified.
+- No OMS state machine, controlled Execution Gateway, broker dealing method, or LIVE order path is implemented.
 
-See [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md) and [Task Register](../engineering/TASK_REGISTER.md) for current evidence.
+Source presence, owner-reported runtime evidence, mock-based CI, and independently reproduced target-Mac verification are distinct evidence classes. See [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md) and [Task Register](../engineering/TASK_REGISTER.md).
 
 ## Mandatory control flow
 
