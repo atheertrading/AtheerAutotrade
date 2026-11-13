@@ -10,9 +10,10 @@ final class BrokerAccountStore: ObservableObject {
     @Published private(set) var positions: [BrokerPositionSnapshot] = []
     @Published private(set) var workingOrders: [BrokerWorkingOrderSnapshot] = []
     @Published private(set) var syncStatus = "disconnected"
+    /// Local receipt time, used for transport freshness and clock-skew-safe staleness.
     @Published private(set) var lastSuccessfulSyncAt: Date?
     @Published private(set) var lastSyncError: String?
-    @Published private(set) var pollingIntervalMilliseconds = 3_000
+    @Published private(set) var pollingIntervalMilliseconds = 1_000
 
     private var eventSubscriptionID: UUID?
     private let eventQueue = DispatchQueue(label: "com.atheertrading.broker-account-events")
@@ -23,9 +24,21 @@ final class BrokerAccountStore: ObservableObject {
         syncStatus == "connected" || syncStatus == "degraded" || syncStatus == "syncing"
     }
 
-    var isStale: Bool {
-        guard let lastSuccessfulSyncAt else { return true }
-        return Date().timeIntervalSince(lastSuccessfulSyncAt) > 10
+    var accountSnapshotAge: TimeInterval {
+        guard let lastSuccessfulSyncAt else { return .infinity }
+        return max(0, Date().timeIntervalSince(lastSuccessfulSyncAt))
+    }
+
+    /// Account data is considered delayed after 2.5 cadence windows and stale
+    /// after five seconds without a newly received broker snapshot.
+    var isDelayed: Bool { accountSnapshotAge > 2.5 }
+    var isStale: Bool { accountSnapshotAge > 5.0 }
+
+    var freshnessLabel: String {
+        guard accountSnapshot != nil else { return "WAITING" }
+        if isStale { return "STALE" }
+        if isDelayed { return "DELAYED" }
+        return "LIVE"
     }
 
     func startObserving() {
@@ -68,6 +81,7 @@ final class BrokerAccountStore: ObservableObject {
     private func consumeAccounts(_ payload: [String: Any]) {
         guard let accounts = payload["accounts"] as? [[String: Any]] else {
             lastSyncError = "Capital.com account snapshot has an invalid payload."
+            syncStatus = "degraded"
             return
         }
 
@@ -81,17 +95,21 @@ final class BrokerAccountStore: ObservableObject {
             snapshots.first(where: \.isPreferred) ??
             snapshots.first else {
             lastSyncError = "Capital.com returned no usable financial account."
+            syncStatus = "degraded"
             return
         }
 
         accountSnapshot = selected
-        lastSuccessfulSyncAt = selected.observedAt
+        // Use local receipt time for freshness. Broker timestamps remain attached
+        // to the immutable snapshot for audit and source-observation display.
+        lastSuccessfulSyncAt = Date()
         lastSyncError = nil
     }
 
     private func consumePositions(_ payload: [String: Any]) {
         guard let items = payload["positions"] as? [[String: Any]] else {
             lastSyncError = "Capital.com positions snapshot has an invalid payload."
+            syncStatus = "degraded"
             return
         }
         positions = items.compactMap(BrokerPositionSnapshot.init(payload:))
@@ -100,6 +118,7 @@ final class BrokerAccountStore: ObservableObject {
     private func consumeWorkingOrders(_ payload: [String: Any]) {
         guard let items = payload["workingOrders"] as? [[String: Any]] else {
             lastSyncError = "Capital.com working-orders snapshot has an invalid payload."
+            syncStatus = "degraded"
             return
         }
         workingOrders = items.compactMap(BrokerWorkingOrderSnapshot.init(payload:))
