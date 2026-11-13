@@ -251,6 +251,11 @@ final class MarketDataStore: ObservableObject {
             consumeQuoteBatch([payload])
         case "broker.marketData.error":
             streamError = payload["message"] as? String ?? "Market data stream error."
+        case "system.backend.disconnected":
+            isBrokerConnected = false
+            streamStatus = "stopped"
+            quotes.removeAll()
+            streamError = "Backend process disconnected."
         default:
             break
         }
