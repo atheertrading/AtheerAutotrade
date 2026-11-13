@@ -81,6 +81,7 @@ Balance and Funds remain one displayed metric because Capital.com's `balance.bal
 - `services/backend/src/modules/broker-adapters/capital-com/capital-com-runtime.ts`
 - `services/backend/tests/capital-com-account-monitor.test.mjs`
 - `apps/macos/Sources/Core/Broker/Services/BrokerAccountStore.swift`
+- `apps/macos/Sources/Core/Broker/Models/BrokerAccountSnapshot.swift`
 - `apps/macos/Sources/Core/MarketData/MarketDataStore.swift`
 - `apps/macos/Sources/Core/DesignSystem/AtheerColors.swift`
 - `apps/macos/Sources/Features/Brokers/BrokerAccountStatusBar.swift`
