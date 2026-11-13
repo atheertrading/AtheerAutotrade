@@ -632,6 +632,7 @@ struct CapitalComBrokerView: View {
             DispatchQueue.main.async {
                 if case .success(let response) = result {
                     isConnected = response["connected"] as? Bool == true
+                    marketDataStore.setBrokerConnectionState(isConnected)
                     connectionDetail = isConnected
                         ? "Demo API session authenticated"
                         : "No active broker session"
@@ -642,6 +643,7 @@ struct CapitalComBrokerView: View {
                     }
                 } else {
                     isConnected = false
+                    marketDataStore.setBrokerConnectionState(false)
                     connectionDetail = "Backend unavailable"
                 }
             }
@@ -659,11 +661,13 @@ struct CapitalComBrokerView: View {
                 switch result {
                 case .success(let response):
                     isConnected = response["connected"] as? Bool == true
+                    marketDataStore.setBrokerConnectionState(isConnected)
                     connectionDetail = "Demo API session authenticated"
                     marketDataStore.startStreamingIfNeeded(forceRestart: true)
                     feedback = .success("Capital.com Demo session established and verified with an authenticated ping.")
                 case .failure(let error):
                     isConnected = false
+                    marketDataStore.setBrokerConnectionState(false)
                     connectionDetail = "Connection failed"
                     marketResults = []
                     feedback = .error(error.localizedDescription)
@@ -709,6 +713,7 @@ struct CapitalComBrokerView: View {
                 switch result {
                 case .success:
                     isConnected = false
+                    marketDataStore.setBrokerConnectionState(false)
                     connectionDetail = "No active broker session"
                     marketResults = []
                     feedback = .success("Capital.com session closed. Keychain credentials remain saved.")
@@ -787,6 +792,7 @@ struct CapitalComBrokerView: View {
             identifier = ""
             password = ""
             hasSavedCredentials = false
+            marketDataStore.setBrokerConnectionState(false)
             feedback = .success("Saved Capital.com credentials were removed.")
         } catch {
             feedback = .error(error.localizedDescription)
