@@ -124,7 +124,7 @@ struct DashboardView: View {
                     .fill(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
                     .frame(width: 7, height: 7)
 
-                Text(marketDataStore.streamStatus == "connected" ? "DEMO MARKET FEED" : "SYSTEM FOUNDATION")
+                Text(marketDataStore.streamStatus == "connected" ? (marketDataStore.quotes.isEmpty ? "DEMO SUBSCRIPTION ACTIVE" : "DEMO QUOTES STREAMING") : "SYSTEM FOUNDATION")
                     .font(.system(size: 9, weight: .semibold, design: .rounded))
                     .tracking(0.8)
                     .foregroundColor(AtheerColors.textSecondary)
