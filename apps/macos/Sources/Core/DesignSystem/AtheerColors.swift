@@ -21,10 +21,11 @@ enum AtheerColors {
     static let textSecondary = Color(red: 0.55, green: 0.60, blue: 0.67)
     static let textTertiary = Color(red: 0.40, green: 0.46, blue: 0.54)
 
-    // MARK: - Semantic colors
+    // MARK: - Semantic trading colors
 
     static let accent = Color(red: 0.31, green: 0.78, blue: 0.71)
     static let accentMuted = accent.opacity(0.12)
+    static let info = Color(red: 0.36, green: 0.68, blue: 0.95)
     static let positive = Color(red: 0.25, green: 0.76, blue: 0.49)
     static let negative = Color(red: 0.88, green: 0.31, blue: 0.34)
     static let warning = Color(red: 0.91, green: 0.68, blue: 0.36)
