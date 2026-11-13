@@ -23,15 +23,15 @@ final class LocalIPCProtocolTests: XCTestCase {
 
     func testFrameDecoderHandlesFragmentedAndMultipleFrames() throws {
         var decoder = LocalIPCFrameDecoder()
-        let first = Data("{\"kind\":\"response\"}".utf8)
-        let second = Data("{\"kind\":\"response2\"}".utf8)
+        let first = Data("{\\"kind\\":\\"response\\"}".utf8)
+        let second = Data("{\\"kind\\":\\"response2\\"}".utf8)
 
         XCTAssertEqual(try decoder.append(first + Data([0x0A]) + Data(second.prefix(5))).count, 1)
         let remaining = Data(second.dropFirst(5)) + Data([0x0A])
         let frames = try decoder.append(remaining)
 
         XCTAssertEqual(frames.count, 1)
-        XCTAssertEqual(String(decoding: frames[0], as: UTF8.self), "{\"kind\":\"response2\"}")
+        XCTAssertEqual(String(decoding: frames[0], as: UTF8.self), "{\\"kind\\":\\"response2\\"}")
     }
 
     func testFrameDecoderRejectsOversizedUnterminatedFrame() {
@@ -54,9 +54,35 @@ final class LocalIPCProtocolTests: XCTestCase {
         XCTAssertEqual(event.payload["status"] as? String, "connected")
     }
 
+    func testEventParserAcceptsEveryCapitalComAccountEvent() throws {
+        let eventPayloads: [(String, String)] = [
+            ("broker.account.snapshot", "{\\"accounts\\":[],\\"observedAt\\":\\"2026-11-13T10:00:00.000Z\\"}"),
+            ("broker.positions.snapshot", "{\\"positions\\":[]}"),
+            ("broker.workingOrders.snapshot", "{\\"workingOrders\\":[]}"),
+            ("broker.account.sync.status", "{\\"status\\":\\"syncing\\",\\"intervalMs\\":2000}"),
+            ("broker.account.sync.error", "{\\"source\\":\\"accounts\\",\\"message\\":\\"snapshot unavailable\\"}")
+        ]
+
+        for (name, payload) in eventPayloads {
+            let frame = Data(
+                "{\\"protocol\\":\\"atheer.local-ipc\\",\\"version\\":2,\\"kind\\":\\"event\\",\\"event\\":\\"\(name)\\",\\"payload\\":\(payload)}".utf8
+            )
+            let event = try LocalIPCProtocol.event(from: frame)
+            XCTAssertEqual(event.name, name)
+        }
+    }
+
+    func testEventParserRejectsUnknownEventNames() {
+        let frame = Data(
+            "{\\"protocol\\":\\"atheer.local-ipc\\",\\"version\\":2,\\"kind\\":\\"event\\",\\"event\\":\\"broker.unknown.event\\",\\"payload\\":{}}".utf8
+        )
+
+        XCTAssertThrowsError(try LocalIPCProtocol.event(from: frame))
+    }
+
     func testResponseRejectsProtocolVersionMismatch() {
         let frame = Data(
-            "{\"protocol\":\"atheer.local-ipc\",\"version\":1,\"kind\":\"response\",\"id\":\"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133\",\"ok\":true,\"result\":{}}".utf8
+            "{\\"protocol\\":\\"atheer.local-ipc\\",\\"version\\":1,\\"kind\\":\\"response\\",\\"id\\":\\"f2b66c1b-8c25-4c35-ae80-b0d59d7a9133\\",\\"ok\\":true,\\"result\\":{}}".utf8
         )
 
         XCTAssertThrowsError(try LocalIPCProtocol.response(from: frame))
