@@ -35,7 +35,7 @@ struct WorkspaceLayoutView: View {
         GeometryReader { geometry in
             Group {
                 if let workspace = activeWorkspace {
-                    workspaceContent(workspace, availableSize: geometry.size)
+                    workspaceContent(workspace)
                 } else {
                     emptyWorkspaceState
                 }
@@ -50,8 +50,7 @@ struct WorkspaceLayoutView: View {
     // MARK: - Workspace Content
 
     private func workspaceContent(
-        _ workspace: AtheerWorkspace,
-        availableSize: CGSize
+        _ workspace: AtheerWorkspace
     ) -> some View {
         VStack(spacing: spacing) {
             workspaceHeader(workspace)
