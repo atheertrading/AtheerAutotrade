@@ -175,3 +175,11 @@ Limitations:
 - The owner reports working Capital.com Demo authentication and broker-originated price delivery in the local Xcode application. This remains owner-reported and is not converted into independent verification.
 - The full OOP source audit remains IN PROGRESS. ADR-0006 acceptance does not establish legacy-code conformance.
 - No broker dealing, operational OMS/Execution path, or LIVE capability is present in main.
+
+
+### ATP-BASELINE-001 documentation reconciliation
+
+- Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48
+- Eight documentation files updated on `docs/atp-baseline-reconciliation-001`.
+- No application/backend source, tests, SQL, Xcode project, broker permission, or runtime behavior changed.
+- PR #48 is open, draft, and not merged; owner review is pending.
