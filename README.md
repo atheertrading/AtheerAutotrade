@@ -4,13 +4,22 @@
 
 ## Current engineering status
 
-This repository contains an incremental foundation:
-- a native SwiftUI macOS application shell and Trading Workspace;
-- a Node.js/TypeScript modular-monolith backend foundation with a process-health endpoint;
-- a provider-neutral Trading Domain Instrument model;
-- read-only Capital.com REST and WebSocket adapter source merged into the repository; operational integration and verification remain pending.
+**Verified GitHub baseline:** `main` at `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (2026-11-14).
 
-The complete broker lifecycle is not integrated or verified. No actual Capital.com Demo session or broker-originated market observation has been verified from this implementation. Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and LIVE dealing are not implemented. Architecture diagrams describe target architecture, not implementation evidence.
+The repository contains an incremental, read-only broker-connected foundation:
+- Native SwiftUI macOS application, navigation, Trading Workspace, broker screen, Market Watch, and Dashboard.
+- Native backend child-process supervision, versioned stdio IPC v2, request validation/correlation, and encrypted one-shot credential handoff.
+- macOS Keychain credential storage; backend broker session tokens remain in process memory.
+- Capital.com read-only Demo session lifecycle, market search, historical prices, WebSocket quote/OHLC events, and read-only account/preferences/positions/working-order snapshots.
+- Shared MarketDataStore and quote normalization/freshness presentation.
+- A provider-neutral Instrument model and a pure RiskEngine evaluator.
+- PostgreSQL OMS foundation schema and migration-runner source.
+
+**Important verification boundary:** the owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices. This is owner-reported runtime evidence; this repository review did not independently run the target Mac, Xcode application, or broker account. Current-main Xcode build, packaged runtime, cross-language cryptographic interoperability, long-duration soak, and actual broker-originated observations remain unverified here.
+
+The platform does **not** yet have an integrated operational order path. The RiskEngine is not connected to an OMS/Execution Gateway workflow; there is no broker dealing method, durable order lifecycle, broker confirmation/fill processing, or reconciliation path. The PostgreSQL schema and migration runner are source artifacts only; no local database provisioning or real migration execution is claimed. Local-only PostgreSQL enforcement is still under review in PR #35.
+
+LIVE trading remains disabled. Architecture diagrams describe target architecture, not implementation evidence.
 
 ## Repository layout
 
