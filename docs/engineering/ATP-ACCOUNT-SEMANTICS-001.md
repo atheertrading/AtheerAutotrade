@@ -1,8 +1,8 @@
 # ATP-ACCOUNT-SEMANTICS-001 — Capital.com Account Field Semantics Correction
 
 **Status:** IMPLEMENTED IN SOURCE — XCODE BUILD AND CAPITAL.COM DEMO RECONCILIATION PENDING  
-**Branch:** `fix/atp-account-semantics-001`  
-**Base:** ATP-MD-QUALITY-002 branch head `f24cc7bae69eaa50f19e7694e8abdff01772bc70`  
+**Branch:** `fix/atp-account-semantics-001-rebased`  
+**Base:** `feat/atp-broker-001-continuous-account-sync` at `b0e14c8f9ed5ef44a3c1511072b3796d4dba39fe`  
 **Environment:** Capital.com Demo evidence only; this change is read-only and does not add dealing capability.
 
 ## Owner-reported observation
