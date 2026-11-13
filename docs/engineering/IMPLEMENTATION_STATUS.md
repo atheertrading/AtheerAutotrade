@@ -17,6 +17,7 @@
 - Historical user evidence: Xcode Build Succeeded on 2026-11-12; four XCTest cases and signing checks were reported passing on x86_64. These results predate the current IPC v2 changes and do not verify this branch.
 
 ### Backend foundation
+- `risk-engine.ts` now implements a pure pre-trade evaluation boundary for BUY/SELL exposure-increasing intents: validates intent/account/quote/policy inputs; checks quote and account-snapshot freshness; computes stop-loss monetary risk and gross exposure; enforces per-trade risk, aggregate exposure, position-count, and free-margin-reserve limits; returns immutable rejection reason codes. It requires broker-supplied contract multiplier, account-currency monetary inputs, and estimated initial margin. Source implementation is present on PR #27; it is not yet wired into OMS, IPC, strategies, UI, or broker dealing.
 - Node.js/TypeScript modular backend with diagnostic-only HTTP mode and production desktop stdio transport.
 - Protocol v2 supports bounded NDJSON framing, strict envelopes, UUID request IDs, duplicate detection, request limits, and safe errors.
 - IpcSecretChannel implements per-child-session X25519/HKDF-SHA256/AES-256-GCM decryption. Credential submission is one-shot per child session; mutable plaintext buffers are cleared after parsing where feasible.
@@ -47,7 +48,7 @@
 - Full Market Data ingestion lifecycle remains incomplete: ordering, deduplication, gap detection, candle integrity, durable storage, stale-event propagation, and recovery. The current quote normalizer is an initial component, not a completed Market Data Engine.
 - Broker account and position snapshots/reconciliation.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
-- Central Risk Engine.
+- Risk Engine integration into an enforced order-intake/OMS path; the pure pre-trade evaluator exists on open PR #27 but is not merged or operationally integrated.
 - Order Management System and durable intent state machine.
 - Execution Gateway and broker dealing integration.
 - Portfolio/account/position reconciliation.
@@ -92,3 +93,10 @@
 7. Complete the full Market Data Engine: ordering, deduplication, gap detection, OHLC integrity, persistence, and recovery.
 8. Add broker account/position read-only snapshots and reconciliation only after the relevant official API contracts are confirmed.
 9. Implement centralized Risk Engine, durable OMS, and Execution Gateway before enabling any dealing method. Keep LIVE disabled until all safety controls and explicit user-authorization gates are implemented and verified.
+
+
+### ATP-EXEC-001 — The New Batch / Batch 1
+- Branch: `feat/atp-new-batch-risk-engine-foundation`; draft PR #27.
+- Added `services/backend/src/modules/risk-engine/risk-engine.ts` and `services/backend/tests/risk-engine.test.mjs`.
+- Initial GitHub Actions run 43350570347 passed the Backend CI job (TypeScript build and backend test command). A later commit strengthened account-snapshot freshness and future-intent validation; its CI run is pending.
+- No local Node execution, Xcode build, broker Demo order, or live trade is claimed.
