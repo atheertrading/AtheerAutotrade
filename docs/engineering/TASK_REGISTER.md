@@ -209,7 +209,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
-| ATP-BASELINE-001 | Source-of-truth and engineering-record reconciliation | Documentation-only branch `docs/atp-baseline-reconciliation-001`; reconcile current main, accepted ADRs, source inventory, open PRs, owner-reported runtime evidence, and stale status records | IN PROGRESS — draft documentation changes; not merged |
+| ATP-BASELINE-001 | Source-of-truth and engineering-record reconciliation | Draft PR #48 on `docs/atp-baseline-reconciliation-001`; eight documentation files reconcile current main, accepted ADRs, source inventory, open PRs, owner-reported runtime evidence, and stale status records | IN PROGRESS — draft PR #48; not merged |
 | ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #31; branch `feat/atp-ux-001-clipboard-and-broker-polish`; backend CI run 43430341371 passed; branch is 20 commits ahead and 54 behind current main; no target-Mac Xcode acceptance evidence | IN PROGRESS — rebase/reconciliation and Xcode verification required |
 | ATP-PERSIST-003 | Enforce local PostgreSQL and correct migration execution | PR #35; branch `fix/atp-persist-003-local-postgres-runner`; branch is 1 commit ahead and 39 behind current main; CI run 43453512269 failed 1 of 52 tests because generated SQL lost the required backslash before psql `gexec`; no real PostgreSQL execution | IN PROGRESS — fix and rerun CI, rebase, then local PostgreSQL integration tests |
 
