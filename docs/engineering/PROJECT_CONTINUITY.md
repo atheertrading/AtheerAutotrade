@@ -314,3 +314,47 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - Node tests: 51 passed, 0 failed, 0 skipped.
 - Draft PR #47 remains open and unmerged pending owner review.
 - This CI result does not establish Xcode build, target-Mac runtime, app packaging, or Capital.com Demo verification.
+
+
+## Latest reconciled handoff — 2026-11-14 (supersedes older baseline statements)
+
+### Verified repository baseline
+- Repository: `atheertrading/AtheerAutotrade`.
+- Current GitHub `main`: `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- Local Xcode project path supplied by the owner: `/Users/enghossamalfahad/Developer/AtheerAutotrade/apps/macos/AtheerAutotrade.xcodeproj`.
+- The local Mac working tree, branch, commit, uncommitted changes, Xcode build, and live application were not accessed in this review. Do not assume local files are identical to GitHub main.
+
+### Merged OOP milestones
+- PR #45 merged ADR-0006 / project-wide OOP standard (merge commit `65b814a09b905011cb0da00f493e341c7ee94591`).
+- PR #46 merged the initial ATP-ARCH-OOP-002 source-conformance audit (merge commit `0bbd272d7a3ec33b53f6d84a1658f8c07e93e396`).
+- PR #47 merged ATP-ARCH-OOP-003 stdio broker dependency injection (merge commit `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`).
+- PR #47 Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed and 51/51 tests passed.
+- ATP-ARCH-OOP-002 remains IN PROGRESS. The initial source audit is not complete, and ADR acceptance does not imply that existing source is OOP-conformant.
+
+### Owner-reported runtime evidence
+- The owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices.
+- Preserve this as owner-reported runtime evidence. It has not been independently reproduced in this review.
+- Do not describe the broker integration as absent; distinguish source integration, owner-reported local runtime, and independently verified runtime.
+
+### Open pull requests — do not merge without their gates
+- **PR #31 — ATP-UX-001:** open, not merged; branch is 20 commits ahead and 54 behind current main; Backend CI run 43430341371 passed, but no target-Mac Xcode build/UI acceptance is recorded. GitHub reports draft=false while the PR body says it must remain draft until target-Mac acceptance. Reconcile and verify before merge.
+- **PR #35 — ATP-PERSIST-003:** open draft, not merged; branch is 1 commit ahead and 39 behind current main. Backend CI run 43453512269 failed 1/52 tests: the migration-runner test expected the psql `\\gexec` command, but the generated script contained `gexec` without the required backslash. Fix the escaping, rerun CI, rebase, and execute real PostgreSQL integration tests before merge.
+- Local PostgreSQL-only topology is the recorded current-phase owner decision in PR #35. It does not, by itself, resolve the longer-term deployment topology described in older Q&A material.
+
+### Architecture and source-of-truth findings
+- `README.md`, `SYSTEM_OVERVIEW.md`, `MODULE_BOUNDARIES.md`, `TASK_REGISTER.md`, `IMPLEMENTATION_STATUS.md`, and earlier continuity entries contained stale implementation or PR status. This reconciliation branch updates the principal status descriptions without changing source code.
+- ATP-ARCH-003 defines PostgreSQL domain-owned logical schemas (`oms`, `risk`, `execution`, `positions`, `reconciliation`, `audit`, `reference`, `integration`). Current migration 0001 instead places initial OMS tables under a generic `trading` schema. The migration has not been executed; reconcile schema ownership against ATP-ARCH-003 before applying it.
+- ATP-ARCH-036 (API/service contracts) remains incomplete. The CapitalCom-shaped `StdioIpcBroker` interface is a bounded first injection seam, not a final provider-neutral application contract. Review before expanding provider scope.
+- ATP-ARCH-042 proposed Express and pnpm, while current backend source uses Node built-in HTTP APIs and npm. Do not add Express or migrate package management merely to match a historical proposal; record an explicit compatibility/deviation decision after reviewing the current accepted architecture.
+- The Q&A repository contains an earlier hybrid-deployment recommendation; the current-phase local PostgreSQL decision is narrower and must not be interpreted as a final platform deployment decision.
+- The project-wide OOP standard is accepted, but existing modules must be assessed incrementally. Do not force class-per-file or perform cosmetic directory moves.
+
+### Engineering sequence
+1. Finish source/branch/document reconciliation and preserve the local Mac worktree.
+2. Resolve/rebase the existing UX and local-PostgreSQL PRs against current main; satisfy their own acceptance gates.
+3. Complete the bounded OOP/source review for the modules actually entering the next milestone; use ATP-ARCH-036 and domain contracts rather than inventing interfaces.
+4. Complete Market Data correctness (OHLC consumption, monotonic timestamps, deduplication, gap/recovery, freshness-aware status) before any consumer treats the feed as execution-grade.
+5. Integrate account/position/order snapshots into shared read-only UI and reconciliation views; keep broker values authoritative.
+6. Validate PostgreSQL schema ownership, local-only enforcement, migration correctness, and real local integration before operational OMS work.
+7. Integrate RiskEngine with immutable intents and durable OMS; implement idempotency, outbox, state transitions, unknown-outcome reconciliation, then Execution Gateway and broker dealing in DEMO only.
+8. Perform sustained Demo qualification and recovery testing. LIVE remains disabled pending all safeguards and separate explicit authorization.
