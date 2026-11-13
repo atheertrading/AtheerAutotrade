@@ -227,7 +227,7 @@ ATP-REALTIME-001 is the current active UI/data task on `feat/atp-realtime-001-li
 
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
-| ATP-ACCOUNT-SEMANTICS-001 | Correct Capital.com Funds, Equity, Available, and Margin field semantics using broker API/platform definitions and screenshot evidence | Branch `fix/atp-account-semantics-001`; record `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` | IMPLEMENTED IN SOURCE — XCODE BUILD, XCTEST, AND DEMO RECONCILIATION PENDING |
+| ATP-ACCOUNT-SEMANTICS-001 | Correct Capital.com Funds, Equity, Available, and Margin field semantics using broker API/platform definitions and screenshot evidence | Draft PR #41: https://github.com/atheertrading/AtheerAutotrade/pull/41; branch `fix/atp-account-semantics-001`; record `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` | IMPLEMENTED IN SOURCE — PR #41 DRAFT; XCODE BUILD, XCTEST, AND DEMO RECONCILIATION PENDING |
 
 - Screenshot review identified a deterministic inversion: the app displayed API `balance.balance` (Equity) as Funds, displayed `balance.deposit` (Funds) as Margin, and then added P&L to Equity a second time.
 - Correct mapping: Funds = `balance.deposit`; Equity = `balance.balance`; P&L = `balance.profitLoss`; Available = `balance.available`; Margin = Equity − Available.
