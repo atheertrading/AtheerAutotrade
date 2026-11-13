@@ -281,12 +281,13 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - This reconciles the semantic fields; exact synchronized broker parity still needs a live Demo capture.
 
 ### Implemented in source on GitHub
+- Draft PR #41: https://github.com/atheertrading/AtheerAutotrade/pull/41 (base: `feat/atp-broker-001-continuous-account-sync`; head: `fix/atp-account-semantics-001`). It remains open and unmerged; GitHub currently reports `mergeable=false`, so branch reconciliation is required before any merge.
 - Branch: `fix/atp-account-semantics-001`, created from `f24cc7bae69eaa50f19e7694e8abdff01772bc70`.
 - Updated `apps/macos/Sources/Core/Broker/Models/BrokerAccountSnapshot.swift` to map Funds/Equity correctly and derive Margin = Equity − Available.
 - Added XCTest regression coverage to `apps/macos/Tests/LocalIPCProtocolTests.swift` for the screenshot values and negative-margin rejection.
 - Added `docs/engineering/ATP-ACCOUNT-SEMANTICS-001.md` with screenshot evidence, field contract, diagnosis, code changes, and acceptance criteria.
 - Updated `docs/engineering/TASK_REGISTER.md`.
-- Latest implementation commit at handoff: `e48824d9fb5519f4dc1ec1815df7d7552d116f6e` (task register; preceding source/test/doc commits are on the same branch).
+- Latest implementation commit at handoff: `013d1aee5e5cc4971797e81f885a4ba3e5c6820d` (XCTest expectation cleanup; preceding source/test/doc commits are on the same branch).
 
 ### Latency assessment
 - Account state uses a one-second-target REST polling monitor, not account WebSocket events.
