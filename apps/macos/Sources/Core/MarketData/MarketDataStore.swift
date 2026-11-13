@@ -114,7 +114,9 @@ final class MarketDataStore: ObservableObject {
         isStartingStream = true
 
         BackendProcessSupervisor.shared.stopCapitalComMarketData { [weak self] _ in
-            self?.startStreamForCurrentWatchlist()
+            DispatchQueue.main.async {
+                self?.startStreamForCurrentWatchlist()
+            }
         }
     }
 
