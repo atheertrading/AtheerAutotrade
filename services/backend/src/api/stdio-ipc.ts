@@ -169,6 +169,10 @@ export async function serveStdioIpc(
               "broker.disconnect",
               "broker.marketSearch",
               "broker.historicalPrices",
+              "broker.accounts",
+              "broker.accountPreferences",
+              "broker.positions",
+              "broker.workingOrders",
               "broker.stream.start",
               "broker.stream.stop"
             ],
@@ -233,6 +237,30 @@ export async function serveStdioIpc(
               }
               const result = await broker.searchMarkets(request.payload.searchTerm);
               await writeResponse(output, success(request.id, { markets: result.markets }));
+              break;
+            }
+            case "broker.accounts": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.accounts does not accept payload fields.");
+              const result=await broker.getAccounts();
+              await writeResponse(output,success(request.id,{observedAt:result.observedAt,accounts:result.accounts}));
+              break;
+            }
+            case "broker.accountPreferences": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.accountPreferences does not accept payload fields.");
+              const result=await broker.getAccountPreferences();
+              await writeResponse(output,success(request.id,{observedAt:result.observedAt,hedgingMode:result.hedgingMode,leverages:result.leverages}));
+              break;
+            }
+            case "broker.positions": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.positions does not accept payload fields.");
+              const result=await broker.getPositions();
+              await writeResponse(output,success(request.id,{observedAt:result.observedAt,positions:result.positions}));
+              break;
+            }
+            case "broker.workingOrders": {
+              if (Object.keys(request.payload).length !== 0) throw new TypeError("broker.workingOrders does not accept payload fields.");
+              const result=await broker.getWorkingOrders();
+              await writeResponse(output,success(request.id,{observedAt:result.observedAt,workingOrders:result.workingOrders}));
               break;
             }
             case "broker.stream.start": {
