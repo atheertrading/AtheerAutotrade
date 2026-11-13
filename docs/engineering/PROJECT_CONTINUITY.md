@@ -251,3 +251,15 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - No order is submitted. LIVE remains disabled.
 - Next: review and validate the schema against ATP-ARCH-003/019; implement the pinned PostgreSQL client and checksum-verified migration runner; add PostgreSQL integration tests for atomic intent/idempotency/event creation, concurrent duplicate requests, payload mismatch, rollback, and restart recovery. Only then proceed to ATP-OMS-001 state-transition handling.
 - Preserve all local Mac work and stashes. This milestone was performed through GitHub only; no local filesystem or Xcode environment was accessed.
+
+
+## Latest architecture decision — 2026-11-14: ATP-ARCH-OOP-001
+
+- ADR-0006 accepts a project-wide Object-Oriented Design Standard.
+- Normative specification: docs/architecture/OOP_DESIGN_STANDARD.md.
+- Root AGENTS.md now requires the standard for all future source changes.
+- The standard applies across macOS Swift/SwiftUI, backend TypeScript/Node.js, tests, directories, and files.
+- It requires cohesive objects, encapsulation, explicit protocols/interfaces, composition, dependency injection, and explicit lifecycle ownership. Idiomatic Swift structs/enums/protocols and pure deterministic functions remain appropriate; do not force a class into every file/function.
+- Directory conventions follow bounded contexts and architectural layers. Existing paths are preserved until a scoped migration is justified.
+- This milestone changes architecture documentation only. Existing code has not yet been audited or refactored for full conformance.
+- Next: assess current source module-by-module and record evidence; remediate incrementally without disturbing working Capital.com connectivity or workspace functionality.

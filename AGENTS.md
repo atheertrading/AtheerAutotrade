@@ -61,3 +61,15 @@ A task is complete only when its acceptance criteria are met and the evidence is
 - `docs/engineering/PROJECT_CONTINUITY.md` when the current handoff, environment, constraints, or active milestone changes.
 
 Do not create duplicate status or decision documents when an authoritative document already exists.
+
+
+## Project-wide OOP design standard
+
+All new and materially changed source across the entire repository must comply with [ADR-0006](docs/decisions/ADR-0006-OBJECT-ORIENTED-DESIGN-STANDARD.md) and [OOP Design Standard](docs/architecture/OOP_DESIGN_STANDARD.md). This applies to Swift/SwiftUI, TypeScript/Node.js, tests, directories, and files.
+
+- Design around cohesive objects, encapsulated state, explicit protocols/interfaces, composition, dependency injection, and explicit lifecycle ownership.
+- Use idiomatic Swift structs/enums/protocols and TypeScript interfaces/classes according to semantics. Do not force every file/function into a class.
+- Organize folders by bounded context and architectural layer; name files for their primary type/responsibility.
+- Keep UI declarative and prevent UI, strategy, or intelligence code from owning broker, risk, OMS, or dealing behavior.
+- Preserve existing paths and behavior. Apply conformance incrementally; no wholesale rewrite or cosmetic folder churn.
+- Significant objects must document responsibility, contracts, state/lifecycle, dependencies, concurrency, failure behavior, security authority, and tests.
