@@ -1,8 +1,8 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-13  
-**Latest observed main baseline:** `4f618e3080ed54e71b61ad94d1ad5b69deb95959`  
-**Active branch:** `feat/atp-new-batch-risk-engine-foundation` (new execution batch; PR #27)
+**Latest observed main baseline:** `df85a423b30ce72d4106c281566cf9797031dfef` (PR #27 merge)  
+**Active branch:** `feat/atp-cap-account-001-readonly-snapshots` (read-only Capital.com account state)
 
 ## Status definitions
 
@@ -36,7 +36,7 @@
 
 ## Active milestone
 
-| ATP-EXEC-001 | Automated trading execution foundation — Batch 1: centralized pre-trade Risk Engine | Pure BUY/SELL intent risk evaluation; broker quote/account freshness; stop-loss risk, gross exposure, position-count and free-margin checks | IN PROGRESS — PR #27 open; initial Node 24 CI passed; follow-up freshness hardening CI pending |
+| ATP-EXEC-001 | Automated trading execution foundation — Batch 1: centralized pre-trade Risk Engine | Pure BUY/SELL intent risk evaluation; broker quote/account freshness; stop-loss risk, gross exposure, position-count and free-margin checks | DONE — MERGED in PR #27; pure evaluator not yet integrated with OMS/Execution Gateway |
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
@@ -79,7 +79,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 - WebSocket quote/OHLC adapter is wired through IPC v2 event frames and the macOS UI; actual quote/OHLC delivery and sustained stream behavior remain unverified.
 - Initial quote normalization and 5/10/15-second freshness classification are now present in source; end-to-end Demo delivery remains unverified. Full ordering/deduplication, gap detection, OHLC integrity, persistence, and recovery remain unimplemented.
-- Broker account/position snapshots and reconciliation remain unimplemented.
+- Read-only Capital.com account, account-preferences, open-position, and working-order retrieval is being added in ATP-CAP-ACCOUNT-001; durable reconciliation/persistence remain unimplemented.
 - LIVE, order, dealing, and execution methods remain absent. All future exposure-increasing intents must pass through centralized Risk Engine and OMS authorization.
 
 ## Planned implementation sequence after the initial broker session
@@ -90,7 +90,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 | ATP-MD-IPC-001 | Expose Capital.com WebSocket quote/OHLC events over IPC | Event envelope, subscription lifecycle, reconnect state, and Swift event consumption | IN PROGRESS — source integrated; target verification pending |
 | ATP-MD-ENGINE-001 | Market Data ingestion and quality engine | Normalize REST/stream observations; timestamps, deduplication, gaps, freshness, OHLC validation, recovery | PLANNED |
 | ATP-UX-CLIPBOARD-001 | Application-wide selectable text and native clipboard behavior | Enable selection/copy for static text across all screens and retain native paste/edit behavior for editable controls; no per-label patches | PLANNED |
-| ATP-CAP-ACCOUNT-001 | Read-only broker account and position snapshots | Confirm official Capital.com API contracts, normalize and reconcile broker-authoritative state | PLANNED |
+| ATP-CAP-ACCOUNT-001 | Read-only broker account and trading-state snapshots | GET /accounts, /accounts/preferences, /positions, /workingorders; typed parsing, observation timestamps, read-only IPC | IN PROGRESS — feature branch; CI pending |
 | ATP-DOM-PERSIST-001 | Durable domain and audit persistence | Domain event contracts, migrations, append-oriented audit, recovery and idempotency foundations | PLANNED |
 | ATP-RISK-001 | Central Risk Engine | Mandatory evaluation for every exposure-increasing intent; policy and reason codes | PLANNED |
 | ATP-OMS-001 | Order Management System | Durable lifecycle, outbox/idempotency, unknown outcomes, broker reconciliation | PLANNED |
@@ -135,3 +135,14 @@ Run Node 24 CI for ATP-MD-WATCH-001, then build the macOS target on the target I
 
 
 - 2026-11-13: Started The New Batch, ATP-EXEC-001 Batch 1, on `feat/atp-new-batch-risk-engine-foundation` from main commit `4f618e3080ed54e71b61ad94d1ad5b69deb95959`. Added the pure centralized pre-trade RiskEngine and focused tests in PR #27. Initial Backend CI run 43350570347 passed; a follow-up commit added stale account-snapshot and future-intent rejection and requires its own CI result. No broker dealing, IPC, UI, or LIVE path was added. PR #27 remains draft and unmerged.
+
+
+### ATP-CAP-ACCOUNT-001 — read-only broker trading-state snapshots
+
+- Base: `main` at `df85a423b30ce72d4106c281566cf9797031dfef`, after PR #27 merged.
+- Branch: `feat/atp-cap-account-001-readonly-snapshots`.
+- Scope: typed read-only REST parsing for accounts, account preferences, open positions, and working orders; backend runtime delegation; explicit IPC allowlist; mock-based client and IPC tests.
+- Official API endpoints: `GET /api/v1/accounts`, `GET /api/v1/accounts/preferences`, `GET /api/v1/positions`, and `GET /api/v1/workingorders`.
+- Account `balance.available` is preserved as-is and is not assumed to equal RiskEngine free margin.
+- No account mutation, order creation, dealing, position amendment/closure, OMS, persistence, SwiftUI display, or LIVE capability is added in this batch.
+- CI and PR evidence are pending.
