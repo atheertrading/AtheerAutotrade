@@ -49,7 +49,7 @@ A future transport change must re-evaluate peer authentication. TCP loopback and
 - The first request must be a version handshake. No application method is accepted before successful handshake.
 - Request IDs must be unique within a process session.
 - Methods are explicitly registered allowlist entries. No generic shell, filesystem, arbitrary URL, or dynamic method dispatch.
-- Protocol v2 negotiates an ephemeral X25519/HKDF-SHA256/AES-256-GCM secret channel. The current allowlist exposes `system.ping`, encrypted `broker.credentials.submit`, read-only `broker.connect`/`broker.disconnect`, `broker.status`, `broker.marketSearch`, and `broker.historicalPrices`.
+- Protocol v2 negotiates an ephemeral X25519/HKDF-SHA256/AES-256-GCM secret channel. The current allowlist exposes `system.ping`, encrypted `broker.credentials.submit`, read-only `broker.connect`/`broker.disconnect`, `broker.status`, `broker.marketSearch`, `broker.historicalPrices`, `broker.accounts`, `broker.accountPreferences`, `broker.positions`, `broker.workingOrders`, and `broker.stream.start`/`broker.stream.stop`. Quote/OHLC events are emitted over the established event envelope.
 - Malformed, oversized, unsupported-version, or invalid protocol input is rejected. A protocol violation closes the session.
 - Responses contain only bounded structured results or safe error codes/messages. Never serialize stack traces or internal exception text.
 - Standard output is protocol-only; diagnostics use standard error with secret redaction.
@@ -103,7 +103,7 @@ The existing loopback HTTP `GET /health` endpoint may remain available only as a
 
 - A compromised application or backend process can access data available to that process.
 - Same-user malware with equivalent process-inspection or code-injection privileges is outside the protection offered by pipe possession alone.
-- The packaging phase, encrypted credential transfer, and read-only Demo session source are implemented but have not been built or runtime-verified. Backend signature verification and release notarization remain outstanding.
+- The packaging phase and encrypted credential transfer are implemented in source. The owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices; this is owner-reported runtime evidence, not independent reproduction in this review. Target-Mac build/release-signature verification and notarization remain separate gates.
 - The stdio protocol is local and synchronous by design; it is not a remote service API or multi-client transport.
 - macOS code-signing, hardened-runtime, crash-report, and release-packaging controls require target-machine verification.
 
@@ -112,5 +112,5 @@ The existing loopback HTTP `GET /health` endpoint may remain available only as a
 - Production desktop mode will not listen on TCP or create a filesystem IPC endpoint.
 - The backend is a child process supervised by the macOS application in desktop deployment.
 - Backend protocol implementation and native Swift process/client integration are separate implementation batches.
-- Capital.com credentials remain Keychain-owned by the native app; protocol v2 transfers them only as encrypted ciphertext to the backend process. Actual Demo authentication and sustained market-data operation remain unverified.
+- Capital.com credentials remain Keychain-owned by the native app; protocol v2 transfers them only as encrypted ciphertext to the backend process. The owner reports working Demo authentication and quote delivery; sustained market-data continuity, OHLC consumption, and target-Mac release verification remain outstanding.
 - This ADR does not authorize trading, order submission, or LIVE connectivity.
