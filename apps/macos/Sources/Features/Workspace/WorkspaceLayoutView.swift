@@ -56,8 +56,16 @@ struct WorkspaceLayoutView: View {
         VStack(spacing: spacing) {
             workspaceHeader(workspace)
 
-            primaryLayout(workspace, availableSize: availableSize)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            // Measure the space remaining after the header and outer padding.
+            // Passing the parent GeometryReader's full size here over-allocates
+            // panel regions and causes the workspace layout to overflow vertically.
+            GeometryReader { layoutGeometry in
+                primaryLayout(workspace, availableSize: layoutGeometry.size)
+                    .frame(
+                        width: layoutGeometry.size.width,
+                        height: layoutGeometry.size.height
+                    )
+            }
         }
         .padding(spacing)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
