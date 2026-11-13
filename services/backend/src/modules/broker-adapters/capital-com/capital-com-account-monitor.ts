@@ -127,6 +127,7 @@ export class CapitalComAccountMonitor {
         this.emit("broker.account.snapshot", {
           cycleId,
           observedAt: accounts.value.observedAt,
+          ...(accounts.value.activeAccountId ? { activeAccountId: accounts.value.activeAccountId } : {}),
           accounts: accounts.value.accounts
         });
       } else {
