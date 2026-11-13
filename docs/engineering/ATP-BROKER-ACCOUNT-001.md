@@ -20,7 +20,7 @@ Official API:
 - Open positions: `GET /api/v1/positions`
 - Working orders: `GET /api/v1/workingorders`
 
-Capital.com documents a maximum general request rate of 10 requests per second per user and a 10-minute inactivity timeout for REST and WebSocket sessions. The monitor polls account, positions, and working orders concurrently every 3 seconds (three snapshot requests per cycle), renews/checks the session before each cycle, and prevents overlapping cycles. This is approximately one snapshot request per second on average, plus one session ping per cycle, below the published general rate limit.
+Capital.com documents a maximum general request rate of 10 requests per second per user and a 10-minute inactivity timeout for REST and WebSocket sessions. The monitor polls account, positions, and working orders concurrently every 2 seconds (three snapshot requests per cycle), renews/checks the session before each cycle, and prevents overlapping cycles. This is approximately 1.5 snapshot requests per second on average, plus one session ping per cycle, below the published general rate limit.
 
 ## Implemented backend OOP design
 
@@ -67,7 +67,7 @@ Balance and Funds are two labels for the same Capital.com source field in this A
 
 ## Freshness and failure behavior
 
-- Target polling interval: 3 seconds.
+- Target polling interval: 2 seconds.
 - Account snapshot becomes stale after 10 seconds without a successful broker observation.
 - Successful sources publish independently; a positions/orders failure does not suppress a valid account snapshot.
 - Any failed source changes synchronization status to degraded and emits a sanitized source-specific error.
