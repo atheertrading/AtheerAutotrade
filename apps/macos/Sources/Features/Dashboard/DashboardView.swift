@@ -107,7 +107,7 @@ struct DashboardView: View {
                     )
                     AccountMetricPanel(
                         title: "AVAILABLE",
-                        symbol: "wallet.bifold",
+                        symbol: "creditcard",
                         value: formatMoney(account.available, account: account),
                         detail: "Broker-reported available funds"
                     )
@@ -285,7 +285,7 @@ struct DashboardView: View {
     // MARK: - Shared Components
 
     private func formatMoney(_ value: Decimal, account: BrokerAccountSnapshot) -> String {
-        "\(account.symbol)\(value.formatted(.number.precision(.fractionLength(2))))"
+        "\(account.currencySymbol)\(value.formatted(.number.precision(.fractionLength(2))))"
     }
 
     private func sectionHeading(title: String, subtitle: String) -> some View {
