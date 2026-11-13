@@ -186,7 +186,7 @@ ATP-UI-DASHBOARD-002 is the current active UI task on `feat/atp-dashboard-002-ac
 |---|---|---|---|
 | ATP-BROKER-ACCOUNT-001 | Continuous Capital.com account, positions, and working-orders synchronization; shared OOP application state | Branch `feat/atp-broker-001-continuous-account-sync`; `docs/engineering/ATP-BROKER-ACCOUNT-001.md` | IMPLEMENTED IN SOURCE — PENDING BACKEND CI, XCODE BUILD, AND DEMO RECONCILIATION |
 
-- Backend `CapitalComAccountMonitor` begins immediately after successful Demo authentication and publishes account, positions, and working-orders snapshots every 3 seconds without overlapping cycles.
+- Backend `CapitalComAccountMonitor` begins immediately after successful Demo authentication and publishes account, positions, and working-orders snapshots every 2 seconds without overlapping cycles.
 - Account polling checks/renews the session each cycle. Capital.com official WebSocket documentation currently documents market quote and OHLC subscriptions, not account balance/positions/order events; account state therefore uses authenticated REST polling.
 - The active financial account ID from the authenticated session is carried in the snapshot; the macOS app selects that account rather than assuming the preferred account is always active.
 - Native OOP domain models are under `Core/Broker/Models`; the shared application service is under `Core/Broker/Services/BrokerAccountStore.swift`.
