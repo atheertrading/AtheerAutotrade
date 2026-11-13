@@ -35,11 +35,23 @@ struct MarketQuoteSnapshot: Identifiable {
     let ask: Double
     let mid: Double
     let spread: Double
+    let previousMid: Double?
     let brokerTimestamp: Double
     let receivedAt: Double
     let qualityAtReceipt: String
 
     var id: String { epic }
+
+    /// Quote-to-quote movement only; this is not a session/day change.
+    var changeFromPrevious: Double? {
+        guard let previousMid else { return nil }
+        return mid - previousMid
+    }
+
+    var changePercentFromPrevious: Double? {
+        guard let previousMid, previousMid > 0 else { return nil }
+        return (mid - previousMid) / previousMid * 100
+    }
 
     var ageMilliseconds: Double {
         Date().timeIntervalSince1970 * 1_000 - brokerTimestamp
@@ -288,12 +300,14 @@ final class MarketDataStore: ObservableObject {
                 let quality = payload["quality"] as? String
             else { continue }
 
+            let previousMid = updatedQuotes[epic]?.mid
             updatedQuotes[epic] = MarketQuoteSnapshot(
                 epic: epic,
                 bid: bid,
                 ask: ask,
                 mid: mid,
                 spread: spread,
+                previousMid: previousMid,
                 brokerTimestamp: brokerTimestamp,
                 receivedAt: receivedAt,
                 qualityAtReceipt: quality
