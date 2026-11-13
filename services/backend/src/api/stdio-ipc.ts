@@ -173,6 +173,9 @@ export async function serveStdioIpc(
               "broker.accountPreferences",
               "broker.positions",
               "broker.workingOrders",
+              "broker.accountSnapshots",
+              "broker.positionsSnapshots",
+              "broker.workingOrderSnapshots",
               "broker.stream.start",
               "broker.stream.stop"
             ],
@@ -217,7 +220,17 @@ export async function serveStdioIpc(
               if (!hasExactKeys(request.payload, ["environment"]) || request.payload.environment !== "demo") {
                 throw new TypeError("Only the explicitly selected Capital.com Demo environment is supported.");
               }
-              await writeResponse(output, success(request.id, await broker.connect("demo")));
+              const connection = await broker.connect("demo");
+              broker.startAccountMonitor((event, payload) => {
+                void writeResponse(output, {
+                  protocol: LOCAL_IPC_PROTOCOL,
+                  version: LOCAL_IPC_VERSION,
+                  kind: "event",
+                  event,
+                  payload
+                }).catch(() => undefined);
+              });
+              await writeResponse(output, success(request.id, connection));
               break;
             }
             case "broker.status": {
