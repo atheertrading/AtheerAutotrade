@@ -1,6 +1,6 @@
 # ATP-REALTIME-001 — Live Account Telemetry, Quote Responsiveness, and Semantic Color System
 
-**Status:** IMPLEMENTED IN SOURCE — PENDING CI, TARGET-MAC BUILD, AND CAPITAL.COM DEMO PERFORMANCE VERIFICATION  
+**Status:** IMPLEMENTED IN SOURCE — BACKEND CI PASSED; TARGET-MAC BUILD AND CAPITAL.COM DEMO PERFORMANCE VERIFICATION PENDING  
 **Branch:** `feat/atp-realtime-001-live-telemetry-and-color-semantics`  
 **Base:** `feat/atp-broker-001-continuous-account-sync`  
 **Broker scope:** Capital.com Demo, read-only. No dealing or LIVE capability.
@@ -104,4 +104,4 @@ Balance and Funds remain one displayed metric because Capital.com's `balance.bal
 
 ## Verification status
 
-Source changes and backend tests are committed to the feature branch. GitHub Actions results for this new branch, target-Mac Xcode build, and live Capital.com Demo latency/reconciliation measurements are pending. The one-second polling cadence is implemented but not yet measured against the user's actual broker account and network.
+Source changes and backend tests are committed to the feature branch. GitHub Actions run 43472162312 passed TypeScript compilation and all 57 backend tests (0 failed, 0 skipped). Target-Mac Xcode build and live Capital.com Demo latency/reconciliation measurements remain pending. The one-second polling cadence is implemented but not yet measured against the user's actual broker account and network.
