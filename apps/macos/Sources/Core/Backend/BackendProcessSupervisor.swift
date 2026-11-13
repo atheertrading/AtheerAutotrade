@@ -32,6 +32,7 @@ final class BackendProcessSupervisor {
     private var isStopping = false
     private var secretChannel: IPCSecretChannel?
     private var eventHandler: ((String, [String: Any]) -> Void)?
+    private var additionalEventHandlers: [UUID: (String, [String: Any]) -> Void] = [:]
 
     func start(completion: @escaping StartCompletion) {
         queue.async {
@@ -84,6 +85,23 @@ final class BackendProcessSupervisor {
     func setEventHandler(_ handler: ((String, [String: Any]) -> Void)?) {
         queue.async {
             self.eventHandler = handler
+        }
+    }
+
+    /// Registers an independent domain consumer without replacing existing
+    /// market-data or other application event subscriptions.
+    @discardableResult
+    func addEventHandler(_ handler: @escaping (String, [String: Any]) -> Void) -> UUID {
+        let identifier = UUID()
+        queue.async {
+            self.additionalEventHandlers[identifier] = handler
+        }
+        return identifier
+    }
+
+    func removeEventHandler(_ identifier: UUID) {
+        queue.async {
+            self.additionalEventHandlers.removeValue(forKey: identifier)
         }
     }
 
@@ -405,6 +423,7 @@ final class BackendProcessSupervisor {
                 {
                     let event = try LocalIPCProtocol.event(from: frame)
                     eventHandler?(event.name, event.payload)
+                    additionalEventHandlers.values.forEach { $0(event.name, event.payload) }
                     continue
                 }
 
