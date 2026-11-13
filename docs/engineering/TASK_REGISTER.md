@@ -118,7 +118,7 @@ Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged
 
 ## Current next action
 
-ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript compilation and 46/46 tests. ATP-PERSIST-001 Stage 1 is now active on `feat/atp-persist-001-postgres-foundation`, based on main `794e9c5854bba45c5b007b44de697b030f3b72a8`. Initial PostgreSQL schema and scope documentation are authored but not executed. This follows ATP-ARCH-003's approved sequence: database/migration baseline before OMS persistence. Next: review the schema, add a pinned PostgreSQL client and checksum-verified migration runner, and execute PostgreSQL integration tests. Then implement ATP-OMS-001 durable state transitions and idempotency. No broker dealing or LIVE capability is introduced.
+ATP-UI-DASHBOARD-002 is the current active UI task on `feat/atp-dashboard-002-account-marketwatch-settings`, stacked on the Dashboard presentation branch. It integrates the existing read-only Capital.com account IPC into the Dashboard, improves Market Watch quote-side and movement presentation, adds broker market metadata fields and instrument icons, and relocates broker setup under Settings. Source and engineering record are authored; target-Mac Xcode build and real Demo data verification are pending. ATP-PERSIST-001 Stage 1 remains pending on its separate branch and is not discarded. No broker dealing or LIVE capability is introduced.
 
 ## Change log
 
@@ -163,3 +163,18 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Existing Capital.com connection, credential, IPC and quote subscription source paths were not changed.
 - Dashboard text selection is enabled; application-wide text selection was already merged in PR #34.
 - This feature branch does not modify `main`. Merge only after review and target-Mac build/runtime verification.
+
+
+## UI milestone — ATP-UI-DASHBOARD-002
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-UI-DASHBOARD-002 | Broker account metrics, Market Watch presentation, and Settings navigation | Branch `feat/atp-dashboard-002-account-marketwatch-settings`; record `docs/engineering/ATP-UI-DASHBOARD-002.md` | IMPLEMENTED IN SOURCE — PENDING XCODE BUILD / DEMO VERIFICATION |
+
+- Account values are consumed from the existing read-only `broker.accounts` IPC method; preferred account is selected and account metrics are refreshed every 15 seconds while Dashboard is visible.
+- Capital.com field mapping is Funds/Balance, Available, Equity = Funds + P&L, P&L, Margin, and Margin Level = Equity / Margin × 100.
+- Market Watch distinguishes SELL/BID and BUY/ASK, displays broker net/percentage change where supplied, calculates ticks only from broker tickSize, shows volume only when supplied, and adds asset-type icons.
+- Quote-to-quote movement is explicitly distinguished from daily/session movement.
+- Broker Connections is moved from primary navigation into Settings.
+- Local Xcode build, Demo account reconciliation, market metadata/volume availability, and saved-watchlist decoding are pending.
+- No order execution, account mutation, or LIVE capability is introduced.
