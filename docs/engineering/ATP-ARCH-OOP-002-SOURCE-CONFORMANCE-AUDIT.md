@@ -130,3 +130,26 @@ A previous repository audit recorded Node CI evidence for specific commits and t
 ## 8. Current disposition
 
 **ATP-ARCH-OOP-002: IN PROGRESS.** Initial critical-path review identifies partially conformant state/orchestration objects and confirms good encapsulation in the IPC secret channel and RiskEngine. The audit is not complete. No source code, project configuration, broker behavior, or trading permission was changed.
+
+
+## 9. Initial remediation evidence — ATP-ARCH-OOP-003
+
+A first behavior-preserving remediation has been implemented on branch `refactor/atp-arch-oop-003-stdio-composition`:
+
+- `stdio-ipc.ts` now consumes the explicit `StdioIpcBroker` capability contract and no longer constructs `CapitalComRuntime` as a default parameter.
+- `server.ts`, the backend composition root, now constructs `CapitalComRuntime` and supplies it to the stdio transport.
+- IPC tests now inject a deterministic broker test double; the production child-process test continues to exercise the real composition path.
+- The change does not alter the IPC protocol, capability list, credential handoff, broker REST/WebSocket behavior, or available dealing permissions.
+
+**Verification:** source edits and GitHub file writes are confirmed. Backend TypeScript build and Node tests have not yet been run for this branch; CI verification is pending. This is an initial remediation, not completion of the repository-wide audit.
+
+
+### CI verification update — ATP-ARCH-OOP-003
+
+GitHub Actions Backend CI run [43528019119](https://github.com/atheertrading/AtheerAutotrade/actions/runs/43528019119) completed successfully on Node.js 24.22.2:
+
+- Dependency installation: passed.
+- TypeScript compilation: passed.
+- Node test suite: **51 passed, 0 failed, 0 skipped**.
+
+This verifies the backend build and tests for the pull-request merge commit. It does not verify Xcode, app packaging, the target Mac, or a real Capital.com Demo session. ATP-ARCH-OOP-002 remains IN PROGRESS because the full source inventory and remaining module reviews are still outstanding.

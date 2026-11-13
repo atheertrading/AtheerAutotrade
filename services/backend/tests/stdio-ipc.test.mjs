@@ -21,6 +21,25 @@ const clientPublicKey = testKeyPair.publicKey
   .subarray(-32)
   .toString("base64");
 
+function createFakeBroker() {
+  return {
+    setCredentials() {},
+    async connect() { return { connected: true, environment: "demo" }; },
+    status() { return { connected: false, environment: null }; },
+    disconnect() {},
+    async searchMarkets() { return { markets: [] }; },
+    async getHistoricalPrices() { return { prices: [] }; },
+    async getAccounts() { return { observedAt: "2026-11-14T00:00:00.000Z", accounts: [] }; },
+    async getAccountPreferences() {
+      return { observedAt: "2026-11-14T00:00:00.000Z", hedgingMode: false, leverages: {} };
+    },
+    async getPositions() { return { observedAt: "2026-11-14T00:00:00.000Z", positions: [] }; },
+    async getWorkingOrders() { return { observedAt: "2026-11-14T00:00:00.000Z", workingOrders: [] }; },
+    async startMarketDataStream() {},
+    stopMarketDataStream() {}
+  };
+}
+
 function request(id, method, payload = {}) {
   const requestPayload = method === "system.hello" ? { ...payload, clientPublicKey } : payload;
   return JSON.stringify({
@@ -33,7 +52,7 @@ function request(id, method, payload = {}) {
   }) + "\n";
 }
 
-async function runSession(chunks, broker) {
+async function runSession(chunks, broker = createFakeBroker()) {
   const output = {
     value: "",
     write(chunk) {
@@ -134,7 +153,7 @@ test("accepts only one encrypted credential submission per child session", async
     plaintext.fill(0);
   }
 
-  await serveStdioIpc(input(), output);
+  await serveStdioIpc(input(), output, createFakeBroker());
   const responses = output.value.split("\n").filter(Boolean).map((line) => JSON.parse(line));
   assert.equal(responses.length, 3);
   assert.equal(responses[1].ok, true);

@@ -150,3 +150,15 @@ Limitations:
 - **Not assessed:** remaining market-data stream/quality modules, composition root, trading domain, persistence runtime, OMS, execution, strategies, intelligence, portfolio/reconciliation, and full test architecture.
 - Main design concerns: concentration of mutable state and orchestration, global singleton dependencies, direct concrete construction, and insufficient separation between presentation, transport, application, and domain ownership.
 - No source-code changes or runtime verification were performed by this audit stage. Do not claim whole-repository conformance.
+
+
+## ATP-ARCH-OOP-003 — Backend IPC composition boundary
+
+**Implemented in source on branch:** `refactor/atp-arch-oop-003-stdio-composition`.
+
+- `stdio-ipc.ts` now accepts the explicit `StdioIpcBroker` contract. The transport layer no longer imports or instantiates `CapitalComRuntime`.
+- `server.ts` constructs `CapitalComRuntime` and injects it into the stdio transport as the composition root.
+- IPC tests use a deterministic broker test double for unit-level sessions. The production child-process test still starts `server.js`, exercising explicit production composition.
+- Protocol v2, capability allowlist, encrypted credential transfer, read-only broker methods, and disconnect cleanup are unchanged by intent.
+
+**Verification status:** GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript compilation passed and 51/51 Node tests passed. Packaged app behavior, Xcode build, target-Mac runtime, and actual Capital.com Demo runtime remain unverified. No dealing or LIVE capability was added. PR #47 remains open and unmerged.

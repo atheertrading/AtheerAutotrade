@@ -274,3 +274,43 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - Audit remains IN PROGRESS. The full repository file inventory and remaining active modules have not been inspected; no whole-project conformance claim is made.
 - No source code, Xcode project, package configuration, broker behavior, or trading permissions changed. No Xcode/Node tests or runtime checks were run during this audit stage.
 - Next: complete source inventory and inspect remaining modules, callers, tests, dependency construction, and directory ownership; then propose narrow, behavior-preserving refactors with separate verification gates.
+
+
+## Latest implementation handoff — ATP-ARCH-OOP-003 (2026-11-14)
+
+### Objective
+Begin incremental remediation of the OOP conformance findings without waiting for an Xcode build and without changing working broker behavior.
+
+### Branch and implementation
+- Repository: `atheertrading/AtheerAutotrade`.
+- Branch: `refactor/atp-arch-oop-003-stdio-composition`, created from `main`.
+- Added the explicit `StdioIpcBroker` capability contract to the stdio IPC boundary.
+- Removed the concrete `new CapitalComRuntime()` default construction from `serveStdioIpc`.
+- Moved concrete runtime construction to `services/backend/src/server.ts`, the composition root.
+- Updated IPC tests to inject deterministic broker test doubles; production child-process test retains the real server startup path.
+- Added `docs/engineering/ATP-ARCH-OOP-003-STDIO-COMPOSITION.md` and updated the audit, task register, and implementation status.
+
+### Behavior and safety
+- No IPC protocol/version/capability changes.
+- No change to encrypted credential handoff, Capital.com Demo REST/WebSocket behavior, or read-only account/position/order snapshots.
+- No broker dealing, OMS, execution, or LIVE capability added.
+- Credentials and broker tokens remain outside source and ChatGPT.
+
+### Verification
+- GitHub source writes confirmed.
+- Backend CI, TypeScript build, and Node tests are pending.
+- No local Mac filesystem, Xcode build, runtime, or broker session was accessed or verified in this milestone.
+
+### Next
+Inspect the branch diff, run Backend CI, and address any reported failures before moving to the next OOP remediation. Continue the broader ATP-ARCH-OOP-002 audit in parallel only through separately scoped, evidence-backed work.
+
+
+### ATP-ARCH-OOP-003 verification result
+
+- GitHub Actions Backend CI run: [43528019119](https://github.com/atheertrading/AtheerAutotrade/actions/runs/43528019119).
+- Runner Node.js: 24.22.2.
+- Dependency installation: passed.
+- TypeScript compilation: passed.
+- Node tests: 51 passed, 0 failed, 0 skipped.
+- Draft PR #47 remains open and unmerged pending owner review.
+- This CI result does not establish Xcode build, target-Mac runtime, app packaging, or Capital.com Demo verification.
