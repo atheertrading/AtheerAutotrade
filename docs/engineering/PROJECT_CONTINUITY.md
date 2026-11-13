@@ -243,7 +243,7 @@ After CI passes and the branch is reviewed, implement the durable OMS intent jou
 - Added `services/backend/migrations/README.md`.
 - Updated Task Register and Implementation Status to record this bounded milestone and its verification limits.
 - Initial schema covers `atheer.schema_migrations`, `trading.idempotency_records`, `trading.trade_intents`, `trading.order_events`, and `trading.order_command_outbox`.
-- Exact decimal quantity storage uses PostgreSQL `numeric(38,18)`; timestamps use `timestamptz`; scoped idempotency includes command type, account, mode, principal, key, and payload fingerprint.
+- Exact decimal quantity storage uses PostgreSQL `numeric` without a fixed scale; timestamps use `timestamptz`; scoped idempotency includes command type, account, mode, principal, key, and payload fingerprint.
 
 ### Verification and exclusions
 - SQL has not been executed against PostgreSQL and no database has been provisioned.
