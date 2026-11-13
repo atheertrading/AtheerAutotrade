@@ -20,6 +20,7 @@ export interface IpcWritable {
   once(event: "drain", listener: () => void): unknown;
 }
 
+/** Narrow broker capability contract required by the local stdio IPC transport. */
 export interface StdioIpcBroker {
   setCredentials(value: unknown): void;
   connect(environment: CapitalComEnvironment): Promise<Record<string, unknown>>;
