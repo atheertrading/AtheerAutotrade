@@ -19,7 +19,8 @@ const account = {
   equity: 10_000,
   freeMargin: 8_000,
   grossExposure: 1_000,
-  openPositions: 1
+  openPositions: 1,
+  observedAt: now
 };
 const quote = {
   epic: "OIL_CRUDE",
@@ -33,7 +34,8 @@ const policy = {
   maxGrossExposurePercent: 100,
   maxOpenPositions: 5,
   minFreeMarginPercent: 10,
-  maxQuoteAgeMs: 5_000
+  maxQuoteAgeMs: 5_000,
+  maxAccountSnapshotAgeMs: 5_000
 };
 
 test("approves an order within configured risk, exposure, margin, and freshness limits", () => {
@@ -88,4 +90,10 @@ test("uses Bid for SELL and requires stop loss above the executable reference pr
   const result = new RiskEngine().evaluate(sell, account, quote, policy, now);
   assert.equal(result.approved, true);
   assert.equal(result.referencePrice, quote.bid);
+});
+
+test("rejects stale account snapshots and intents dated in the future", () => {
+  const engine = new RiskEngine();
+  assert.ok(engine.evaluate(intent, { ...account, observedAt: now - 6_000 }, quote, policy, now).reasons.includes("ACCOUNT_SNAPSHOT_STALE"));
+  assert.ok(engine.evaluate({ ...intent, requestedAt: now + 1_000 }, account, quote, policy, now).reasons.includes("INVALID_INTENT"));
 });
