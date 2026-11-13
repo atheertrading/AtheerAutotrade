@@ -36,7 +36,7 @@ Capital.com currently documents WebSocket streaming for market quotes and OHLC, 
   - **LIVE:** snapshot received within 2.5 seconds.
   - **DELAYED:** older than 2.5 seconds but no older than 5 seconds.
   - **STALE:** no successful account snapshot received for more than 5 seconds.
-- Stale financial values remain visibly marked as stale; they must not be represented as current. Disconnect/backend loss continues to clear account, position, and working-order state.
+- Stale financial values are withheld from the Dashboard and persistent account strip; the last-known snapshot remains in the shared store for diagnostics/reconciliation but is never presented as current. Delayed values remain visible only with an amber DELAYED/DEGRADED state. Disconnect/backend loss clears account, position, and working-order state.
 - The global account strip refreshes its age/freshness display every second, even when no new snapshot arrives.
 
 ## Implemented market-data responsiveness
@@ -97,7 +97,7 @@ Balance and Funds remain one displayed metric because Capital.com's `balance.bal
 4. External Demo account activity updates Balance/Funds, Available, Equity, P&L, Margin, positions, and working orders without requiring Dashboard navigation or manual refresh.
 5. Market quote updates render with no additional 100 ms application debounce; target batching is 16 ms. Quote freshness classification remains aligned with RiskEngine thresholds.
 6. Positive, negative, neutral, informational, warning, delayed, and stale states are visually distinguishable.
-7. When account data stops arriving, the status bar changes to DELAYED/STALE within the defined thresholds and never continues to label the last value LIVE.
+7. When account data stops arriving, the status bar changes to DELAYED/DEGRADED/STALE within the defined thresholds, stale values are withheld, and the last value is never labeled LIVE.
 8. When market quotes become stale, the quote freshness state is visible and no consumer may treat the stale quote as current.
 9. All account consumers use the same shared `BrokerAccountStore`; no duplicate per-screen polling is introduced.
 10. No order placement, account mutation, RiskEngine bypass, or LIVE capability is introduced.
