@@ -1,6 +1,7 @@
 import { createServer } from "node:http";
 import { route } from "./api/router.js";
 import { serveStdioIpc } from "./api/stdio-ipc.js";
+import { CapitalComRuntime } from "./modules/broker-adapters/capital-com/capital-com-runtime.js";
 import { environment } from "./config/environment.js";
 
 function startHttpDiagnosticServer(): void {
@@ -66,7 +67,7 @@ const transportArgument = process.argv.find((argument) => argument.startsWith("-
 const transport = transportArgument?.slice("--transport=".length) ?? "http";
 
 if (transport === "stdio") {
-  void serveStdioIpc(process.stdin, process.stdout)
+  void serveStdioIpc(process.stdin, process.stdout, new CapitalComRuntime())
     .then(() => {
       process.stdin.destroy();
     })
