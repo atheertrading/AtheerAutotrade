@@ -162,7 +162,7 @@ struct MarketWatchTableView: View {
             Text("No instruments in Market Watch")
                 .font(.system(size: 12, weight: .semibold))
                 .foregroundColor(AtheerColors.textPrimary)
-            Text("Connect Capital.com Demo, open Brokers, search for an instrument, and add it to this watchlist.")
+            Text("Open Settings → Broker Connections, connect Capital.com Demo, search for an instrument, and add it to this watchlist.")
                 .font(.system(size: 11))
                 .foregroundColor(AtheerColors.textSecondary)
                 .fixedSize(horizontal: false, vertical: true)
