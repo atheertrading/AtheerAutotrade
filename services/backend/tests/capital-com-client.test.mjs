@@ -174,7 +174,7 @@ test("read-only account, preferences, positions, and working orders use authenti
   const requests=[];
   const client=new CapitalComClient("demo",credentialsProvider(),async(url,init)=>{
     requests.push({url,init});
-    if(init.method==="POST") return response({}, {CST:"cst-test","X-SECURITY-TOKEN":"security-test"});
+    if(init.method==="POST") return response({currentAccountId:"demo-account-1"}, {CST:"cst-test","X-SECURITY-TOKEN":"security-test"});
     if(url.endsWith("/api/v1/accounts")) return response({accounts:[{accountId:"demo-account-1",accountName:"USD",status:"ENABLED",accountType:"CFD",preferred:true,currency:"USD",symbol:"$",balance:{balance:1000,deposit:950,profitLoss:50,available:800}}]});
     if(url.endsWith("/api/v1/accounts/preferences")) return response({hedgingMode:false,leverages:{COMMODITIES:{current:5,available:[1,2,5,10]}}});
     if(url.endsWith("/api/v1/positions")) return response({positions:[{position:{dealId:"position-1",dealReference:"p-reference-1",size:2,direction:"BUY",level:75.5,currency:"USD",leverage:5,upl:12.5,createdDateUTC:"2026-11-13T10:00:00.000",guaranteedStop:false},market:{epic:"OIL_CRUDE",instrumentName:"Crude Oil",instrumentType:"COMMODITIES",marketStatus:"TRADEABLE",bid:75.4,offer:75.6,lotSize:1,updateTimeUTC:"2026-11-13T10:01:00.000"}}]});
