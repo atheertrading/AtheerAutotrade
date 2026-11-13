@@ -69,7 +69,10 @@ final class BrokerAccountStore: ObservableObject {
             return
         }
 
-        let snapshots = accounts.compactMap { BrokerAccountSnapshot(payload: $0) }
+        let observedAt = Self.date(payload["observedAt"] as? String) ?? Date()
+        let snapshots = accounts.compactMap {
+            BrokerAccountSnapshot(payload: $0, observedAt: observedAt)
+        }
         guard let selected = snapshots.first(where: \.isPreferred) ?? snapshots.first else {
             lastSyncError = "Capital.com returned no usable financial account."
             return
@@ -94,6 +97,14 @@ final class BrokerAccountStore: ObservableObject {
             return
         }
         workingOrders = items.compactMap(BrokerWorkingOrderSnapshot.init(payload:))
+    }
+
+    private static func date(_ value: String?) -> Date? {
+        guard let value else { return nil }
+        let fractional = ISO8601DateFormatter()
+        fractional.formatOptions = [.withInternetDateTime, .withFractionalSeconds]
+        if let date = fractional.date(from: value) { return date }
+        return ISO8601DateFormatter().date(from: value)
     }
 
     private func consumeSyncStatus(_ payload: [String: Any]) {
