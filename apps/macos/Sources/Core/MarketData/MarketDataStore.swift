@@ -45,9 +45,9 @@ struct MarketQuoteSnapshot: Identifiable {
     var currentQuality: String {
         let age = ageMilliseconds
         guard age >= 0 else { return "UNKNOWN" }
-        if age <= 2_500 { return "FRESH" }
-        if age <= 5_000 { return "DELAYED" }
-        if age <= 10_000 { return "DEGRADED" }
+        if age <= 5_000 { return "FRESH" }
+        if age <= 10_000 { return "DELAYED" }
+        if age <= 15_000 { return "DEGRADED" }
         return "STALE"
     }
 
