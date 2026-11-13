@@ -77,6 +77,9 @@ test("handshake and ping work across fragmented UTF-8 input", async () => {
   assert.ok(responses[0].result.capabilities.includes("broker.accountPreferences"));
   assert.ok(responses[0].result.capabilities.includes("broker.positions"));
   assert.ok(responses[0].result.capabilities.includes("broker.workingOrders"));
+  assert.ok(responses[0].result.capabilities.includes("broker.accountSnapshots"));
+  assert.ok(responses[0].result.capabilities.includes("broker.positionsSnapshots"));
+  assert.ok(responses[0].result.capabilities.includes("broker.workingOrderSnapshots"));
   assert.equal(responses[0].result.keyAgreement.algorithm, "X25519-HKDF-SHA256-AES-256-GCM");
   assert.equal(responses[1].ok, true);
   assert.deepEqual(responses[1].result, { status: "alive" });
@@ -274,4 +277,40 @@ test("read-only account IPC methods return snapshots and reject mutation payload
   const invalidBroker={async getAccounts(){throw new Error("must not be called");},disconnect(){}};
   const invalid=await runSession([encoder.encode(request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133","system.hello",{clientVersion:"0.1.0"})+request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52","broker.accounts",{accountId:"x"}))],invalidBroker);
   assert.equal(invalid[1].error.code,"INVALID_PAYLOAD");
+});
+
+
+test("successful broker connection starts the account monitor and streams account snapshots over IPC", async () => {
+  const events = [];
+  const broker = {
+    async connect(environment) {
+      assert.equal(environment, "demo");
+      return { connected: true, environment: "demo" };
+    },
+    startAccountMonitor(emit) {
+      emit("broker.account.snapshot", {
+        observedAt: "2026-11-13T10:00:00.000Z",
+        accounts: [{ accountId: "demo-account" }]
+      });
+      emit("broker.account.sync.status", { status: "connected", intervalMs: 3000 });
+    },
+    disconnect() {}
+  };
+  const input = request("f2b66c1b-8c25-4c35-ae80-b0d59d7a9133", "system.hello", {
+    clientVersion: "0.1.0"
+  }) + request("e2d20bb2-89e6-46a2-8d5f-86a0bde87b52", "broker.connect", {
+    environment: "demo"
+  });
+
+  const responses = await runSession([encoder.encode(input)], broker);
+  assert.ok(responses.some((item) =>
+    item.kind === "event" &&
+    item.event === "broker.account.snapshot" &&
+    item.payload.accounts[0].accountId === "demo-account"
+  ));
+  assert.ok(responses.some((item) =>
+    item.kind === "response" &&
+    item.id === "e2d20bb2-89e6-46a2-8d5f-86a0bde87b52" &&
+    item.ok === true
+  ));
 });

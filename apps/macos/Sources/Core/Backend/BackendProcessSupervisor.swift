@@ -32,6 +32,7 @@ final class BackendProcessSupervisor {
     private var isStopping = false
     private var secretChannel: IPCSecretChannel?
     private var eventHandler: ((String, [String: Any]) -> Void)?
+    private var additionalEventHandlers: [UUID: (String, [String: Any]) -> Void] = [:]
 
     func start(completion: @escaping StartCompletion) {
         queue.async {
@@ -84,6 +85,23 @@ final class BackendProcessSupervisor {
     func setEventHandler(_ handler: ((String, [String: Any]) -> Void)?) {
         queue.async {
             self.eventHandler = handler
+        }
+    }
+
+    /// Registers an independent domain consumer without replacing existing
+    /// market-data or other application event subscriptions.
+    @discardableResult
+    func addEventHandler(_ handler: @escaping (String, [String: Any]) -> Void) -> UUID {
+        let identifier = UUID()
+        queue.async {
+            self.additionalEventHandlers[identifier] = handler
+        }
+        return identifier
+    }
+
+    func removeEventHandler(_ identifier: UUID) {
+        queue.async {
+            self.additionalEventHandlers.removeValue(forKey: identifier)
         }
     }
 
@@ -313,6 +331,9 @@ final class BackendProcessSupervisor {
                         capabilities.contains("broker.status"),
                         capabilities.contains("broker.marketSearch"),
                         capabilities.contains("broker.historicalPrices"),
+                        capabilities.contains("broker.accountSnapshots"),
+                        capabilities.contains("broker.positionsSnapshots"),
+                        capabilities.contains("broker.workingOrderSnapshots"),
                         capabilities.contains("broker.stream.start"),
                         capabilities.contains("broker.stream.stop"),
                         let keyAgreement = response["keyAgreement"] as? [String: Any],
@@ -405,6 +426,7 @@ final class BackendProcessSupervisor {
                 {
                     let event = try LocalIPCProtocol.event(from: frame)
                     eventHandler?(event.name, event.payload)
+                    additionalEventHandlers.values.forEach { $0(event.name, event.payload) }
                     continue
                 }
 
@@ -440,6 +462,7 @@ final class BackendProcessSupervisor {
         guard process === child else { return }
         isStopping = true
         isReady = false
+        additionalEventHandlers.values.forEach { $0("system.backend.disconnected", [:]) }
         failAll(with: LocalIPCError.processTerminated)
         detachHandlers()
         closePipes()

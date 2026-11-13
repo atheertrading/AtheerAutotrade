@@ -6,6 +6,7 @@ struct ApplicationShellView: View {
     @State private var selection: WorkspaceSection = .dashboard
     @StateObject private var workspaceManager = WorkspaceManager()
     @StateObject private var marketDataStore = MarketDataStore.shared
+    @StateObject private var brokerAccountStore = BrokerAccountStore.shared
 
     var body: some View {
         NavigationSplitView {
@@ -16,10 +17,14 @@ struct ApplicationShellView: View {
                     max: 280
                 )
         } detail: {
-            destinationView
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .background(AtheerColors.canvas)
-                .navigationTitle(selection.rawValue)
+            VStack(spacing: 0) {
+                BrokerAccountStatusBar()
+
+                destinationView
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+            .background(AtheerColors.canvas)
+            .navigationTitle(selection.rawValue)
         }
         .navigationSplitViewStyle(.balanced)
         // Owner requirement: selectable text and native Copy must work throughout
@@ -28,7 +33,11 @@ struct ApplicationShellView: View {
         .textSelection(.enabled)
         .background(AtheerColors.canvas)
         .environmentObject(marketDataStore)
-        .onAppear { marketDataStore.startObserving() }
+        .environmentObject(brokerAccountStore)
+        .onAppear {
+            marketDataStore.startObserving()
+            brokerAccountStore.startObserving()
+        }
     }
 
     @ViewBuilder

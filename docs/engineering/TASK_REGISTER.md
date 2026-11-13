@@ -171,10 +171,25 @@ ATP-UI-DASHBOARD-002 is the current active UI task on `feat/atp-dashboard-002-ac
 |---|---|---|---|
 | ATP-UI-DASHBOARD-002 | Broker account metrics, Market Watch presentation, and Settings navigation | Branch `feat/atp-dashboard-002-account-marketwatch-settings`; record `docs/engineering/ATP-UI-DASHBOARD-002.md` | IMPLEMENTED IN SOURCE — PENDING XCODE BUILD / DEMO VERIFICATION |
 
-- Account values are consumed from the existing read-only `broker.accounts` IPC method; preferred account is selected and account metrics are refreshed every 15 seconds while Dashboard is visible.
+- Initial account values were consumed from the read-only `broker.accounts` IPC method. Dashboard-scoped 15-second refresh is superseded by ATP-BROKER-ACCOUNT-001's backend-owned continuous account-state monitor.
 - Capital.com field mapping is Funds/Balance, Available, Equity = Funds + P&L, P&L, Margin, and Margin Level = Equity / Margin × 100.
 - Market Watch distinguishes SELL/BID and BUY/ASK, displays broker net/percentage change where supplied, calculates ticks only from broker tickSize, shows volume only when supplied, and adds asset-type icons.
 - Quote-to-quote movement is explicitly distinguished from daily/session movement.
 - Broker Connections is moved from primary navigation into Settings.
 - Local Xcode build, Demo account reconciliation, market metadata/volume availability, and saved-watchlist decoding are pending.
 - No order execution, account mutation, or LIVE capability is introduced.
+
+
+## Broker synchronization milestone — ATP-BROKER-ACCOUNT-001
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-BROKER-ACCOUNT-001 | Continuous Capital.com account, positions, and working-orders synchronization; shared OOP application state | Branch `feat/atp-broker-001-continuous-account-sync`; `docs/engineering/ATP-BROKER-ACCOUNT-001.md` | IMPLEMENTED IN SOURCE — PENDING BACKEND CI, XCODE BUILD, AND DEMO RECONCILIATION |
+
+- Backend `CapitalComAccountMonitor` begins immediately after successful Demo authentication and publishes account, positions, and working-orders snapshots every 2 seconds without overlapping cycles.
+- Account polling checks/renews the session each cycle. Capital.com official WebSocket documentation currently documents market quote and OHLC subscriptions, not account balance/positions/order events; account state therefore uses authenticated REST polling.
+- The active financial account ID from the authenticated session is carried in the snapshot; the macOS app selects that account rather than assuming the preferred account is always active.
+- Native OOP domain models are under `Core/Broker/Models`; the shared application service is under `Core/Broker/Services/BrokerAccountStore.swift`.
+- `BrokerAccountStore` is injected at the application root for cross-feature consumption. `MarketDataStore` no longer owns a duplicate account snapshot or polling path.
+- Backend CI run 43466811703 passed on Node.js 24: TypeScript build succeeded; 56 tests passed, 0 failed, 0 skipped. The target-Mac Xcode build and Demo account reconciliation remain pending.
+- Account snapshot stale threshold is 10 seconds. Disconnect/backend loss clears snapshots. No order placement, account mutation, or LIVE capability is introduced.
