@@ -88,19 +88,26 @@ final class BackendProcessSupervisor {
     }
 
     func startCapitalComMarketData(
-        epic: String,
+        epics: [String],
         completion: @escaping Completion
     ) {
         request(
             method: "broker.stream.start",
             payload: [
-                "epics": [epic],
+                "epics": epics,
                 "resolutions": ["MINUTE"],
                 "candleType": "classic"
             ],
             timeout: 20,
             completion: completion
         )
+    }
+
+    func startCapitalComMarketData(
+        epic: String,
+        completion: @escaping Completion
+    ) {
+        startCapitalComMarketData(epics: [epic], completion: completion)
     }
 
     func stopCapitalComMarketData(completion: @escaping Completion) {
