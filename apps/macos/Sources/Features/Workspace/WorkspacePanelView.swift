@@ -113,11 +113,7 @@ struct WorkspacePanelView: View {
             )
 
         case .marketWatch:
-            emptyState(
-                symbol: "list.bullet.rectangle",
-                title: "Market Watch",
-                message: "No instruments are configured."
-            )
+            MarketWatchTableView(compact: true)
 
         case .orderEntry:
             emptyState(
