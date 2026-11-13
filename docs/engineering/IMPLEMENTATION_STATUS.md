@@ -9,6 +9,8 @@
 ### macOS application
 - Native SwiftUI macOS application target, dark-first navigation shell, and Trading Workspace with panel management, resizing, and drag/drop.
 - Capital.com broker screen with DEMO environment, Keychain credential entry/save/restore/delete, connection state, Connect/Disconnect actions, and authenticated market discovery UI.
+- Shared MarketDataStore and Markets destination; user watchlists persist locally, support up to 40 Capital.com instruments, and remain subscribed when navigating away from the Brokers screen.
+- Dashboard, Markets destination, Brokers screen, and Trading Workspace panel share the same Market Watch table, displaying broker Bid/Ask, derived Mid/Spread, quote age, and freshness state. Dashboard connection indicators are driven by shared broker/feed state rather than hard-coded disconnected labels.
 - Native app owns macOS Keychain access. Credential values are not persisted in preferences or project files.
 - IPCSecretChannel.swift uses ephemeral Curve25519/X25519 key agreement, HKDF-SHA256, and AES-256-GCM to encrypt the credential payload before it crosses the local app/backend pipe.
 - BackendProcessSupervisor.swift starts the backend from fixed app-bundle paths, performs protocol v2 handshake/capability negotiation, correlates requests, applies timeouts, consumes broker market-data events, and supervises child termination. The SwiftUI app delegate requests child shutdown during application termination.
@@ -19,7 +21,8 @@
 - Protocol v2 supports bounded NDJSON framing, strict envelopes, UUID request IDs, duplicate detection, request limits, and safe errors.
 - IpcSecretChannel implements per-child-session X25519/HKDF-SHA256/AES-256-GCM decryption. Credential submission is one-shot per child session; mutable plaintext buffers are cleared after parsing where feasible.
 - CapitalComRuntime owns the read-only broker session lifecycle. It accepts validated credentials in memory, establishes a Capital.com Demo REST session, verifies it with authenticated ping, reports status, and exposes market search and historical prices.
-- CapitalComClient source supports session creation, authenticated ping, market search, and historical prices. CapitalComMarketDataStream is now wired through IPC v2 event frames and the macOS UI for quote/OHLC subscriptions, keepalive, reconnect, and re-subscription.
+- CapitalComClient source supports session creation, authenticated ping, market search, and historical prices. CapitalComMarketDataStream is wired through IPC v2 event frames for quote/OHLC subscriptions, keepalive, reconnect, and re-subscription.
+- `market-data-quality.ts` validates broker Bid/Ask and timestamps, derives Mid and Spread without synthesizing executable prices, records broker and local receipt timestamps, and classifies quote age using the 5/10/15-second policy.
 - The backend stores CST and X-SECURITY-TOKEN only in process memory. Capital.com REST uses HTTPS/TLS.
 - No broker dealing, order, position mutation, account mutation, or LIVE method is exposed.
 
@@ -36,11 +39,12 @@
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
 - Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
 - No real Capital.com Demo authentication, market search, historical-price response, live quote, or OHLC event has been verified against a real Demo account.
+- The new Market Watch SwiftUI files and Xcode project membership have not yet been compiled on the target Mac.
 
 ## Not implemented or not operationally integrated
 
-- Capital.com WebSocket quote/OHLC stream is wired through IPC v2 events and macOS UI controls, but actual broker-originated quote/OHLC delivery has not been verified.
-- Market Data ingestion quality lifecycle: quote freshness, stale/unknown states, ordering, deduplication, gap detection, candle integrity, and recovery.
+- Capital.com WebSocket quote/OHLC stream is wired through IPC v2 events and the shared Market Watch UI, but actual broker-originated quote/OHLC delivery has not been verified.
+- Full Market Data ingestion lifecycle remains incomplete: ordering, deduplication, gap detection, candle integrity, durable storage, stale-event propagation, and recovery. The current quote normalizer is an initial component, not a completed Market Data Engine.
 - Broker account and position snapshots/reconciliation.
 - Durable Trading Domain persistence, migrations, append-oriented audit journal, and restart recovery.
 - Central Risk Engine.
@@ -72,7 +76,9 @@
 - PR #16 merged native Swift IPC supervisor source as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
 - PR #17 merged Capital.com screen and Keychain store as 9297f28fd2079dc5801cd89baf2b4723ed625a75.
 - PR #18 merged Keychain load/read-back verification and field restoration as 675ea4af4d54610539218858e3d2f99c4c9a1985.
-- Current branch feat/atp-capitalcom-operational-connection adds IPC v2 encrypted secret transfer, broker runtime methods, Xcode backend packaging phase, functional Demo connect/disconnect and market search UI, tests, CI, and documentation. No build/test result is claimed for this branch.
+- PR #19 merged feat/atp-capitalcom-operational-connection into main as `b673d639bf5440ddd52085815bf7cf2a4fd54167`. It adds IPC v2 encrypted secret transfer, read-only Demo broker methods, Xcode backend packaging, market search/history, and WebSocket quote/OHLC event IPC. Target-Mac build, crypto interoperability, packaged runtime, and real Demo verification remain pending.
+- Branch feat/atp-market-data-watchlist-main adds shared Market Watch, multi-epic subscriptions, quote normalization/freshness, and the application-level market-data store. Backend CI and target-Mac verification are pending.
+- Stacked branch feat/atp-market-data-watchlist adds shared persistent Market Watch, multi-epic subscriptions, quote normalization, Bid/Ask/Mid/Spread, and freshness display. Backend CI and target-Mac Xcode/runtime verification are pending.
 - Apple Silicon arm64 runtime remains unverified.
 
 ## Next acceptance gates
@@ -82,6 +88,7 @@
 3. Verify CryptoKit/Node X25519-HKDF-AES-GCM interoperability and invalid-tag rejection.
 4. Verify Xcode packaging, universal Node runtime, nested code signatures, and bundled child launch.
 5. Verify encrypted credential submission, actual Capital.com Demo authentication, authenticated ping, market search, and historical prices using the user's own Demo account. Never request credentials in ChatGPT.
-6. Verify WebSocket subscription acknowledgements and live quote/OHLC event delivery; then implement market-data freshness, stale-state, and gap-recovery controls.
-7. Add broker account/position read-only snapshots and reconciliation only after the relevant official API contracts are confirmed.
-8. Keep account mutation, dealing, order execution, and LIVE disabled until Risk Engine, OMS, Execution Gateway, reconciliation, and explicit user-authorization gates are implemented and verified.
+6. Verify WebSocket subscription acknowledgements and sustained multi-instrument Bid/Ask delivery in the shared Market Watch. Confirm quote age and 5/10/15-second freshness states against broker timestamps.
+7. Complete the full Market Data Engine: ordering, deduplication, gap detection, OHLC integrity, persistence, and recovery.
+8. Add broker account/position read-only snapshots and reconciliation only after the relevant official API contracts are confirmed.
+9. Implement centralized Risk Engine, durable OMS, and Execution Gateway before enabling any dealing method. Keep LIVE disabled until all safety controls and explicit user-authorization gates are implemented and verified.
