@@ -139,3 +139,14 @@ Limitations:
 - Idiomatic Swift value types/protocols/enums and deterministic pure functions remain valid; the rule is not class-per-file or class-per-function.
 - Existing source conformance has **not yet been audited**. Do not claim whole-repository OOP compliance until each bounded context is assessed and evidence is recorded.
 - No source-code refactor or directory move was performed as part of this documentation milestone.
+
+
+## ATP-ARCH-OOP-002 — source-code OOP conformance audit
+
+- **Status:** IN PROGRESS; initial critical-path review only.
+- **Audit record:** [ATP-ARCH-OOP-002-SOURCE-CONFORMANCE-AUDIT.md](ATP-ARCH-OOP-002-SOURCE-CONFORMANCE-AUDIT.md).
+- **Partially conformant (reviewed):** macOS MarketDataStore, BackendProcessSupervisor, CapitalComBrokerView; backend stdio IPC, CapitalComRuntime, CapitalComClient.
+- **Conformant for inspected responsibilities:** backend IPCSecretChannel and RiskEngine.
+- **Not assessed:** remaining market-data stream/quality modules, composition root, trading domain, persistence runtime, OMS, execution, strategies, intelligence, portfolio/reconciliation, and full test architecture.
+- Main design concerns: concentration of mutable state and orchestration, global singleton dependencies, direct concrete construction, and insufficient separation between presentation, transport, application, and domain ownership.
+- No source-code changes or runtime verification were performed by this audit stage. Do not claim whole-repository conformance.
