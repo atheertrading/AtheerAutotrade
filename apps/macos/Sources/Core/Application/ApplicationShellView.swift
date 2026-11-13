@@ -5,6 +5,7 @@ import SwiftUI
 struct ApplicationShellView: View {
     @State private var selection: WorkspaceSection = .dashboard
     @StateObject private var workspaceManager = WorkspaceManager()
+    @StateObject private var marketDataStore = MarketDataStore.shared
 
     var body: some View {
         NavigationSplitView {
@@ -22,6 +23,8 @@ struct ApplicationShellView: View {
         }
         .navigationSplitViewStyle(.balanced)
         .background(AtheerColors.canvas)
+        .environmentObject(marketDataStore)
+        .onAppear { marketDataStore.startObserving() }
     }
 
     @ViewBuilder
@@ -31,6 +34,8 @@ struct ApplicationShellView: View {
             DashboardView()
         case .tradingWorkspace:
             WorkspaceLayoutView(workspaceManager: workspaceManager)
+        case .markets:
+            MarketWatchView()
         case .brokers:
             CapitalComBrokerView()
         default:
