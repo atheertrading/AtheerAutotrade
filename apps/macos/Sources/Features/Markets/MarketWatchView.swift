@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct MarketWatchView: View {
+    @EnvironmentObject private var marketDataStore: MarketDataStore
+
     var body: some View {
         VStack(alignment: .leading, spacing: 18) {
             HStack(alignment: .firstTextBaseline) {
@@ -13,9 +15,14 @@ struct MarketWatchView: View {
                         .foregroundColor(AtheerColors.textSecondary)
                 }
                 Spacer()
-                Text("CAPITAL.COM · DEMO")
-                    .font(.system(size: 10, weight: .bold, design: .monospaced))
-                    .foregroundColor(AtheerColors.accent)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text("CAPITAL.COM · DEMO")
+                        .font(.system(size: 10, weight: .bold, design: .monospaced))
+                        .foregroundColor(AtheerColors.accent)
+                    Text(marketDataStore.streamStatus.uppercased())
+                        .font(.system(size: 9, weight: .semibold, design: .monospaced))
+                        .foregroundColor(marketDataStore.streamStatus == "connected" ? AtheerColors.positive : AtheerColors.warning)
+                }
             }
 
             MarketWatchTableView()
