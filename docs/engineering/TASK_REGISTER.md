@@ -45,7 +45,7 @@ Merged backend foundation: PR #15, commit 8cb8734624957c8bfb367ee8bfe4a2bbb51ce0
 
 Native Swift IPC supervisor: PR #16, merged as f13ce0e3f8157a4901c99b8d928f2540cd213adc.
 
-Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged into main. Current branch extends that baseline; it does not recreate those milestones.
+Capital.com broker screen and Keychain persistence: PR #17 and PR #18 are merged into main. PR #19 subsequently merged the encrypted Demo session and market-data bridge; ATP-MD-WATCH-001 builds directly on that main baseline.
 
 ### Existing merged IPC baseline
 
@@ -129,4 +129,4 @@ Run Node 24 CI for ATP-MD-WATCH-001, then build the macOS target on the target I
 - 2026-11-12: ATP-SEC-IPC-001 backend stdio protocol merged through PR #15 as `8cb8734624957c8bfb367ee8bfe4a2bbb51ce0e5`.
 - 2026-11-12: Started `security/atp-sec-ipc-001-swift-supervisor`; native Swift IPC source, XCTest source, Xcode membership, and signed bundle layout contract authored. PR #16 subsequently merged as `f13ce0e3f8157a4901c99b8d928f2540cd213adc`; verification pending.
 - 2026-11-13: Added ATP-CAP-UI-001 on the same branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. Verification and PR #17 pending.
-- 2026-11-13: Added ATP-CAP-UI-001 on the same active branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. PR #16 remains draft; Xcode build and UI/Keychain tests are pending.
+- 2026-11-13: Added ATP-CAP-UI-001 on the same active branch: Capital.com broker screen, Keychain credential store, sidebar destination, and Xcode target registration. PR #17 merged ATP-CAP-UI-001; PR #18 merged ATP-CAP-UI-002. Xcode build and UI/Keychain tests remain pending.
