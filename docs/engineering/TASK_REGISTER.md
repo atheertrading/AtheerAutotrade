@@ -310,3 +310,17 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Original branch histories were preserved; no force-push or history rewrite was used.
 
 **Operational truth:** PostgreSQL is NOT IMPLEMENTED operationally; end-to-end manual/automated order execution is NOT IMPLEMENTED. The product requirement remains a complete manual and automated trading platform across DEMO and LIVE. Read-only broker connectivity is an incremental milestone only.
+
+
+## ATP-GOV-003 — Owner-approved project governance charter and repeat-error prevention — 2026-11-14
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-GOV-003 | Preserve the owner's complete project governance charter in GitHub and make it mandatory context for future work | PR #59 merged as `a79de03d97c543c7b28635cddc3255cb37b9fe34`; `docs/engineering/PROJECT_GOVERNANCE_CHARTER.md`; root `AGENTS.md`; README and custom-instructions links | DONE — MERGED TO MAIN |
+
+- The owner-supplied source text was retrieved in full and preserved in the new governance charter.
+- Added a repository-specific addendum covering mandatory context loading, no restart by default, no repeated resolved troubleshooting, branch freshness, evidence discipline, no silent conflict resolution, trading safety, and required task handoff records.
+- Root `AGENTS.md` now requires the charter in the pre-work reading sequence. README and the existing custom instructions link to it.
+- Documentation-only milestone. No application source, broker integration, database, build, tests, release version, or trading permissions changed.
+- No LIVE trading authorization is implied or granted.
+- Current main baseline after this milestone: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
