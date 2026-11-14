@@ -191,7 +191,7 @@ Limitations:
 ATHEER Trading Pro must support both manual and automated trading through broker-linked DEMO and LIVE account environments. The currently merged `main` branch has not yet integrated an operational order path. Read-only market/account connectivity is an incremental milestone only and must never be described as the intended product boundary.
 
 ### Current main and active branches
-- Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
+- Current main baseline: `1843331767483cb04f3cc3d1626e2a10fd1c72a3`.
 - PR #48 documentation reconciliation is present in main.
 - PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
 - PR #55 merged the SemVer and immutable release tagging policy as `ac5c658595ab032032d71f5f53c035aa342ed581`.
@@ -276,10 +276,10 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 
 - **Governance:** PR #50 merged. Owner-provided instructions are normative and loaded first by root `AGENTS.md`.
 - **Versioning:** PR #55 merged. SemVer and immutable annotated Git tag policy are normative. No release version or tag is claimed; first tag awaits an owner-approved qualified milestone.
-- **Status records:** PR #54 merged and reconciled current PR states.
-- **PostgreSQL runner:** PR #51 Draft. Latest current-head Backend CI run `43537770742` passed TypeScript build and 52/52 tests. This proves runner source/unit behavior only. No local PostgreSQL server/database was provisioned and no migration was applied. ATP-PERSIST-004 schema mapping is still proposed and awaits owner approval.
+- **Status records:** PR #54, #56, and #57 merged and reconciled current PR states.
+- **PostgreSQL runner:** PR #51 Draft. Latest current-head Backend CI run `43538085414` passed TypeScript build and 52/52 tests. This proves runner source/unit behavior only. No local PostgreSQL server/database was provisioned and no migration was applied. ATP-PERSIST-004 schema mapping is still proposed and awaits owner approval.
 - **macOS UI:** PR #52 Draft. Five SwiftUI files and UI/UX audit ported onto current main. No target-Mac Xcode build or UI acceptance was performed; this remains mandatory before merge.
-- **Capital.com dealing adapter:** PR #53 Draft. Current-head Backend CI run `43537807412` passed TypeScript build and 62/62 tests. The adapter is DEMO-only, not exposed to IPC/UI/strategy/AI, and no actual broker order was submitted. A later documentation-only commit added the release policy to the branch; no source/test changed after the CI run.
+- **Capital.com dealing adapter:** PR #53 Draft. Current-head Backend CI run `43537817589` passed TypeScript build and 62/62 tests. The adapter is DEMO-only, not exposed to IPC/UI/strategy/AI, and no actual broker order was submitted. A later documentation-only commit added the release policy to the branch; no source/test changed after the CI run.
 - **Superseded PRs:** #31, #35, and #49 closed unmerged; their work was ported to #52, #51, and #53 respectively.
 
 **End-to-end trading remains NOT IMPLEMENTED.** RiskEngine is not yet an enforced OMS order-intake gate; durable OMS, outbox/idempotency, Execution Gateway, order IPC/UI, strategy order intake, broker confirmation/reconciliation, and operational qualification remain incomplete. LIVE remains disabled.
