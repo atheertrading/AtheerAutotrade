@@ -227,7 +227,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 
 | ID | Milestone | Scope | Status |
 |---|---|---|---|
-| ATP-EXEC-002 | Capital.com market dealing and broker confirmation adapter | Typed market-position submission, mandatory stop level, authenticated broker POST, deal confirmation parsing, and unknown-outcome handling | IMPLEMENTED IN SOURCE — BACKEND CI PENDING |
+| ATP-EXEC-002 | Capital.com market dealing and broker confirmation adapter | Typed market-position submission, mandatory stop level, authenticated broker POST, deal confirmation parsing, and unknown-outcome handling | IMPLEMENTED IN SOURCE — BACKEND CI PASSED (62/62) |
 
 - Branch: `feat/atp-exec-002-capital-com-dealing-adapter`.
 - Architecture decision: [ADR-0007 — End-to-End Trading Capability and Controlled Broker Execution](../decisions/ADR-0007-TRADING-CAPABILITY-AND-CONTROLLED-EXECUTION.md).
@@ -235,6 +235,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Added `CapitalComClient.createPosition` for the documented `POST /api/v1/positions` market-order endpoint and `getDealConfirmation` for `GET /api/v1/confirms/{dealReference}`.
 - Added deterministic mock tests for authenticated request payloads, validation, 4xx rejection, ambiguous transport/5xx/malformed-response outcomes, and broker confirmation parsing.
 - No dealing method has been added to IPC, HTTP routes, UI, strategy, or AI. This is intentional until durable OMS, mandatory RiskEngine authorization, and Execution Gateway are integrated.
-- No actual Demo order, local backend build, CI result, PostgreSQL execution, or Xcode build is claimed.
+- GitHub Actions Backend CI run `43534214647` passed on Node.js `24.22.2`: TypeScript build passed; 62 tests passed, 0 failed, 0 skipped.
+- No actual Demo order, local backend build, PostgreSQL execution, or Xcode build is claimed.
 - Next: complete ATP-PERSIST-003/PostgreSQL execution and durable OMS; then integrate RiskEngine → OMS → Execution Gateway → broker confirmation/reconciliation. Only after that expose the shared order-intake capability to manual and automated clients.
 
