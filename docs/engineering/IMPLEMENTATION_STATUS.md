@@ -194,7 +194,7 @@ ATHEER Trading Pro must support both manual and automated trading through broker
 - Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
 - PR #48 documentation reconciliation is present in main.
 - PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
-- PR #49 / ATP-EXEC-002 adds a DEMO-only Capital.com market-position adapter method and deal-confirmation parser on a feature branch. GitHub Actions run `43534214647` passed TypeScript compilation and 62/62 tests on Node.js 24.22.2. It is not merged and not exposed through IPC, UI, strategy, or AI. It does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
+- Old PR #49 / ATP-EXEC-002 was closed unmerged as superseded. Current-main-based PR #53 ports its DEMO-only Capital.com market-position adapter method and deal-confirmation parser; current-main CI is pending. The previous PR #49 CI passed 62/62 tests, but that result is not a substitute for CI on PR #53. The adapter remains unexposed through IPC, UI, strategy, or AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
 - PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
 - PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
 
@@ -250,3 +250,13 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 ### ATP-GOV-001
 
 - PR #50 merged as `d44e184d998b719289c42159db138073d3213584`; owner instructions are normative and mandatory through root `AGENTS.md`.
+
+
+### ATP-EXEC-002 — current-main Capital.com dealing adapter port
+
+- PR #49 closed unmerged as superseded; its original branch/history was preserved.
+- PR #53: branch `feat/atp-exec-002-current-main`, 8 commits ahead / 0 behind current main at creation, Draft.
+- Ported `CapitalComClient.createPosition` for authenticated `POST /api/v1/positions`, `getDealConfirmation` for `GET /api/v1/confirms/{dealReference}`, DEMO-only enforcement, pre-network session validation, and unknown-submission outcome handling.
+- Ported deterministic mock tests for request validation, authenticated payload, 4xx rejection, ambiguous outcomes, missing session, LIVE rejection, and broker confirmation parsing.
+- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
+- The adapter remains infrastructure-only and is not exposed to IPC/UI/strategies/AI. No actual Demo or LIVE order was submitted. End-to-end trading remains NOT IMPLEMENTED.
