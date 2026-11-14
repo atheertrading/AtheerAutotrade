@@ -394,7 +394,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 - **PR #51 — ATP-PERSIST-003:** Draft; current-main-based branch `fix/atp-persist-003-current-main`. Corrects psql `\\gexec` escaping. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. ATP-PERSIST-004 schema mapping remains proposed and requires owner approval.
 - **PR #52 — ATP-UX-001:** Draft; current-main-based branch `feat/atp-ux-001-current-main`, 16 commits ahead / 0 behind at latest comparison. Ported five SwiftUI files and UX audit. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed for this port. Target-Mac acceptance is mandatory before merge.
-- **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`, 8 commits ahead / 0 behind at creation. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. Previous PR #49 CI passed 62/62 tests, but PR #53 must pass its own CI before merge. No actual broker order was sent.
+- **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62/62 tests passed. Adapter remains unexposed and no actual broker order was sent.
 
 ### Superseded PRs
 
@@ -420,6 +420,6 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 ### Evidence classification
 
-- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and branch divergence.
+- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and current-head CI run `43537007717`.
 - **Owner-confirmed:** local code synchronized with GitHub; Capital.com Demo authentication and broker-originated prices work in the local app.
 - **Not independently performed here:** local Terminal commands, Xcode build, local PostgreSQL provisioning/migrations, target-Mac UI acceptance, or actual broker dealing.
