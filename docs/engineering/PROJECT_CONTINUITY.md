@@ -420,3 +420,11 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - Verified through GitHub: PR #50 merge, current-main comparison, PR branch divergence, PR #51 source changes, and Backend CI results for PR #49 and PR #51.
 - Owner-reported: local code is synchronized with GitHub and Capital.com Demo prices work in the local app.
 - Not independently executed in this review: local Terminal commands, Xcode build, local PostgreSQL setup/migrations, target-Mac UI acceptance, or actual broker dealing.
+
+
+### ATP-PERSIST-004 — schema ownership decision pending
+
+- Added `docs/engineering/ATP-PERSIST-004-SCHEMA-OWNERSHIP-PROPOSAL.md` on the persistence branch.
+- Recommendation: place initial idempotency, trade intents, order events, and command outbox in `oms`; retain `atheer.schema_migrations` only as platform migration metadata; reserve `risk`, `execution`, `positions`, `reconciliation`, `audit`, `reference`, and `integration` for their owning bounded contexts.
+- This is a proposal, not an accepted ADR or team consensus. Owner approval is required before changing migration 0001 or applying it.
+- No SQL or database was changed by this proposal.
