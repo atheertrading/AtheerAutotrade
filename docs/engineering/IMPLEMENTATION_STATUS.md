@@ -260,3 +260,11 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - Ported deterministic mock tests for request validation, authenticated payload, 4xx rejection, ambiguous outcomes, missing session, LIVE rejection, and broker confirmation parsing.
 - GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
 - The adapter remains infrastructure-only and is not exposed to IPC/UI/strategies/AI. No actual Demo or LIVE order was submitted. End-to-end trading remains NOT IMPLEMENTED.
+
+
+### ATP-GOV-002 — versioning and release policy
+
+- Added `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` on branch `docs/atp-versioning-policy-001`.
+- Defined SemVer for integrated product releases, pre-1.0 0.x.y development, prerelease identifiers, immutable annotated tags, component-version boundaries, append-only database migration versioning, and release qualification evidence.
+- Updated root `AGENTS.md` to load the versioning policy and linked it from README.
+- No product version or tag was created or claimed. First tag is deferred until an owner-approved milestone is qualified.
