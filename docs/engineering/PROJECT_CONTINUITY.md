@@ -368,9 +368,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 - Branch: `docs/atp-baseline-reconciliation-001`, based directly on current main `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
 - Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48.
-- Eight documentation files updated: README, System Overview, Module Boundaries, Implementation Status, Task Register, Project Continuity, ATP-ARCH-OOP-003 implementation record, and ATP-AUD-002 audit.
-- No source code, tests, Xcode project, SQL migration, broker permission, database, or runtime setting changed.
-- PR #48 is open, draft, not merged, and awaiting review. No build or runtime verification is claimed for this documentation-only change.
+- PR #48 documentation reconciliation was merged and is present in main. It updated README, System Overview, Module Boundaries, Implementation Status, Task Register, Project Continuity, ATP-ARCH-OOP-003 implementation record, and ATP-AUD-002 audit. No source code, database, or runtime behavior changed.
 
 
 ---
@@ -392,9 +390,9 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 ### Open PRs
 
-- **PR #51 — ATP-PERSIST-003:** Draft; current-main-based branch `fix/atp-persist-003-current-main`. Corrects psql `\\gexec` escaping. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. ATP-PERSIST-004 schema mapping remains proposed and requires owner approval.
+- **PR #51 — ATP-PERSIST-003:** Draft; current-main-based branch `fix/atp-persist-003-current-main`. Corrects psql `\\gexec` escaping. Latest Backend CI run `43538085414` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. ATP-PERSIST-004 schema mapping remains proposed and requires owner approval.
 - **PR #52 — ATP-UX-001:** Draft; current-main-based branch `feat/atp-ux-001-current-main`, 16 commits ahead / 0 behind at latest comparison. Ported five SwiftUI files and UX audit. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed for this port. Target-Mac acceptance is mandatory before merge.
-- **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62/62 tests passed. Adapter remains unexposed and no actual broker order was sent.
+- **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. Latest GitHub Actions Backend CI run `43537817589` passed on Node.js 24.22.2: TypeScript build passed; 62/62 tests passed. Adapter remains unexposed and no actual broker order was sent.
 
 ### Superseded PRs
 
@@ -425,11 +423,12 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - **Not independently performed here:** local Terminal commands, Xcode build, local PostgreSQL provisioning/migrations, target-Mac UI acceptance, or actual broker dealing.
 
 
-### ATP-GOV-002 — versioning policy branch
+### ATP-GOV-002 — versioning policy merged
 
-- Branch `docs/atp-versioning-policy-001` defines SemVer, immutable annotated Git tags, pre-1.0 release numbering, component/API/schema version separation, immutable migration rules, and release qualification evidence.
-- Root `AGENTS.md` now requires the policy as part of mandatory context loading; README links it.
-- Status: implemented on documentation branch, PR pending. No product release version or Git tag is claimed; first tag must follow an owner-approved qualified milestone.
+- PR #55 merged as `ac5c658595ab032032d71f5f53c035aa342ed581`.
+- `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` defines SemVer, immutable annotated tags, pre-1.0 numbering, component/API/schema version separation, immutable migration rules, and release qualification.
+- Root `AGENTS.md` requires the policy during context loading; README links it.
+- No product release version or Git tag is claimed; first tag follows an owner-approved qualified milestone.
 
 
 ## Latest verified handoff — 2026-11-14
@@ -437,15 +436,16 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 ### Merged to main
 
 - PR #50: owner-approved custom instructions; merge commit `d44e184d998b719289c42159db138073d3213584`.
-- PR #54: current workstream/status reconciliation; merge commit `110dcf9e4fb4b7f564d1687c165ca3cd56d9b3d6`.
+- PR #54: initial workstream/status reconciliation; merge commit `110dcf9e4fb4b7f564d1687c165ca3cd56d9b3d6`.
+- PR #56: latest verified workstream and CI reconciliation; merge commit `c465eedd3b15067641bbb1b1206e5e29a659ffc1`.
 - PR #55: SemVer and release versioning policy; merge commit `ac5c658595ab032032d71f5f53c035aa342ed581`.
 - Root `AGENTS.md` requires reading custom instructions and versioning policy before any project work.
 
 ### Active Draft PRs
 
-- **#51 — ATP-PERSIST-003:** migration runner current-main port. Latest CI run `43537770742`: TypeScript build + 52/52 tests passed. No local PostgreSQL provisioned and no migration applied. ATP-PERSIST-004 schema mapping still requires owner approval.
+- **#51 — ATP-PERSIST-003:** migration runner current-main port. Latest CI run `43538085414`: TypeScript build + 52/52 tests passed. No local PostgreSQL provisioned and no migration applied. ATP-PERSIST-004 schema mapping still requires owner approval.
 - **#52 — ATP-UX-001:** current-main SwiftUI/UI port. Target-Mac Xcode build and UI acceptance not performed; keep Draft.
-- **#53 — ATP-EXEC-002:** Capital.com DEMO dealing adapter current-main port. CI run `43537807412`: TypeScript build + 62/62 tests passed. Adapter remains infrastructure-only; no OMS/RiskEngine/Gateway/reconciliation integration and no real order.
+- **#53 — ATP-EXEC-002:** Capital.com DEMO dealing adapter current-main port. Latest CI run `43537817589`: TypeScript build + 62/62 tests passed. Adapter remains infrastructure-only; no OMS/RiskEngine/Gateway/reconciliation integration and no real order.
 
 ### Superseded PRs
 
