@@ -277,3 +277,15 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Ported CapitalComClient market-position submission and broker confirmation methods, explicit DEMO-only and session guards, unknown-outcome handling, and deterministic mock tests.
 - Added ADR-0007 and ATP-EXEC-002 implementation record. No order method is exposed through IPC/UI/strategy/AI; OMS/RiskEngine/Execution Gateway/durable reconciliation remain incomplete.
 - GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. No real broker order was submitted.
+
+
+## ATP-GOV-002 — Versioning and release policy
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-GOV-002 | Establish professional product versioning, immutable Git tags, and release qualification | `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md`; root `AGENTS.md` requires the policy during context loading; README link added | IMPLEMENTED ON BRANCH — DRAFT PR; NOT YET MERGED |
+
+- Product releases use SemVer. Until 1.0, use the 0.x.y development series; prereleases use alpha/beta/rc identifiers.
+- Tag only owner-accepted, qualified commits already merged to main. Tags are annotated and immutable.
+- Keep app build numbers, backend/package versions, IPC/API contract versions, database schema versions, and migration IDs as distinct version domains.
+- No current application version or release tag is claimed. The first release tag requires an owner-approved milestone and complete qualification record.
