@@ -147,6 +147,20 @@ test("HTTP 5xx and malformed success responses are treated as unknown outcomes",
   }
 });
 
+test("market position submission rejects a missing session before network access", async () => {
+  let calls = 0;
+  const client = new CapitalComClient("demo", credentialsProvider(), async () => {
+    calls += 1;
+    return response({ dealReference: "unexpected" });
+  });
+
+  await assert.rejects(
+    client.createPosition({ epic: "OIL_CRUDE", direction: "BUY", size: 1, stopLevel: 70 }),
+    /session is not established/
+  );
+  assert.equal(calls, 0);
+});
+
 test("LIVE dealing is disabled even when a live REST client is constructed", async () => {
   let submissions = 0;
   const client = new CapitalComClient("live", credentialsProvider(), async (url, init) => {
