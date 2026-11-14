@@ -551,6 +551,9 @@ export class CapitalComClient {
     if (this.environment !== "demo") {
       throw new Error("Capital.com LIVE dealing is disabled.");
     }
+    if (!this.session) {
+      throw new Error("Capital.com session is not established.");
+    }
     const epic = validateEpic(input.epic);
     if (input.direction !== "BUY" && input.direction !== "SELL") {
       throw new TypeError("direction must be BUY or SELL.");
