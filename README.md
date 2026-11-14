@@ -64,6 +64,7 @@ The backend currently listens on `127.0.0.1:3000` by default. `GET /health` repo
 - [Engineering Task Register](docs/engineering/TASK_REGISTER.md)
 - [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md)
 - [Owner-approved ATHEER Trading Pro Custom Instructions](docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md)
+- [Versioning and Release Policy](docs/engineering/VERSIONING_AND_RELEASE_POLICY.md)
 - [Repository Agent Instructions](AGENTS.md)
 - [System Overview](docs/architecture/SYSTEM_OVERVIEW.md)
 - [Module Boundaries](docs/architecture/MODULE_BOUNDARIES.md)
