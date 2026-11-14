@@ -268,3 +268,16 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - Defined SemVer for integrated product releases, pre-1.0 0.x.y development, prerelease identifiers, immutable annotated tags, component-version boundaries, append-only database migration versioning, and release qualification evidence.
 - Updated root `AGENTS.md` to load the versioning policy and linked it from README.
 - No product version or tag was created or claimed. First tag is deferred until an owner-approved milestone is qualified.
+
+
+## Latest verified workstream state — 2026-11-14
+
+- **Governance:** PR #50 merged. Owner-provided instructions are normative and loaded first by root `AGENTS.md`.
+- **Versioning:** PR #55 merged. SemVer and immutable annotated Git tag policy are normative. No release version or tag is claimed; first tag awaits an owner-approved qualified milestone.
+- **Status records:** PR #54 merged and reconciled current PR states.
+- **PostgreSQL runner:** PR #51 Draft. Latest current-head Backend CI run `43537770742` passed TypeScript build and 52/52 tests. This proves runner source/unit behavior only. No local PostgreSQL server/database was provisioned and no migration was applied. ATP-PERSIST-004 schema mapping is still proposed and awaits owner approval.
+- **macOS UI:** PR #52 Draft. Five SwiftUI files and UI/UX audit ported onto current main. No target-Mac Xcode build or UI acceptance was performed; this remains mandatory before merge.
+- **Capital.com dealing adapter:** PR #53 Draft. Current-head Backend CI run `43537807412` passed TypeScript build and 62/62 tests. The adapter is DEMO-only, not exposed to IPC/UI/strategy/AI, and no actual broker order was submitted. A later documentation-only commit added the release policy to the branch; no source/test changed after the CI run.
+- **Superseded PRs:** #31, #35, and #49 closed unmerged; their work was ported to #52, #51, and #53 respectively.
+
+**End-to-end trading remains NOT IMPLEMENTED.** RiskEngine is not yet an enforced OMS order-intake gate; durable OMS, outbox/idempotency, Execution Gateway, order IPC/UI, strategy order intake, broker confirmation/reconciliation, and operational qualification remain incomplete. LIVE remains disabled.
