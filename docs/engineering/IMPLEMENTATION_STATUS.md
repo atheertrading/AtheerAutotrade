@@ -66,7 +66,7 @@
 
 - Native SwiftUI client is presentation/operator-control only.
 - Node.js/TypeScript backend owns broker lifecycle, data ingestion, orchestration, risk, OMS, execution, and reconciliation.
-- Broker adapters are provider-specific and initially read-only.
+- The merged Capital.com connectivity milestone is read-only; this is an incremental implementation stage, not the product scope. Manual and automated dealing across DEMO and LIVE are mandatory product capabilities.
 - All exposure-increasing intents must pass through centralized Risk Engine.
 - OMS owns durable intent lifecycle; Execution Gateway is the only dealing path and accepts only Risk-approved, OMS-authorized intent.
 - Broker-confirmed account and execution state is authoritative.
@@ -183,3 +183,29 @@ Limitations:
 - Eight documentation files updated on `docs/atp-baseline-reconciliation-001`.
 - No application/backend source, tests, SQL, Xcode project, broker permission, or runtime behavior changed.
 - PR #48 is open, draft, and not merged; owner review is pending.
+
+
+## Current reconciled status — 2026-11-14 (owner instruction and trading scope)
+
+### Product scope
+ATHEER Trading Pro must support both manual and automated trading through broker-linked DEMO and LIVE account environments. The currently merged `main` branch has not yet integrated an operational order path. Read-only market/account connectivity is an incremental milestone only and must never be described as the intended product boundary.
+
+### Current main and active branches
+- Current main baseline: `d5a82dc236ceed9987b4ab86d168e7a8da40f814`.
+- PR #48 documentation reconciliation is present in main.
+- PR #49 / ATP-EXEC-002 adds a DEMO-only Capital.com market-position adapter method and deal-confirmation parser on a feature branch. GitHub Actions run `43534214647` passed TypeScript compilation and 62/62 tests on Node.js 24.22.2. It is not merged and not exposed through IPC, UI, strategy, or AI. It does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
+- PR #35 / ATP-PERSIST-003 is unmerged. Its migration-runner source is not a provisioned PostgreSQL implementation. A source-level `\\gexec` escaping defect is confirmed; no local database or migration execution is claimed.
+- PR #31 / ATP-UX-001 is open as Draft. Its branch is 20 commits ahead and 70 behind main; target-Mac Xcode/UI acceptance remains pending. Do not merge until reconciled and accepted.
+- PR #31 was converted to Draft to match its own acceptance statement.
+
+### Persistence status
+**PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
+
+### Execution status
+**End-to-end trading: NOT IMPLEMENTED.** The RiskEngine remains a pure evaluator, not an enforced order-intake gate. OMS, durable idempotency/outbox, Execution Gateway, application order IPC, manual order ticket, strategy order intake, broker confirmation/fill processing, and reconciliation are not integrated. The PR #49 adapter method is an isolated infrastructure primitive and must not be exposed until those controls exist.
+
+### Owner-confirmed local synchronization
+The owner confirms that the local development code matches the GitHub project code. This is an owner-confirmed fact. Do not repeatedly ask the owner to reconfirm it. A new feature branch created on GitHub after the synchronization point is not automatically present on the local Mac.
+
+### Verification boundary
+No local Terminal command, Xcode build, local PostgreSQL provisioning/migration, target-Mac UI acceptance, or real broker order was executed as part of this documentation/governance update. CI evidence above applies only to the specific PR #49 source commit recorded in its workflow run.
