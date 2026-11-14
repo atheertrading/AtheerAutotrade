@@ -183,3 +183,17 @@ Limitations:
 - Eight documentation files updated on `docs/atp-baseline-reconciliation-001`.
 - No application/backend source, tests, SQL, Xcode project, broker permission, or runtime behavior changed.
 - PR #48 is open, draft, and not merged; owner review is pending.
+
+
+## ATP-EXEC-002 — Capital.com market dealing adapter (2026-11-14)
+
+**Source status:** Implemented on `feat/atp-exec-002-capital-com-dealing-adapter`; backend CI not yet observed.
+
+- `CapitalComClient` now has typed market-position submission via the documented authenticated `POST /api/v1/positions` endpoint. The initial order contract requires a positive size and stop-loss level and permits an optional take-profit level.
+- Added broker deal-confirmation retrieval and typed parsing of status and affected-deal identifiers.
+- Added explicit unknown-submission outcome handling. Transport errors, 5xx responses, invalid JSON, and malformed success payloads cannot be interpreted as rejection or success; callers must reconcile and must not blindly retry.
+- Added mock-only tests. They do not submit real broker orders.
+- These adapter capabilities are not exposed through general IPC, HTTP, SwiftUI, strategy, or AI. The enforced order path is still incomplete because PostgreSQL execution, durable OMS, RiskEngine integration, Execution Gateway, and reconciliation are not complete.
+- ADR-0007 corrects product-scope interpretation: manual and automated trading across DEMO and LIVE are required product capabilities. DEMO is the first qualification environment; LIVE remains disabled pending verified controls and separate owner authorization.
+- No local Terminal, backend build, CI, database, Xcode, or real broker execution was performed/verified by this change.
+
