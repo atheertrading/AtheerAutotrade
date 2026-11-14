@@ -191,11 +191,13 @@ Limitations:
 ATHEER Trading Pro must support both manual and automated trading through broker-linked DEMO and LIVE account environments. The currently merged `main` branch has not yet integrated an operational order path. Read-only market/account connectivity is an incremental milestone only and must never be described as the intended product boundary.
 
 ### Current main and active branches
-- Current main baseline: `d5a82dc236ceed9987b4ab86d168e7a8da40f814`.
+- Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
 - PR #48 documentation reconciliation is present in main.
+- PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
 - PR #49 / ATP-EXEC-002 adds a DEMO-only Capital.com market-position adapter method and deal-confirmation parser on a feature branch. GitHub Actions run `43534214647` passed TypeScript compilation and 62/62 tests on Node.js 24.22.2. It is not merged and not exposed through IPC, UI, strategy, or AI. It does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
-- PR #35 was closed unmerged as superseded by current-main-based PR #51. PR #51 fixes the `\\gexec` escaping defect and Backend CI run 43535924779 passed TypeScript build and 52/52 tests. No local PostgreSQL database has been provisioned and no migration has been applied.
-- PR #31 was closed unmerged as superseded by current-main-based PR #52. PR #52 ports five SwiftUI files and the UI/UX audit; target-Mac Xcode/UI acceptance remains pending. Do not merge until accepted.
+- PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
+- PR #31 / ATP-UX-001 is open as Draft. Its branch is 20 commits ahead and 70 behind main; target-Mac Xcode/UI acceptance remains pending. Do not merge until reconciled and accepted.
+- PR #31 was converted to Draft to match its own acceptance statement. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
 
 ### Persistence status
 **PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
@@ -210,21 +212,23 @@ The owner confirms that the local development code matches the GitHub project co
 No local Terminal command, Xcode build, local PostgreSQL provisioning/migration, target-Mac UI acceptance, or real broker order was executed as part of this documentation/governance update. CI evidence above applies only to the specific PR #49 source commit recorded in its workflow run.
 
 
-### ATP-UX-001 — current-main UI port
+### ATP-PERSIST-003 — current-main source port and CI result
 
-- PR #31 was closed unmerged as superseded; its branch/history was preserved and not rewritten.
-- PR #52: branch `feat/atp-ux-001-current-main`, 6 commits ahead / 0 behind main, Draft.
-- Ported adaptive Capital.com broker layout, clearer Demo/session/feed states in Dashboard, native Market Watch row copy actions, ATHEER Trading Pro sidebar branding, and accurate Workspace placeholder wording.
-- Added the UI/UX audit and explicit target-Mac acceptance criteria.
-- No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test was performed for this port. **Do not merge until the owner-Mac Xcode build and UI acceptance gates pass.**
-
-### ATP-PERSIST-003 — current-main migration-runner port
-
-- PR #35 closed unmerged as superseded by current-main-based PR #51.
-- PR #51 fixes generated psql `\\gexec` escaping; Backend CI run 43535924779 passed TypeScript build and 52/52 tests.
-- PostgreSQL remains NOT IMPLEMENTED operationally: no local server/database provisioned, no migration applied, and schema ownership against ATP-ARCH-003 remains unresolved.
+- Old PR #35 was closed unmerged as superseded; no commit history was rewritten or force-pushed.
+- Current-main-based PR #51: `fix/atp-persist-003-current-main`, 4 commits ahead / 0 behind main, Draft.
+- Corrected the template-literal escape so generated psql input contains a literal `\\gexec` command; added a unit assertion against the generated output.
+- GitHub Actions Backend CI run `43535924779` passed on Node.js 24.22.2: TypeScript build passed; 52 passed, 0 failed, 0 skipped.
+- **PostgreSQL remains NOT IMPLEMENTED operationally.** No local PostgreSQL server/database was provisioned and no migration applied. Resolve ATP-ARCH-003 schema ownership versus migration 0001 before the first migration; perform owner-Mac integration tests before merge.
 
 ### ATP-GOV-001 — owner-approved instructions
 
-- PR #50 merged as `d44e184d998b719289c42159db138073d3213584`.
-- The owner-provided instruction file is normative and mandatory through root `AGENTS.md`.
+- PR #50 merged to main as `d44e184d998b719289c42159db138073d3213584`.
+- `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` is normative project guidance and is the first mandatory context file in root `AGENTS.md`.
+- Manual and automated trading across DEMO/LIVE are explicit mandatory product requirements. Read-only connectivity is only an incremental implementation milestone.
+
+
+### ATP-PERSIST-004 — schema ownership decision
+
+- Proposal: `docs/engineering/ATP-PERSIST-004-SCHEMA-OWNERSHIP-PROPOSAL.md`.
+- Recommended mapping: initial OMS tables under `oms`; migration ledger under platform metadata schema `atheer`.
+- Status: PROPOSED — OWNER APPROVAL REQUIRED. No migration 0001 changes or database operations were performed. Do not apply the migration until the mapping is approved.
