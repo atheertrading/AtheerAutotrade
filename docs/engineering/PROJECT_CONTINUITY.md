@@ -540,3 +540,13 @@ Fetch and check out the correction branch without resetting or cleaning the loca
 ### Governance/process discrepancy
 
 PR #60 was merged before its documented Xcode and UI acceptance gates were satisfied. Preserve that fact in status records; do not infer acceptance from the merge. No release tag is created, and LIVE trading remains disabled.
+
+
+## ATP-UX-002 — follow-up compiler correction (2026-11-14)
+
+- Owner's second Xcode 14.3.1 build confirmed the earlier TableColumnBuilder and Button initializer diagnostics no longer appeared.
+- The build then failed at `MarketWatchView.swift:165`: `visibleColumns` is a `Set<String>`, so shorthand `.mid.rawValue` could not be inferred as a String member.
+- Corrected all five optional-column membership checks to use explicit `MarketWatchOptionalColumn.<case>.rawValue` values. This preserves the persisted String-based preference representation and changes no visibility policy or trading/data behavior.
+- Follow-up branch: `fix/atp-ux-002-visible-column-string-compat`, based on main after PR #61 merge `7704af6c6dfbf4b5c375212217567875c4d655b0`.
+- PR #61 was merged while its body still stated Draft/target-Mac acceptance pending. The merge does not establish build or UI acceptance; the follow-up remains subject to the same owner-Mac verification gates.
+- **Current status:** source correction committed to the follow-up branch; Xcode rebuild and visual/interaction acceptance are pending. No successful build, XCTest, UI runtime, or Capital.com Demo verification is claimed.
