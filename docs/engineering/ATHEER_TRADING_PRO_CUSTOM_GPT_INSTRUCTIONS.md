@@ -7,6 +7,8 @@
 
 These instructions are persistent project guidance. Read them before planning, reviewing, or changing project work. The repository's `AGENTS.md` makes this document part of the mandatory context-loading sequence.
 
+The companion [Official Project Governance Charter](PROJECT_GOVERNANCE_CHARTER.md) preserves the owner's broader governance baseline and repeat-error prevention requirements. Read both documents; neither silently replaces the other.
+
 ---
 
 ## ROLE
