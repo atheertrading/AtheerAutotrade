@@ -1,12 +1,12 @@
 # ATHEER Trading Pro
 
-**ATHEER Trading Pro** is a professional, production-oriented automated multi-asset trading system. This repository currently uses **AtheerAutotrade** as a temporary technical project identifier; the repository and Xcode identifiers will remain unchanged until a controlled migration plan is approved.
+**ATHEER Trading Pro** is a professional, production-oriented multi-asset trading platform supporting both manual and automated trading through broker-linked DEMO and LIVE account environments. The current source is an incremental implementation toward that complete product; read-only connectivity is an early integration milestone, not the product scope. This repository currently uses **AtheerAutotrade** as a temporary technical project identifier; the repository and Xcode identifiers will remain unchanged until a controlled migration plan is approved.
 
 ## Current engineering status
 
 **Verified GitHub baseline:** `main` at `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (2026-11-14).
 
-The repository contains an incremental, read-only broker-connected foundation:
+The current `main` source contains an incremental broker-connectivity milestone whose implemented Capital.com adapter is currently read-only:
 - Native SwiftUI macOS application, navigation, Trading Workspace, broker screen, Market Watch, and Dashboard.
 - Native backend child-process supervision, versioned stdio IPC v2, request validation/correlation, and encrypted one-shot credential handoff.
 - macOS Keychain credential storage; backend broker session tokens remain in process memory.
@@ -17,7 +17,7 @@ The repository contains an incremental, read-only broker-connected foundation:
 
 **Important verification boundary:** the owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices. This is owner-reported runtime evidence; this repository review did not independently run the target Mac, Xcode application, or broker account. Current-main Xcode build, packaged runtime, cross-language cryptographic interoperability, long-duration soak, and actual broker-originated observations remain unverified here.
 
-The platform does **not** yet have an integrated operational order path. The RiskEngine is not connected to an OMS/Execution Gateway workflow; there is no broker dealing method, durable order lifecycle, broker confirmation/fill processing, or reconciliation path. The PostgreSQL schema and migration runner are source artifacts only; no local database provisioning or real migration execution is claimed. Local-only PostgreSQL enforcement is still under review in PR #35.
+The product requirement includes manual and automated order entry and the complete broker execution lifecycle. The current `main` branch does **not** yet have an integrated operational order path: the RiskEngine is not connected to an OMS/Execution Gateway workflow; durable order lifecycle, broker confirmation/fill processing, and reconciliation are not integrated. A broker-dealing adapter is being developed separately in draft PR #49 and is not merged or exposed to the application. The PostgreSQL schema and migration runner are source artifacts only; no local database provisioning or real migration execution is claimed. The PostgreSQL schema and migration runner are source artifacts only; no local database provisioning or real migration execution is claimed. Local-only PostgreSQL enforcement is still under review in PR #35.
 
 LIVE trading remains disabled. Architecture diagrams describe target architecture, not implementation evidence.
 
@@ -63,6 +63,7 @@ The backend currently listens on `127.0.0.1:3000` by default. `GET /health` repo
 - [Project Continuity Record](docs/engineering/PROJECT_CONTINUITY.md)
 - [Engineering Task Register](docs/engineering/TASK_REGISTER.md)
 - [Implementation Status](docs/engineering/IMPLEMENTATION_STATUS.md)
+- [Owner-approved ATHEER Trading Pro Custom Instructions](docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md)
 - [Repository Agent Instructions](AGENTS.md)
 - [System Overview](docs/architecture/SYSTEM_OVERVIEW.md)
 - [Module Boundaries](docs/architecture/MODULE_BOUNDARIES.md)
