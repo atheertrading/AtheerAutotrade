@@ -423,3 +423,10 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and current-head CI run `43537007717`.
 - **Owner-confirmed:** local code synchronized with GitHub; Capital.com Demo authentication and broker-originated prices work in the local app.
 - **Not independently performed here:** local Terminal commands, Xcode build, local PostgreSQL provisioning/migrations, target-Mac UI acceptance, or actual broker dealing.
+
+
+### ATP-GOV-002 — versioning policy branch
+
+- Branch `docs/atp-versioning-policy-001` defines SemVer, immutable annotated Git tags, pre-1.0 release numbering, component/API/schema version separation, immutable migration rules, and release qualification evidence.
+- Root `AGENTS.md` now requires the policy as part of mandatory context loading; README links it.
+- Status: implemented on documentation branch, PR pending. No product release version or Git tag is claimed; first tag must follow an owner-approved qualified milestone.
