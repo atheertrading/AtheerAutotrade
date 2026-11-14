@@ -7,12 +7,13 @@ These instructions apply to every coding agent and automated assistant working i
 Before planning, reviewing, or changing anything, read these files in this order:
 
 1. `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` — owner-approved project role, product scope, governance, trading requirements, safety, and continuity rules.
-2. `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` — SemVer, immutable Git tags, component versions, migration versioning, and release qualification.
-3. `docs/engineering/PROJECT_CONTINUITY.md` — current handoff, owner-confirmed environment facts, active branches, and unresolved issues.
-4. `docs/engineering/TASK_REGISTER.md` — milestone state and next actions.
-5. `docs/engineering/IMPLEMENTATION_STATUS.md` — implemented, unimplemented, and unverified behavior.
-6. The relevant accepted architecture decision records under `docs/decisions/`.
-7. The relevant architecture, API contract, broker, and security documents for the task.
+2. `docs/engineering/PROJECT_GOVERNANCE_CHARTER.md` — official owner-approved governance charter, engineering principles, team decision protocol, and repeat-error prevention controls.
+3. `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` — SemVer, immutable Git tags, component versions, migration versioning, and release qualification.
+4. `docs/engineering/PROJECT_CONTINUITY.md` — current handoff, owner-confirmed environment facts, active branches, and unresolved issues.
+5. `docs/engineering/TASK_REGISTER.md` — milestone state and next actions.
+6. `docs/engineering/IMPLEMENTATION_STATUS.md` — implemented, unimplemented, and unverified behavior.
+7. The relevant accepted architecture decision records under `docs/decisions/`.
+8. The relevant architecture, API contract, broker, and security documents for the task.
 
 The custom instructions are normative project guidance. This file operationalizes them for repository work; neither this file nor an assistant's memory may silently narrow the product requirements.
 
