@@ -304,3 +304,12 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - Initial implementation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`; latest branch head: `7f9838d95325c4996a4e5ce9519d986c8009c963`, based on main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`.
 - GitHub source diff contains the native Market Watch table and the associated task/status/continuity/audit documentation.
 - No Xcode build, XCTest, UI automation, or target-Mac runtime evidence is available yet; PR remains Draft.
+
+## ATP-UX-002 — target-Mac build failure and corrective source branch (2026-11-14)
+
+- **Merged source:** PR #60, merge commit `00e81142c3afbb4a08bb7b1c1bc1f81bf562279c`.
+- **Owner-reported verification:** Xcode 14.3.1 / Swift 5.8.1 / macOS SDK 13.3 / deployment target macOS 13.0. The build reached Swift compilation but failed in `MarketWatchView.swift`.
+- **Diagnostics:** conditional control flow inside `TableColumnBuilder` was rejected; the context-menu `Button(_:systemImage:)` initializer did not match the installed SDK.
+- **Corrective source:** branch `fix/atp-ux-002-xcode14-compat`, commit `fb95a396d8d69db47af43d65b3302b90c39e49f8`. Optional columns are now unconditional with state-driven zero/nonzero widths; context-menu buttons use explicit `Label` content.
+- **Status:** correction implemented in GitHub source, target-Mac rebuild pending. Do not mark ATP-UX-002 verified. UI behavior of zero-width optional columns is specifically pending visual acceptance.
+- **Process note:** PR #60 was merged before its stated target-Mac acceptance gates passed. Its merge status is not evidence of build or UI acceptance.
