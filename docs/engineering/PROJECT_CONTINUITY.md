@@ -513,6 +513,6 @@ The owner confirms local development code matches GitHub project code. Do not as
 
 - Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60.
 - Branch: `feat/atp-ux-002-professional-market-watch`.
-- Initial source/documentation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`.
+- Initial source commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`; latest branch head after documentation reconciliation: `7f9838d95325c4996a4e5ce9519d986c8009c963`.
 - Base: main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`, which includes merged ATP-UX-001 PR #52.
 - PR is intentionally Draft pending Xcode 14/macOS 13-compatible build and target-Mac acceptance. No local build or runtime result is claimed.

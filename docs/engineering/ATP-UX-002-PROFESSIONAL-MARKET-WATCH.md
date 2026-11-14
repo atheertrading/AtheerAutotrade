@@ -5,6 +5,7 @@
 **Base:** `main` at `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`  
 **Draft PR:** [#60](https://github.com/atheertrading/AtheerAutotrade/pull/60)  
 **Initial implementation commit:** `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`  
+**Latest branch head:** `7f9838d95325c4996a4e5ce9519d986c8009c963`  
 **Primary source:** `apps/macos/Sources/Features/Markets/MarketWatchView.swift`
 
 ## Objective

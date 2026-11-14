@@ -332,7 +332,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 |---|---|---|---|
 | ATP-UX-002 | Native Market Watch table and trader workflow controls | Native SwiftUI Table, watchlist search, quote-quality filters, multi-field sorting, persistent optional-column visibility, row selection/keyboard navigation, context copy, and removal | IMPLEMENTED ON FEATURE BRANCH — XCODE BUILD AND TARGET-MAC ACCEPTANCE PENDING |
 
-- Branch: `feat/atp-ux-002-professional-market-watch`, created from current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` after PR #52 merged. Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60. Initial implementation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`.
+- Branch: `feat/atp-ux-002-professional-market-watch`, created from current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` after PR #52 merged. Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60. Initial implementation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`. Latest PR head after documentation reconciliation: `7f9838d95325c4996a4e5ce9519d986c8009c963`.
 - Primary source: `apps/macos/Sources/Features/Markets/MarketWatchView.swift`; implementation record: `docs/engineering/ATP-UX-002-PROFESSIONAL-MARKET-WATCH.md`.
 - Dashboard and compact workspace presentation are preserved through `MarketWatchTableView(compact: true)`; broker discovery/add remains in Brokers.
 - No MarketDataStore, backend, IPC, broker, risk, OMS, execution, or LIVE behavior is changed.
