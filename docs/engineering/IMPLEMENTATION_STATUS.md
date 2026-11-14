@@ -225,3 +225,10 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - PR #50 merged to main as `d44e184d998b719289c42159db138073d3213584`.
 - `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` is normative project guidance and is the first mandatory context file in root `AGENTS.md`.
 - Manual and automated trading across DEMO/LIVE are explicit mandatory product requirements. Read-only connectivity is only an incremental implementation milestone.
+
+
+### ATP-PERSIST-004 — schema ownership decision
+
+- Proposal: `docs/engineering/ATP-PERSIST-004-SCHEMA-OWNERSHIP-PROPOSAL.md`.
+- Recommended mapping: initial OMS tables under `oms`; migration ledger under platform metadata schema `atheer`.
+- Status: PROPOSED — OWNER APPROVAL REQUIRED. No migration 0001 changes or database operations were performed. Do not apply the migration until the mapping is approved.
