@@ -191,12 +191,13 @@ Limitations:
 ATHEER Trading Pro must support both manual and automated trading through broker-linked DEMO and LIVE account environments. The currently merged `main` branch has not yet integrated an operational order path. Read-only market/account connectivity is an incremental milestone only and must never be described as the intended product boundary.
 
 ### Current main and active branches
-- Current main baseline: `d5a82dc236ceed9987b4ab86d168e7a8da40f814`.
+- Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
 - PR #48 documentation reconciliation is present in main.
+- PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
 - PR #49 / ATP-EXEC-002 adds a DEMO-only Capital.com market-position adapter method and deal-confirmation parser on a feature branch. GitHub Actions run `43534214647` passed TypeScript compilation and 62/62 tests on Node.js 24.22.2. It is not merged and not exposed through IPC, UI, strategy, or AI. It does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
-- PR #35 / ATP-PERSIST-003 is unmerged. Its migration-runner source is not a provisioned PostgreSQL implementation. A source-level `\\gexec` escaping defect is confirmed; no local database or migration execution is claimed.
+- PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
 - PR #31 / ATP-UX-001 is open as Draft. Its branch is 20 commits ahead and 70 behind main; target-Mac Xcode/UI acceptance remains pending. Do not merge until reconciled and accepted.
-- PR #31 was converted to Draft to match its own acceptance statement.
+- PR #31 was converted to Draft to match its own acceptance statement. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
 
 ### Persistence status
 **PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
@@ -209,3 +210,18 @@ The owner confirms that the local development code matches the GitHub project co
 
 ### Verification boundary
 No local Terminal command, Xcode build, local PostgreSQL provisioning/migration, target-Mac UI acceptance, or real broker order was executed as part of this documentation/governance update. CI evidence above applies only to the specific PR #49 source commit recorded in its workflow run.
+
+
+### ATP-PERSIST-003 — current-main source port and CI result
+
+- Old PR #35 was closed unmerged as superseded; no commit history was rewritten or force-pushed.
+- Current-main-based PR #51: `fix/atp-persist-003-current-main`, 4 commits ahead / 0 behind main, Draft.
+- Corrected the template-literal escape so generated psql input contains a literal `\\gexec` command; added a unit assertion against the generated output.
+- GitHub Actions Backend CI run `43535924779` passed on Node.js 24.22.2: TypeScript build passed; 52 passed, 0 failed, 0 skipped.
+- **PostgreSQL remains NOT IMPLEMENTED operationally.** No local PostgreSQL server/database was provisioned and no migration applied. Resolve ATP-ARCH-003 schema ownership versus migration 0001 before the first migration; perform owner-Mac integration tests before merge.
+
+### ATP-GOV-001 — owner-approved instructions
+
+- PR #50 merged to main as `d44e184d998b719289c42159db138073d3213584`.
+- `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` is normative project guidance and is the first mandatory context file in root `AGENTS.md`.
+- Manual and automated trading across DEMO/LIVE are explicit mandatory product requirements. Read-only connectivity is only an incremental implementation milestone.
