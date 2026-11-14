@@ -1,7 +1,6 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-14  
-**Latest observed main baseline:** historical task-register entry; see Project Continuity for its recorded context.  
 **Active documentation change:** ATP-REL-001 — Baseline and Sequential Versioning Policy (PR #63; review pending)
 
 ## Release governance documentation — ATP-REL-001
