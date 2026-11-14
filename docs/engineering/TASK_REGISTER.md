@@ -238,7 +238,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 1. ATP-GOV-001 is merged. All subsequent work must load the owner-approved project instructions through `AGENTS.md`.
 2. Review and complete ATP-PERSIST-003 PR #51 only after the schema ownership mapping is resolved and owner-Mac PostgreSQL integration tests pass; do not claim PostgreSQL implemented until the local database is provisioned and real migrations/integration checks pass.
 3. Reconcile ATP-EXEC-002 with the accepted order architecture. Its adapter method is only an infrastructure primitive; do not expose it until durable OMS, mandatory RiskEngine authorization, Execution Gateway, and broker reconciliation are implemented.
-4. Reconcile ATP-UX-001 and obtain target-Mac Xcode/UI acceptance. Do not merge it based only on backend CI.
+4. Complete target-Mac Xcode/UI acceptance for merged ATP-UX-001. The GitHub merge does not establish runtime verification.
 5. After these dependencies are resolved, select the next milestone from the current architecture/task register. No wholesale rewrite or project restart.
 
 

@@ -108,7 +108,7 @@ Ported source files:
 
 The current root `ApplicationShellView` already enables application-wide text selection, so no redundant edit was ported there.
 
-**Verification:** source port only. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check was performed for PR #52. Keep it Draft until the acceptance criteria in the PR body pass on the owner's Mac. No dealing method or order submission is added by this UI milestone.
+**Verification:** source port only. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check was performed for PR #52. The PR is now merged; the acceptance criteria remain required post-merge verification on the owner's Mac. No dealing method or order submission is added by this UI milestone.
 
 
 ## 9. Conflict resolution and current-main integration — 2026-11-14
@@ -118,7 +118,7 @@ The current root `ApplicationShellView` already enables application-wide text se
 - The merge result retains the five ported SwiftUI files listed in Section 8 and this audit.
 - Repository governance and engineering-status documents are retained from current main, not copied from the older feature branch. This preserves the owner-approved Governance Charter requirement in root `AGENTS.md` and the newer project status.
 - No Xcode project configuration, broker API, order submission, risk authorization, or LIVE permission is changed by this reconciliation.
-- Source-level mergeability must be checked on GitHub after the branch update. Target-Mac Xcode build, XCTest, UI acceptance, and Demo runtime checks remain pending; this PR must remain Draft until those gates pass.
+- GitHub source-level mergeability was confirmed and PR #52 subsequently merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Target-Mac Xcode build, XCTest, UI acceptance, and Demo runtime checks remain pending post-merge.
 
 
 ## 10. ATP-UX-002 — Professional Market Watch Data Grid — 2026-11-14

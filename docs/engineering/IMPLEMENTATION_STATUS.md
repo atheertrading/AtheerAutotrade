@@ -170,7 +170,7 @@ Limitations:
 
 - PR #45 (ADR-0006 / OOP standard), PR #46 (initial OOP source audit), and PR #47 (stdio broker dependency injection) are closed and merged.
 - PR #47 Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed; 51/51 tests passed.
-- PR #31 was closed unmerged as superseded by current-main-based PR #52. PR #52 is Draft and awaits target-Mac Xcode/UI acceptance.
+- PR #31 was closed unmerged as superseded by current-main-based PR #52. PR #52 merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; target-Mac Xcode/UI acceptance remains pending.
 - PR #35 was closed unmerged as superseded by current-main-based PR #51. PR #51 fixes the `\\gexec` defect and CI passes; no local PostgreSQL database or migration has been executed.
 - The owner reports working Capital.com Demo authentication and broker-originated price delivery in the local Xcode application. This remains owner-reported and is not converted into independent verification.
 - The full OOP source audit remains IN PROGRESS. ADR-0006 acceptance does not establish legacy-code conformance.
@@ -198,7 +198,7 @@ ATHEER Trading Pro must support both manual and automated trading through broker
 - PR #56 merged the latest verified workstream state and CI evidence as `c465eedd3b15067641bbb1b1206e5e29a659ffc1`.
 - Old PR #49 / ATP-EXEC-002 was closed unmerged as superseded. Current-main-based PR #53 ports its DEMO-only Capital.com market-position adapter method and deal-confirmation parser; current-head Backend CI run `43537817589` passed TypeScript build and 62/62 tests on Node.js 24.22.2. The adapter remains unexposed through IPC, UI, strategy, or AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
 - PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Latest current-head Backend CI run `43538085414` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
-- PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. PR #52 is a current-main-based port and remains Draft pending target-Mac Xcode/UI acceptance.
+- PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. PR #52 is merged; target-Mac Xcode/UI acceptance remains pending.
 
 ### Persistence status
 **PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
@@ -238,7 +238,7 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 ### ATP-UX-001 — current-main UI port
 
 - PR #31 closed unmerged as superseded; its original branch/history remains preserved.
-- PR #52: `feat/atp-ux-001-current-main`, six commits ahead / zero behind current main at creation, Draft.
+- PR #52: `feat/atp-ux-001-current-main`, merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; target-Mac acceptance pending.
 - Ported adaptive Capital.com broker layout, Dashboard distinction between authentication/subscription/actual quote receipt, Market Watch native copy context menu, ATHEER Trading Pro branding, and accurate Workspace status copy.
 - UI/UX audit and acceptance criteria are included.
 - No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check has been performed. Do not merge until the owner-Mac acceptance gates pass.
@@ -278,7 +278,7 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - **Versioning:** PR #55 merged. SemVer and immutable annotated Git tag policy are normative. No release version or tag is claimed; first tag awaits an owner-approved qualified milestone.
 - **Status records:** PR #54, #56, and #57 merged and reconciled current PR states.
 - **PostgreSQL runner:** PR #51 Draft. Latest current-head Backend CI run `43538085414` passed TypeScript build and 52/52 tests. This proves runner source/unit behavior only. No local PostgreSQL server/database was provisioned and no migration was applied. ATP-PERSIST-004 schema mapping is still proposed and awaits owner approval.
-- **macOS UI:** PR #52 Draft. Five SwiftUI files and UI/UX audit ported onto current main. No target-Mac Xcode build or UI acceptance was performed; this remains mandatory before merge.
+- **macOS UI:** PR #52 merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Five SwiftUI files and the UX audit are on main. Target-Mac Xcode build and UI acceptance remain pending as post-merge verification.
 - **Capital.com dealing adapter:** PR #53 Draft. Current-head Backend CI run `43537817589` passed TypeScript build and 62/62 tests. The adapter is DEMO-only, not exposed to IPC/UI/strategy/AI, and no actual broker order was submitted. A later documentation-only commit added the release policy to the branch; no source/test changed after the CI run.
 - **Superseded PRs:** #31, #35, and #49 closed unmerged; their work was ported to #52, #51, and #53 respectively.
 
