@@ -467,3 +467,15 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 ### Owner-confirmed environment context
 
 The owner confirms local development code matches GitHub project code. Do not ask repeatedly for confirmation. GitHub feature branches created after that synchronization point are not automatically present locally. No local Terminal/Xcode/PostgreSQL/broker execution is claimed by this handoff.
+
+
+## Latest documentation milestone handoff — 2026-11-14
+
+- Owner-supplied Official Project Governance Charter was added and merged through PR #59: https://github.com/atheertrading/AtheerAutotrade/pull/59.
+- Merge commit: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
+- Added `docs/engineering/PROJECT_GOVERNANCE_CHARTER.md`, preserving the supplied governance text and adding a repository-specific precedence/reconciliation note plus repeat-error prevention controls.
+- Updated repository-root `AGENTS.md` so the charter is mandatory context before project work; linked it from `README.md` and `ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md`.
+- Scope was documentation-only. No application code, broker behavior, database, build, test, or trading permission was changed by this milestone.
+- The charter explicitly requires resuming from verified state, avoiding repeated resolved work, checking branch freshness, preserving history/local changes, recording evidence, and reconciling conflicting documents rather than silently guessing.
+- Current repository main baseline after this milestone: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
+- Earlier historical paths and milestone/status statements in the supplied source are not current-state evidence; use the current task register, implementation status, continuity record, and inspected source for operational facts.
