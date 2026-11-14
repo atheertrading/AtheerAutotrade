@@ -516,3 +516,27 @@ The owner confirms local development code matches GitHub project code. Do not as
 - Initial source commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`; latest branch head after documentation reconciliation: `7f9838d95325c4996a4e5ce9519d986c8009c963`.
 - Base: main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`, which includes merged ATP-UX-001 PR #52.
 - PR is intentionally Draft pending Xcode 14/macOS 13-compatible build and target-Mac acceptance. No local build or runtime result is claimed.
+
+## Current handoff — ATP-UX-002 Xcode compatibility correction — 2026-11-14
+
+### Verified GitHub state
+
+- PR #60 merged to `main` as `00e81142c3afbb4a08bb7b1c1bc1f81bf562279c`.
+- Owner's local transcript confirms repository root `/Users/enghossamalfahad/Developer/AtheerAutotrade`, successful `git fetch origin`, and successful checkout of `feat/atp-ux-002-professional-market-watch`.
+- Owner-reported Xcode build used Xcode 14.3.1, Swift 5.8.1, macOS SDK 13.3, and macOS 13.0 target; it failed at Swift compilation in `MarketWatchView.swift`.
+- Exact compiler diagnostics: `TableColumnBuilder` cannot accept the conditional column control flow used; context-menu Button title/system-image initializer is not accepted by the installed SDK.
+
+### Corrective branch
+
+- Branch: `fix/atp-ux-002-xcode14-compat`.
+- Commit: `fb95a396d8d69db47af43d65b3302b90c39e49f8`.
+- Changes are limited to `MarketWatchView.swift`: optional columns are unconditional with state-driven widths; context-menu buttons use explicit `Label` content.
+- GitHub source commit is verified. No local build of this correction has been run.
+
+### Required next action
+
+Fetch and check out the correction branch without resetting or cleaning the local worktree. Run the macOS Debug build. If it succeeds, perform visual and interaction acceptance, paying particular attention to whether zero-width optional columns truly collapse in the native Table and whether compact/dashboard rendering remains unchanged. Keep the corrective PR Draft until those gates pass.
+
+### Governance/process discrepancy
+
+PR #60 was merged before its documented Xcode and UI acceptance gates were satisfied. Preserve that fact in status records; do not infer acceptance from the merge. No release tag is created, and LIVE trading remains disabled.

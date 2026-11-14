@@ -337,3 +337,11 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Dashboard and compact workspace presentation are preserved through `MarketWatchTableView(compact: true)`; broker discovery/add remains in Brokers.
 - No MarketDataStore, backend, IPC, broker, risk, OMS, execution, or LIVE behavior is changed.
 - Target-Mac Xcode build and all acceptance checks in the milestone record remain pending. Do not claim runtime verification from source inspection.
+
+## ATP-UX-002 — post-merge build correction (2026-11-14)
+
+- PR #60 is merged as `00e81142c3afbb4a08bb7b1c1bc1f81bf562279c`, but the owner's subsequent Xcode 14.3.1 build failed in `MarketWatchView.swift`. The merge therefore remains **DONE — MERGED**, not **DONE — VERIFIED**.
+- Owner-reported diagnostics: `TableColumnBuilder` rejected conditional optional-column declarations; the context-menu Button title/system-image initializer was incompatible with the installed SDK.
+- Corrective source commit: `fb95a396d8d69db47af43d65b3302b90c39e49f8`, branch `fix/atp-ux-002-xcode14-compat`.
+- Correction PR must remain Draft until the owner confirms Xcode build success and completes the visual/interaction acceptance checklist.
+- Next: fetch the correction branch, build with Xcode 14.3.1/macOS 13.0 target, then inspect optional-column collapse, table sizing, search/filter/sort, selection, context menus, removal, compact presentation, and unchanged Demo quote delivery.

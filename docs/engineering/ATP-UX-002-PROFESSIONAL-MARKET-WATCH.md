@@ -52,3 +52,28 @@ Advance Market Watch from a fixed custom row layout to a native macOS table work
 ## Verification boundary
 
 GitHub source changes and documentation are the implementation evidence for this branch. No local Xcode build, XCTest, UI automation, target-Mac visual inspection, or broker runtime test has been executed for this milestone. Do not mark it verified or merge it until the acceptance criteria pass.
+
+## Post-merge Xcode 14 compatibility correction — 2026-11-14
+
+### Owner-reported target-Mac build evidence
+
+The owner ran the macOS Debug build using Xcode 14.3.1, Swift 5.8.1, macOS SDK 13.3, and the existing macOS 13.0 deployment target. The repository was fetched and the ATP-UX-002 branch was checked out successfully. The build reached Swift compilation and failed in `MarketWatchView.swift` with two source-compatibility diagnostics:
+
+1. `TableColumnBuilder` rejected conditional `if` statements around optional `TableColumn` declarations.
+2. The `Button(_:systemImage:)` initializer form used in the context menus did not match the available SDK overload.
+
+The initial two Git errors and first missing-project-path error occurred before changing into the repository root and are not application build failures.
+
+### Corrective implementation
+
+- Replaced conditional TableColumn declarations with unconditional declarations whose widths are set to zero when their optional column is disabled. The existing persisted column preferences remain the source of visibility state. This avoids control flow inside the Xcode 14 `TableColumnBuilder`; visual collapse behavior remains subject to target-Mac acceptance.
+- Replaced the unsupported title/systemImage Button initializer form in both full-table and compact context menus with the compatible `Button { } label: { Label(...) }` form.
+- No market-data, broker, IPC, risk, OMS, execution, or LIVE behavior was changed.
+
+### Correction branch and verification boundary
+
+- Correction branch: `fix/atp-ux-002-xcode14-compat`.
+- Correction commit: `fb95a396d8d69db47af43d65b3302b90c39e49f8`.
+- PR #60 was merged as `00e81142c3afbb4a08bb7b1c1bc1f81bf562279c` before the target-Mac acceptance gates were met, despite its recorded draft/acceptance requirement. This is a process deviation and does not establish acceptance.
+- The correction source has been committed to the correction branch. It has not yet been built on the target Mac. No Xcode success, UI acceptance, XCTest, or Demo runtime verification is claimed.
+- Keep the corrective PR Draft until the target-Mac build and UI acceptance gates pass.
