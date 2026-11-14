@@ -73,7 +73,7 @@ Branch: `feat/atp-ux-001-clipboard-and-broker-polish`.
 
 1. **Complete ATP-UX-001:** target-Mac Xcode build and acceptance tests for app-wide copy, native paste, row copy, responsive Broker screen, and accurate status transitions.
 2. **ATP-MD-QUALITY-002:** timestamp monotonicity, duplicate handling, freshness-aware Dashboard, OHLC consumption, and reconnect-gap state.
-3. **ATP-UX-002:** native Market Watch table/data grid, keyboard navigation, sorting/filtering, instrument search/add flow, and configurable columns.
+3. **ATP-UX-002:** native Market Watch table/data grid, keyboard row navigation, watchlist search, quote-quality filtering, multi-field sorting, and configurable columns. Broker catalogue search/add remains in the Brokers workflow.
 4. **ATP-UX-003:** shared broker/session status model and persistent activity/audit presentation.
 5. **ATP-UX-004:** semantic typography, accessibility, keyboard/focus, and appearance preferences.
 6. **Feature completion:** functional Chart, Positions, Orders, Portfolio, Risk, Strategies, Analytics, Intelligence, Activity, and Settings screens only as their underlying backend services become available.
@@ -108,7 +108,7 @@ Ported source files:
 
 The current root `ApplicationShellView` already enables application-wide text selection, so no redundant edit was ported there.
 
-**Verification:** source port only. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check was performed for PR #52. Keep it Draft until the acceptance criteria in the PR body pass on the owner's Mac. No dealing method or order submission is added by this UI milestone.
+**Verification:** source port only. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check was performed for PR #52. The PR is now merged; the acceptance criteria remain required post-merge verification on the owner's Mac. No dealing method or order submission is added by this UI milestone.
 
 
 ## 9. Conflict resolution and current-main integration — 2026-11-14
@@ -118,4 +118,21 @@ The current root `ApplicationShellView` already enables application-wide text se
 - The merge result retains the five ported SwiftUI files listed in Section 8 and this audit.
 - Repository governance and engineering-status documents are retained from current main, not copied from the older feature branch. This preserves the owner-approved Governance Charter requirement in root `AGENTS.md` and the newer project status.
 - No Xcode project configuration, broker API, order submission, risk authorization, or LIVE permission is changed by this reconciliation.
-- Source-level mergeability must be checked on GitHub after the branch update. Target-Mac Xcode build, XCTest, UI acceptance, and Demo runtime checks remain pending; this PR must remain Draft until those gates pass.
+- GitHub source-level mergeability was confirmed and PR #52 subsequently merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Target-Mac Xcode build, XCTest, UI acceptance, and Demo runtime checks remain pending post-merge.
+
+
+## 10. ATP-UX-002 — Professional Market Watch Data Grid — 2026-11-14
+
+**Branch:** `feat/atp-ux-002-professional-market-watch`  
+**Base:** `main` at `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`  
+**Status:** Source implemented; target-Mac build and UI acceptance pending.
+
+- Replaced the full Market Watch fixed HStack with native SwiftUI `Table`.
+- Added watchlist-local search over instrument name, epic, and instrument type.
+- Added filters for Fresh, Delayed, Degraded, Stale, and Waiting observations.
+- Added sort controls for Instrument, Bid, Ask, Spread, Quote Age, and Quote Quality, with direction toggle. Missing numeric observations remain last in both directions.
+- Added persistent optional-column visibility for Mid, Spread, Age, Quality, and Market Status.
+- Native table row selection supports pointer and keyboard navigation; context-menu copy and explicit removal remain available.
+- Preserved the compact table path for Dashboard and compact workspace consumers. Existing Brokers catalogue search/add remains unchanged.
+- The view continues to consume the existing `MarketDataStore`; no broker, IPC, subscription, quote normalization, execution, or LIVE behavior changed.
+- **Verification boundary:** no Xcode build, XCTest, UI automation, target-Mac visual inspection, or Demo runtime test has been performed for this branch. Complete the acceptance criteria in `docs/engineering/ATP-UX-002-PROFESSIONAL-MARKET-WATCH.md` before merge.

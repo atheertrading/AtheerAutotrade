@@ -37,7 +37,7 @@ Repository records are authoritative over conversation summaries. When documents
 - PR #45 merged ADR-0006 / project-wide OOP standard as `65b814a09b905011cb0da00f493e341c7ee94591`.
 - PR #46 merged the initial ATP-ARCH-OOP-002 source-conformance audit as `0bbd272d7a3ec33b53f6d84a1658f8c07e93e396`.
 - PR #47 merged ATP-ARCH-OOP-003 stdio broker dependency injection as `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
-- Current open PRs include #31 (ATP-UX-001), #49 (ATP-EXEC-002), and #51 (ATP-PERSIST-003 current-main port); PR #35 is closed unmerged as superseded. See latest handoff below.
+- Latest open implementation PRs are #51 (ATP-PERSIST-003), #53 (ATP-EXEC-002), and #60 (ATP-UX-002). PR #52 (ATP-UX-001) merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; see latest handoff below.
 - The owner-confirmed local project root is `/Users/enghossamalfahad/Developer/AtheerAutotrade`; the Xcode project is `apps/macos/AtheerAutotrade.xcodeproj`.
 - The local working tree, branch, commit, uncommitted files, and stashes were not inspected in this GitHub review. Do not assume local files match GitHub main. Do not reset, clean, force-push, pop/drop stashes, or overwrite local work without a reviewed reconciliation plan.
 
@@ -391,7 +391,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 ### Open PRs
 
 - **PR #51 — ATP-PERSIST-003:** Draft; current-main-based branch `fix/atp-persist-003-current-main`. Corrects psql `\\gexec` escaping. Latest Backend CI run `43538085414` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. ATP-PERSIST-004 schema mapping remains proposed and requires owner approval.
-- **PR #52 — ATP-UX-001:** Draft; current-main-based branch `feat/atp-ux-001-current-main`, 16 commits ahead / 0 behind at latest comparison. Ported five SwiftUI files and UX audit. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed for this port. Target-Mac acceptance is mandatory before merge.
+- **PR #52 — ATP-UX-001:** merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Five SwiftUI files and UX audit are on main. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed; post-merge acceptance remains mandatory.
 - **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. Latest GitHub Actions Backend CI run `43537817589` passed on Node.js 24.22.2: TypeScript build passed; 62/62 tests passed. Adapter remains unexposed and no actual broker order was sent.
 
 ### Superseded PRs
@@ -404,7 +404,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 1. **PostgreSQL is NOT IMPLEMENTED operationally.** PR #51 only establishes source correctness and CI. Local server provisioning, database creation, real migration application, no-op rerun, checksum mismatch, rollback, concurrency, backup/restore, and repository integration remain unverified.
 2. **Schema ownership approval:** ATP-PERSIST-004 proposes placing initial intent/idempotency/event/outbox tables in `oms` and keeping `atheer.schema_migrations` as platform migration metadata. This is a proposal, not an accepted ADR or team consensus. Owner approval is required before changing or applying migration 0001.
-3. **Xcode/UI acceptance:** PR #52 must pass on the owner's Mac using the existing Xcode environment and deployment target. GitHub source review is not a substitute.
+3. **Xcode/UI acceptance:** the merged ATP-UX-001 changes must pass on the owner's Mac using the existing Xcode environment and deployment target. GitHub source review/merge is not a substitute.
 4. **End-to-end trading is NOT IMPLEMENTED.** The required path remains RiskEngine → durable OMS → Execution Gateway → broker dealing → broker confirmation → reconciliation. PR #53's adapter is only an infrastructure primitive and must remain inaccessible until the complete controls are integrated.
 5. **ATP-ARCH-036 API/service contracts and ATP-ARCH-OOP-002 full source audit remain in progress.**
 
@@ -412,7 +412,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 1. Governance is complete and merged; follow root `AGENTS.md` for every task.
 2. Obtain the owner's decision on ATP-PERSIST-004 schema mapping. Then update the still-unapplied migration 0001, provision local PostgreSQL on the owner Mac, and execute the complete migration/recovery integration tests.
-3. Complete PR #52 target-Mac Xcode/UI acceptance before merge.
+3. Complete post-merge target-Mac Xcode/UI acceptance for ATP-UX-001.
 4. Run and review PR #53 current-head Backend CI. Keep the adapter isolated until OMS, mandatory RiskEngine authorization, Execution Gateway, idempotency/outbox, broker confirmation, and reconciliation exist.
 5. Once persistence and UI acceptance gates are closed, proceed with the shared order-intake/OMS milestone in the documented architecture sequence. Preserve current code and history; no restart or wholesale rewrite.
 
@@ -445,7 +445,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 ### Active Draft PRs
 
 - **#51 — ATP-PERSIST-003:** migration runner current-main port. Latest CI run `43538085414`: TypeScript build + 52/52 tests passed. No local PostgreSQL provisioned and no migration applied. ATP-PERSIST-004 schema mapping still requires owner approval.
-- **#52 — ATP-UX-001:** current-main SwiftUI/UI port. Target-Mac Xcode build and UI acceptance not performed; keep Draft.
+- **#52 — ATP-UX-001:** merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; target-Mac Xcode build and UI acceptance remain pending.
 - **#53 — ATP-EXEC-002:** Capital.com DEMO dealing adapter current-main port. Latest CI run `43537817589`: TypeScript build + 62/62 tests passed. Adapter remains infrastructure-only; no OMS/RiskEngine/Gateway/reconciliation integration and no real order.
 
 ### Superseded PRs
@@ -479,3 +479,40 @@ The owner confirms local development code matches GitHub project code. Do not as
 - The charter explicitly requires resuming from verified state, avoiding repeated resolved work, checking branch freshness, preserving history/local changes, recording evidence, and reconciling conflicting documents rather than silently guessing.
 - Current repository main baseline after this milestone: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
 - Earlier historical paths and milestone/status statements in the supplied source are not current-state evidence; use the current task register, implementation status, continuity record, and inspected source for operational facts.
+
+
+## Latest implementation handoff — ATP-UX-002 — 2026-11-14
+
+### Verified baseline
+
+- PR #52 (ATP-UX-001) is now merged; GitHub reports merge commit/current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Its five SwiftUI UI changes and UX audit are on main.
+- New branch `feat/atp-ux-002-professional-market-watch` was created directly from that main commit.
+
+### ATP-UX-002 source change
+
+- Primary file: `apps/macos/Sources/Features/Markets/MarketWatchView.swift`.
+- Full Market Watch view now uses native SwiftUI `Table` with row selection, watchlist search, quality filtering, selectable sort field/direction, and persisted optional columns.
+- Compact presentation remains available to Dashboard/workspace consumers and retains its existing data source and dense row layout.
+- The search field filters only the current watchlist. Instrument catalogue search/add remains in Brokers.
+- No MarketDataStore, quote normalization, backend IPC, broker connection, dealing, risk, OMS, execution, or LIVE behavior was changed.
+
+### Verification boundary
+
+- Source and documentation were authored through GitHub. No local Terminal/Xcode access or target-Mac build is claimed.
+- No XCTest, UI automation, accessibility audit, or Demo runtime test has been run for ATP-UX-002.
+- Required next action: review the new PR and run the ATP-UX-002 acceptance checklist on the owner's Mac before merge.
+
+### Next sequence
+
+1. Complete target-Mac Xcode and UI acceptance for ATP-UX-001 and ATP-UX-002; resolve any compile/layout/accessibility issues found.
+2. Continue with ATP-MD-QUALITY-002 (quote timestamp monotonicity, duplicate/out-of-order handling, freshness-aware Dashboard, and gap/recovery state) without changing the presentation layer's broker authority.
+3. Proceed to the shared broker/session state and activity/audit presentation only after the relevant typed backend events/contracts exist.
+
+
+### ATP-UX-002 PR handoff update — 2026-11-14
+
+- Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60.
+- Branch: `feat/atp-ux-002-professional-market-watch`.
+- Initial source commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`; latest branch head after documentation reconciliation: `7f9838d95325c4996a4e5ce9519d986c8009c963`.
+- Base: main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`, which includes merged ATP-UX-001 PR #52.
+- PR is intentionally Draft pending Xcode 14/macOS 13-compatible build and target-Mac acceptance. No local build or runtime result is claimed.
