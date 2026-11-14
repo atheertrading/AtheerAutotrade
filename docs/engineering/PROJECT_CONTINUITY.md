@@ -375,9 +375,9 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 ---
 
-## Latest handoff — 2026-11-14 (governance merged; UX and persistence branches refreshed)
+## Latest handoff — 2026-11-14 (governance merged; all three workstreams ported to current main)
 
-### Owner-approved instructions — merged
+### Owner-approved project instructions — merged
 
 - PR #50 merged by squash as `d44e184d998b719289c42159db138073d3213584`.
 - Normative instructions: `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md`.
@@ -388,25 +388,26 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 - Current `main`: `d44e184d998b719289c42159db138073d3213584`.
 - Owner confirms local development code is synchronized with GitHub project code. Do not repeatedly ask for confirmation.
-- Feature branches created after the owner's synchronization point are not automatically present locally; pull them deliberately when selected.
+- GitHub-only feature branches created after the owner's synchronization point are not automatically present locally; pull them deliberately when selected.
 
 ### Open PRs
 
-- **PR #49 — ATP-EXEC-002:** Draft; 14 commits ahead / 0 behind main. Backend CI run `43534214647` passed TypeScript build and 62/62 tests. Contains an isolated DEMO-only Capital.com dealing adapter method and confirmation parser, not exposed through IPC/UI/strategy/AI. No OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation. No real broker order was sent.
-- **PR #51 — ATP-PERSIST-003:** Draft; branch `fix/atp-persist-003-current-main`, 4 commits ahead / 0 behind at initial comparison. Corrects psql `\\gexec` escaping. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. Schema mapping against ATP-ARCH-003 remains pending owner approval.
-- **PR #52 — ATP-UX-001:** Draft; branch `feat/atp-ux-001-current-main`, 16 commits ahead / 0 behind after synchronizing current project records. Ported five SwiftUI source files and UX audit. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed for this port. Target-Mac acceptance is mandatory before merge.
+- **PR #51 — ATP-PERSIST-003:** Draft; current-main-based branch `fix/atp-persist-003-current-main`. Corrects psql `\\gexec` escaping. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. No PostgreSQL server/database provisioned and no migration applied. ATP-PERSIST-004 schema mapping remains proposed and requires owner approval.
+- **PR #52 — ATP-UX-001:** Draft; current-main-based branch `feat/atp-ux-001-current-main`, 16 commits ahead / 0 behind at latest comparison. Ported five SwiftUI files and UX audit. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or broker runtime test has been performed for this port. Target-Mac acceptance is mandatory before merge.
+- **PR #53 — ATP-EXEC-002:** Draft; current-main-based branch `feat/atp-exec-002-current-main`. Ported Capital.com DEMO market-dealing adapter, confirmation parser, guards, mock tests, ADR-0007, and implementation record. GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62/62 tests passed. Adapter remains unexposed and no actual broker order was sent.
 
 ### Superseded PRs
 
-- **PR #31** closed unmerged. Its UI source changes were ported to PR #52. Original branch/history preserved; no force-push or rewrite.
-- **PR #35** closed unmerged. Its migration-runner changes were ported and corrected in PR #51. Original branch/history preserved; no force-push or rewrite.
+- **PR #31** closed unmerged; its UI source changes were ported to PR #52. Original branch/history preserved; no force-push or rewrite.
+- **PR #35** closed unmerged; its migration-runner changes were ported and corrected in PR #51. Original branch/history preserved; no force-push or rewrite.
+- **PR #49** closed unmerged; its dealing-adapter changes were ported to PR #53. Original branch/history preserved; no force-push or rewrite.
 
 ### Critical unresolved blockers
 
 1. **PostgreSQL is NOT IMPLEMENTED operationally.** PR #51 only establishes source correctness and CI. Local server provisioning, database creation, real migration application, no-op rerun, checksum mismatch, rollback, concurrency, backup/restore, and repository integration remain unverified.
 2. **Schema ownership approval:** ATP-PERSIST-004 proposes placing initial intent/idempotency/event/outbox tables in `oms` and keeping `atheer.schema_migrations` as platform migration metadata. This is a proposal, not an accepted ADR or team consensus. Owner approval is required before changing or applying migration 0001.
 3. **Xcode/UI acceptance:** PR #52 must pass on the owner's Mac using the existing Xcode environment and deployment target. GitHub source review is not a substitute.
-4. **End-to-end trading is NOT IMPLEMENTED.** The required path remains RiskEngine → durable OMS → Execution Gateway → broker dealing → broker confirmation → reconciliation. PR #49's adapter is only an infrastructure primitive and must remain inaccessible until the complete controls are integrated.
+4. **End-to-end trading is NOT IMPLEMENTED.** The required path remains RiskEngine → durable OMS → Execution Gateway → broker dealing → broker confirmation → reconciliation. PR #53's adapter is only an infrastructure primitive and must remain inaccessible until the complete controls are integrated.
 5. **ATP-ARCH-036 API/service contracts and ATP-ARCH-OOP-002 full source audit remain in progress.**
 
 ### Next execution order
@@ -414,11 +415,11 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 1. Governance is complete and merged; follow root `AGENTS.md` for every task.
 2. Obtain the owner's decision on ATP-PERSIST-004 schema mapping. Then update the still-unapplied migration 0001, provision local PostgreSQL on the owner Mac, and execute the complete migration/recovery integration tests.
 3. Complete PR #52 target-Mac Xcode/UI acceptance before merge.
-4. Review PR #49 as an adapter-only change; keep it isolated until OMS, mandatory RiskEngine authorization, Execution Gateway, idempotency/outbox, broker confirmation, and reconciliation exist.
+4. Run and review PR #53 current-head Backend CI. Keep the adapter isolated until OMS, mandatory RiskEngine authorization, Execution Gateway, idempotency/outbox, broker confirmation, and reconciliation exist.
 5. Once persistence and UI acceptance gates are closed, proceed with the shared order-intake/OMS milestone in the documented architecture sequence. Preserve current code and history; no restart or wholesale rewrite.
 
 ### Evidence classification
 
-- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 branch contents and divergence; PR #49 CI.
+- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and current-head CI run `43537007717`.
 - **Owner-confirmed:** local code synchronized with GitHub; Capital.com Demo authentication and broker-originated prices work in the local app.
 - **Not independently performed here:** local Terminal commands, Xcode build, local PostgreSQL provisioning/migrations, target-Mac UI acceptance, or actual broker dealing.
