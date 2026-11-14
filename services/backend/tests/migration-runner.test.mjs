@@ -44,8 +44,8 @@ test("runs each migration body only when its version/checksum is absent", () => 
   assert.match(transaction, /pg_advisory_xact_lock/);
   assert.match(transaction, /checksum mismatch/);
   assert.match(transaction, /convert_from\(decode\('/);
-  assert.match(transaction, /\\\\gexec/);
-  assert.ok(transaction.includes("\\\\gexec"), "generated psql input must contain the literal \\gexec meta-command");
+  assert.match(transaction, /\\gexec/);
+  assert.ok(transaction.includes("\\gexec"), "generated psql input must contain the literal \\gexec meta-command");
   assert.match(transaction, /CREATE TABLE IF NOT EXISTS atheer\.schema_migrations/);
   assert.match(transaction, /INSERT INTO atheer\.schema_migrations/);
   assert.match(transaction, /COMMIT;\n$/);
