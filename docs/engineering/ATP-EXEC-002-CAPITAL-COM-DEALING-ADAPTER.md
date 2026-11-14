@@ -10,6 +10,7 @@
 - Added typed market-position request and submission contracts to the existing CapitalComClient.
 - Added the documented authenticated `POST /api/v1/positions` call.
 - Requires a valid epic, BUY/SELL direction, positive size, and mandatory positive stop-loss level. Optional take-profit level is passed only when supplied.
+- Rejects LIVE dealing even if a client is constructed with the live environment; the first adapter release is DEMO-only. Rejects a missing local session before any network request.
 - Added typed `GET /api/v1/confirms/{dealReference}` parsing, including affected-deal identifiers and broker statuses.
 - Added `CapitalComSubmissionUnknownError`. Transport failures, HTTP 5xx responses, invalid JSON, and malformed successful submission responses are treated as unknown outcomes; callers must reconcile and must not retry automatically.
 - HTTP 4xx responses remain explicit broker API rejections.
@@ -22,7 +23,7 @@ These methods are broker-adapter infrastructure capabilities only. They are not 
 ## Acceptance criteria still open
 
 1. Backend TypeScript build and all tests pass in CI.
-2. Contract tests cover request validation, authenticated POST, deal-reference response, 4xx rejection, ambiguous outcomes, and confirmation parsing.
+2. Contract tests cover request validation, authenticated POST, deal-reference response, missing-session and LIVE rejection, 4xx rejection, ambiguous outcomes, and confirmation parsing.
 3. Durable PostgreSQL migrations and repository implementation are executed and integration-tested before OMS dispatch can be enabled.
 4. OMS enforces immutable intent, scoped idempotency, state transitions, and transactional outbox.
 5. Execution Gateway accepts only OMS-authorized, RiskEngine-approved intents.
