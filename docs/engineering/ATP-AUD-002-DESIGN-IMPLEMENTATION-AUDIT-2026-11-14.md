@@ -215,3 +215,34 @@ Apple-inspired quality means native macOS behavior and disciplined information d
 **Not verified in this audit:** target-Mac build, current local/GitHub commit identity, Xcode tests for current source, long-duration stability, accessibility, packaged runtime, and broker order execution.
 
 **Recommended next action:** reconcile the current local branch with GitHub main and the existing UX/market-data branches, then execute ATP-UX-001 and ATP-MD-QUALITY-003 as the first implementation batches without replacing the working broker connection.
+
+
+## 11. Current baseline and branch reconciliation addendum — 2026-11-14
+
+### 11.1 Current GitHub baseline
+- `main` is `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- PR #45 (ADR-0006), PR #46 (initial OOP audit), and PR #47 (stdio dependency injection) are merged.
+- PR #47 Backend CI run 43528019119 passed: TypeScript compilation passed; 51/51 Node tests passed.
+- The OOP source-conformance audit remains IN PROGRESS.
+
+### 11.2 Open work
+- PR #31 / ATP-UX-001 is open and not merged. Its branch is 20 commits ahead and 54 behind current main. Backend CI passed, but target-Mac Xcode/UI acceptance remains unverified. GitHub currently reports the PR as non-draft although its body says it should remain draft until acceptance.
+- PR #35 / ATP-PERSIST-003 is open as a draft. Its branch is 1 commit ahead and 39 behind current main. CI run 43453512269 failed one of 52 tests because the generated psql command omitted the required backslash before `gexec`. No real PostgreSQL server/migration test has been performed.
+
+### 11.3 Architecture discrepancies requiring resolution before dependent implementation
+1. **Persistence schema ownership:** ATP-ARCH-003 specifies domain-owned schemas (`oms`, `risk`, `execution`, `positions`, `reconciliation`, `audit`, `reference`, `integration`). Migration 0001 currently creates `atheer` and generic `trading` schemas containing OMS/idempotency/event/outbox tables. The migration has not been executed. Resolve the mapping and ownership before applying it; do not rewrite an already-applied migration.
+2. **Provider-neutral contracts:** ATP-ARCH-036 remains incomplete. The merged `StdioIpcBroker` contract in `stdio-ipc.ts` imports Capital.com-specific types and exposes the current Capital.com capability surface. This is a useful injection seam, but it is not the final provider-neutral application boundary. Do not expand it without the service-contract design.
+3. **Backend toolchain proposal versus implementation:** ATP-ARCH-042 proposed Express and pnpm; current source uses Node built-in HTTP APIs and npm. This is not grounds for an automatic dependency or package-manager migration. Record the accepted implementation choice or a justified deviation.
+4. **Deployment scope:** older Q&A material recommends a long-term hybrid topology. PR #35 records the owner's local-Mac-only PostgreSQL decision for the current phase. Treat the latter as a scoped database deployment constraint, not a final resolution of all production-hosting decisions.
+5. **Runtime evidence:** the owner reports working local Capital.com Demo authentication and broker-originated prices. This is retained as owner-reported evidence; repository CI and this source audit do not independently verify the local runtime.
+
+### 11.4 Scope and safety
+- No source code, broker permissions, order capability, database, or trading behavior is changed by this reconciliation addendum.
+- No PostgreSQL migration has been executed.
+- No target-Mac Xcode build, packaged runtime test, or sustained broker soak is claimed.
+- No OMS/Execution Gateway dealing path or LIVE capability is present.
+
+
+### ATP-BASELINE-001 disposition
+
+A documentation-only reconciliation is prepared on branch `docs/atp-baseline-reconciliation-001` and draft PR #48. It updates eight engineering/architecture status files to reflect current main and active PR evidence. It does not change source, tests, SQL, broker permissions, or runtime behavior. PR #48 remains open and unmerged pending review.

@@ -31,24 +31,26 @@ Repository records are authoritative over conversation summaries. When documents
 
 ## 3. Repository baseline and active branches
 
-- Latest observed `main` baseline: `794e9c5854bba45c5b007b44de697b030f3b72a8` (PR #29 merge).
-- PR #11 (ATP-DOM-001) was merged as `fa68db5635042b43cda16e687eeffa4f138c5cbe`; user-run verification reported TypeScript build success and 10/10 backend tests passing.
-- PR #12 (ATP-CAP-001) was merged as `dfeff79b0b401d4722b5d4cf8ff9c9ab24344597`; see the current main branch history for subsequent changes.
-- PR #13 (architecture diagram catalogue) was merged on 2026-11-12 as `58766938b1d68c8653909f7b2c50e6e78b354dd1`.
-- ATP-ARCH-REBASE-001 was merged through PR #14 as `9445a749d78c63030e9125041a6103dca0eabafc`.
-- The Capital.com UI feature branch `feature/atp-cap-002-broker-connection-experience` was previously reviewed and found to make direct REST calls from SwiftUI. It is not an approved architecture pattern and must not be merged as-is.
-- The user's local working copy previously contained local changes and a stash. Do not pop, drop, apply, reset, clean, force-push, or overwrite local work without a reviewed reconciliation plan.
+- Current verified GitHub `main` baseline: `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (PR #47 merge, 2026-11-14).
+- PR #45 merged ADR-0006 / project-wide OOP standard as `65b814a09b905011cb0da00f493e341c7ee94591`.
+- PR #46 merged the initial ATP-ARCH-OOP-002 source-conformance audit as `0bbd272d7a3ec33b53f6d84a1658f8c07e93e396`.
+- PR #47 merged ATP-ARCH-OOP-003 stdio broker dependency injection as `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- Current open PRs: #31 (ATP-UX-001) and #35 (ATP-PERSIST-003). Their current branch divergence and verification status are recorded in the latest handoff below.
+- The owner-confirmed local project root is `/Users/enghossamalfahad/Developer/AtheerAutotrade`; the Xcode project is `apps/macos/AtheerAutotrade.xcodeproj`.
+- The local working tree, branch, commit, uncommitted files, and stashes were not inspected in this GitHub review. Do not assume local files match GitHub main. Do not reset, clean, force-push, pop/drop stashes, or overwrite local work without a reviewed reconciliation plan.
 
 ## 4. Current implementation baseline
 
-- Native SwiftUI macOS application shell, dashboard/navigation, and Trading Workspace exist.
-- On main, backend exposes diagnostic HTTP mode and production stdio IPC v1 (PR #15). Native Swift IPC client/supervisor source and Xcode project membership were merged via PR #16; target-Mac build/runtime verification remains pending.
-- Provider-neutral Trading Domain Instrument model is merged.
-- Capital.com read-only REST and WebSocket adapter source exists in the repository history, with mock-based tests. A source implementation is not proof of a connected broker.
-- ADR-0005 selects parent-owned anonymous stdio pipes. PR #17 merged the Capital.com screen/Keychain store, PR #18 merged Keychain restoration, and PR #19 merged the encrypted Demo session and market-data bridge into main as `b673d639bf5440ddd52085815bf7cf2a4fd54167`. Target-Mac build, crypto interoperability, packaged launch, and real Demo verification remain pending. ATP-MD-WATCH-001 now builds directly on main in `feat/atp-market-data-watchlist-main`.
-- No actual Capital.com Demo session, broker-originated quote, or candle is verified from this implementation.
-- A first quote-normalization component is now present on the stacked Market Watch branch, but no real Demo quote is verified. Full Market Data ordering/deduplication, gap detection, OHLC integrity, persistence/audit, and recovery remain incomplete. Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and Intelligence are not implemented as operational integrated modules.
-- No live order path is implemented or authorized.
+- Native SwiftUI macOS application shell, Dashboard, broker screen, Market Watch, and configurable Trading Workspace are present in source.
+- The native app includes `BackendProcessSupervisor`, protocol-v2 IPC client, encrypted credential channel, and Keychain credential store.
+- The Node.js/TypeScript modular-monolith backend supports diagnostic HTTP health mode and production stdio IPC v2. `server.ts` composes `CapitalComRuntime`; the transport consumes an injected `StdioIpcBroker` contract.
+- Capital.com source includes read-only Demo session lifecycle, market search, historical prices, WebSocket quote/OHLC stream, and read-only account/preferences/positions/working-order snapshots.
+- Shared `MarketDataStore`, watchlist persistence, quote display, and backend quote normalization/freshness classification are present.
+- A provider-neutral Instrument model and pure RiskEngine evaluator are present. RiskEngine is not integrated into an enforced order-intake/OMS/Execution Gateway path.
+- PostgreSQL schema and migration-runner source exist. No local PostgreSQL database has been provisioned and no real migration execution is claimed. PR #35 contains pending local-only enforcement/correctness changes.
+- **Owner-reported runtime evidence:** the owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices. This remains owner-reported and has not been independently reproduced in this review.
+- Current-main Xcode build, target-Mac packaging/runtime, CryptoKit-to-Node interoperability, sustained broker soak, and independent Demo observation remain unverified.
+- No broker dealing method, integrated OMS/Execution path, or LIVE authorization is present in main.
 
 ## 5. Architecture baseline accepted in ADR-0004
 
@@ -314,3 +316,56 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - Node tests: 51 passed, 0 failed, 0 skipped.
 - Draft PR #47 remains open and unmerged pending owner review.
 - This CI result does not establish Xcode build, target-Mac runtime, app packaging, or Capital.com Demo verification.
+
+
+## Latest reconciled handoff — 2026-11-14 (supersedes older baseline statements)
+
+### Verified repository baseline
+- Repository: `atheertrading/AtheerAutotrade`.
+- Current GitHub `main`: `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- Local Xcode project path supplied by the owner: `/Users/enghossamalfahad/Developer/AtheerAutotrade/apps/macos/AtheerAutotrade.xcodeproj`.
+- The local Mac working tree, branch, commit, uncommitted changes, Xcode build, and live application were not accessed in this review. Do not assume local files are identical to GitHub main.
+
+### Merged OOP milestones
+- PR #45 merged ADR-0006 / project-wide OOP standard (merge commit `65b814a09b905011cb0da00f493e341c7ee94591`).
+- PR #46 merged the initial ATP-ARCH-OOP-002 source-conformance audit (merge commit `0bbd272d7a3ec33b53f6d84a1658f8c07e93e396`).
+- PR #47 merged ATP-ARCH-OOP-003 stdio broker dependency injection (merge commit `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`).
+- PR #47 Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed and 51/51 tests passed.
+- ATP-ARCH-OOP-002 remains IN PROGRESS. The initial source audit is not complete, and ADR acceptance does not imply that existing source is OOP-conformant.
+
+### Owner-reported runtime evidence
+- The owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices.
+- Preserve this as owner-reported runtime evidence. It has not been independently reproduced in this review.
+- Do not describe the broker integration as absent; distinguish source integration, owner-reported local runtime, and independently verified runtime.
+
+### Open pull requests — do not merge without their gates
+- **PR #31 — ATP-UX-001:** open, not merged; branch is 20 commits ahead and 54 behind current main; Backend CI run 43430341371 passed, but no target-Mac Xcode build/UI acceptance is recorded. GitHub reports draft=false while the PR body says it must remain draft until target-Mac acceptance. Reconcile and verify before merge.
+- **PR #35 — ATP-PERSIST-003:** open draft, not merged; branch is 1 commit ahead and 39 behind current main. Backend CI run 43453512269 failed 1/52 tests: the migration-runner test expected the psql `\\gexec` command, but the generated script contained `gexec` without the required backslash. Fix the escaping, rerun CI, rebase, and execute real PostgreSQL integration tests before merge.
+- Local PostgreSQL-only topology is the recorded current-phase owner decision in PR #35. It does not, by itself, resolve the longer-term deployment topology described in older Q&A material.
+
+### Architecture and source-of-truth findings
+- `README.md`, `SYSTEM_OVERVIEW.md`, `MODULE_BOUNDARIES.md`, `TASK_REGISTER.md`, `IMPLEMENTATION_STATUS.md`, and earlier continuity entries contained stale implementation or PR status. This reconciliation branch updates the principal status descriptions without changing source code.
+- ATP-ARCH-003 defines PostgreSQL domain-owned logical schemas (`oms`, `risk`, `execution`, `positions`, `reconciliation`, `audit`, `reference`, `integration`). Current migration 0001 instead places initial OMS tables under a generic `trading` schema. The migration has not been executed; reconcile schema ownership against ATP-ARCH-003 before applying it.
+- ATP-ARCH-036 (API/service contracts) remains incomplete. The CapitalCom-shaped `StdioIpcBroker` interface is a bounded first injection seam, not a final provider-neutral application contract. Review before expanding provider scope.
+- ATP-ARCH-042 proposed Express and pnpm, while current backend source uses Node built-in HTTP APIs and npm. Do not add Express or migrate package management merely to match a historical proposal; record an explicit compatibility/deviation decision after reviewing the current accepted architecture.
+- The Q&A repository contains an earlier hybrid-deployment recommendation; the current-phase local PostgreSQL decision is narrower and must not be interpreted as a final platform deployment decision.
+- The project-wide OOP standard is accepted, but existing modules must be assessed incrementally. Do not force class-per-file or perform cosmetic directory moves.
+
+### Engineering sequence
+1. Finish source/branch/document reconciliation and preserve the local Mac worktree.
+2. Resolve/rebase the existing UX and local-PostgreSQL PRs against current main; satisfy their own acceptance gates.
+3. Complete the bounded OOP/source review for the modules actually entering the next milestone; use ATP-ARCH-036 and domain contracts rather than inventing interfaces.
+4. Complete Market Data correctness (OHLC consumption, monotonic timestamps, deduplication, gap/recovery, freshness-aware status) before any consumer treats the feed as execution-grade.
+5. Integrate account/position/order snapshots into shared read-only UI and reconciliation views; keep broker values authoritative.
+6. Validate PostgreSQL schema ownership, local-only enforcement, migration correctness, and real local integration before operational OMS work.
+7. Integrate RiskEngine with immutable intents and durable OMS; implement idempotency, outbox, state transitions, unknown-outcome reconciliation, then Execution Gateway and broker dealing in DEMO only.
+8. Perform sustained Demo qualification and recovery testing. LIVE remains disabled pending all safeguards and separate explicit authorization.
+
+
+### ATP-BASELINE-001 — documentation reconciliation branch
+
+- Branch: `docs/atp-baseline-reconciliation-001`, based directly on current main `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+- Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48.
+- Eight documentation files updated: README, System Overview, Module Boundaries, Implementation Status, Task Register, Project Continuity, ATP-ARCH-OOP-003 implementation record, and ATP-AUD-002 audit.
+- No source code, tests, Xcode project, SQL migration, broker permission, database, or runtime setting changed.
+- PR #48 is open, draft, not merged, and awaiting review. No build or runtime verification is claimed for this documentation-only change.

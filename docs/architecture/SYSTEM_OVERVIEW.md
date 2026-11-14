@@ -16,17 +16,33 @@ The target topology consists of:
 
 The desktop client must not own broker protocol logic, risk decisions, order lifecycle, or execution authority. In desktop deployment, the macOS application launches and supervises the backend child process; the two communicate over parent-owned anonymous standard-I/O pipes using the versioned NDJSON contract. The backend owns broker protocol, domain orchestration, persistence, risk, OMS, and execution through typed interfaces and explicit application/domain events. Keep modules in one deployable backend until concrete operational or scaling evidence justifies extraction.
 
-## Current implementation — verified repository state, not runtime claims
+## Current implementation — source evidence and runtime evidence are distinct
 
-- The macOS application is a SwiftUI navigation and workspace shell.
-- The backend currently exposes a local process health endpoint and structured 404 handling.
-- The provider-neutral Trading Domain Instrument model is merged.
-- A read-only Capital.com REST client and WebSocket quote/OHLC transport are merged into the repository. Their integration into the backend runtime and desktop app is not complete.
-- No concrete Keychain credential provider or integrated desktop/backend process client is implemented. The stdio IPC handler is wired into the backend's explicit `--transport=stdio` startup mode; the native Swift process client is not yet integrated.
-- No actual Capital.com Demo session, broker-originated quote, or candle has been verified from this implementation.
-- No production order, Risk Engine, OMS, Execution Gateway, portfolio reconciliation, or automated strategy path is implemented.
+The current `main` baseline is `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (2026-11-14).
 
-See [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md) and [Task Register](../engineering/TASK_REGISTER.md) for current evidence.
+**Present in source:**
+- Native SwiftUI application shell, Dashboard, broker screen, Market Watch, and configurable Trading Workspace.
+- `BackendProcessSupervisor` and the native IPC protocol client; the app supervises a bundled backend child process.
+- macOS Keychain credential storage and per-session X25519/HKDF-SHA256/AES-256-GCM credential transfer over stdio IPC v2.
+- Node.js/TypeScript modular-monolith backend with diagnostic HTTP health mode and production stdio transport. `server.ts` composes `CapitalComRuntime`; the stdio transport consumes an injected `StdioIpcBroker` contract.
+- Capital.com read-only Demo session lifecycle, market search, historical-price retrieval, WebSocket quote/OHLC events, and read-only account/preferences/positions/working-order snapshots.
+- Shared macOS `MarketDataStore`, watchlist persistence, quote presentation, and backend quote normalization/freshness classification.
+- Provider-neutral Instrument model and a pure pre-trade RiskEngine evaluator.
+- Initial PostgreSQL OMS schema and checksum-based migration-runner source.
+
+**Owner-reported runtime evidence:** the owner reports that the local Xcode application connects to Capital.com Demo and receives broker-originated asset prices. This is retained as owner-reported evidence; it is not represented as an independently observed runtime result by this repository review.
+
+**Not yet implemented as an integrated operational path:**
+- Full Market Data Engine behavior for OHLC consumption, monotonic ordering, deduplication, gap detection, candle integrity, persistence, and recovery.
+- SwiftUI consumption of the read-only account/position/order snapshots and complete account-state reconciliation.
+- RiskEngine enforcement at an order-intake boundary.
+- Durable OMS lifecycle, transactional outbox dispatch, idempotent broker command handling, broker dealing, confirmation/fill processing, and unknown-outcome reconciliation.
+- Execution Gateway, Portfolio/Reconciliation, Strategy Runtime, and operational Intelligence services.
+- Any authorized LIVE dealing path.
+
+The PostgreSQL schema and migration runner are not evidence of a provisioned or operational database. The local-only PostgreSQL enforcement/correctness changes remain under review in PR #35. Current-main Xcode build, packaged runtime, target-Mac integration, and long-duration broker qualification have not been verified in this review.
+
+See [Implementation Status](../engineering/IMPLEMENTATION_STATUS.md), [Task Register](../engineering/TASK_REGISTER.md), and [ATP-AUD-002](../engineering/ATP-AUD-002-DESIGN-IMPLEMENTATION-AUDIT-2026-11-14.md) for detailed evidence and limitations.
 
 ## Mandatory control flow
 

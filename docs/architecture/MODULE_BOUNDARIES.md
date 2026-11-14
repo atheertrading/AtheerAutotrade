@@ -49,21 +49,28 @@ This document defines target ownership boundaries for a Node.js/TypeScript modul
 
 ## Current implementation boundary
 
-Present in the repository at differing verification levels:
-- SwiftUI application shell and Trading Workspace;
-- minimal Node.js HTTP process-health API;
-- provider-neutral Instrument model;
-- read-only Capital.com REST and WebSocket adapter source merged into the repository, with mock-based tests.
+Present in source at differing verification levels:
 
-Not yet implemented or integrated:
-- backend composition root and service lifecycle;
-- authenticated desktop/backend transport;
-- concrete macOS Keychain credential provider;
-- broker session orchestration in backend runtime;
-- validated Market Data ingestion and freshness monitor;
-- durable Trading Domain, Risk Engine, OMS, Execution Gateway, Portfolio/Reconciliation, and Strategy Runtime.
+- **macOS application:** SwiftUI shell, Dashboard, broker screen, Market Watch, Trading Workspace, `BackendProcessSupervisor`, protocol-v2 client, encrypted IPC credential channel, and Keychain credential store.
+- **Backend runtime and transport:** Node.js/TypeScript modular monolith, diagnostic HTTP health mode, production stdio IPC v2, explicit `StdioIpcBroker` injection, and `CapitalComRuntime` construction in `server.ts`.
+- **Broker adapter:** read-only Capital.com Demo session, market search, historical prices, WebSocket quote/OHLC stream, and read-only account/preferences/positions/working-order snapshots.
+- **Market data:** shared macOS `MarketDataStore`, local watchlist persistence, quote display, and backend Bid/Ask normalization/freshness classification.
+- **Trading domain and risk:** provider-neutral Instrument model and a pure RiskEngine evaluator. The evaluator is not integrated into an OMS or execution path.
+- **Persistence:** initial PostgreSQL schema and migration-runner source. No database provisioning, real migration execution, operational repositories, or durable OMS runtime is established.
+- **Verification:** backend CI evidence exists for specific commits. Current-main Xcode build, target-Mac packaging/runtime, actual broker observations, and long-duration qualification remain separate verification gates.
 
-Do not mark target modules as operational based on architecture diagrams or source stubs alone.
+**Owner-reported runtime evidence:** the owner reports working Capital.com Demo authentication and broker-originated asset-price delivery in the local Xcode application. This is not represented as independently verified by this source review.
+
+Not yet implemented as an integrated operational path:
+- Full Market Data Engine ordering, deduplication, OHLC consumption/integrity, gap detection, persistence, and recovery.
+- Shared account/position/order UI and durable broker-state reconciliation.
+- RiskEngine enforcement for all exposure-increasing order intents.
+- OMS state machine, durable intent journal, scoped idempotency, transactional outbox dispatch, unknown-outcome recovery, and restart reconciliation.
+- Execution Gateway and broker dealing methods.
+- Portfolio/reconciliation runtime, Strategy Runtime, and operational Intelligence services.
+- LIVE trading authorization or dealing.
+
+Do not mark a target module operational based on architecture diagrams, source stubs, mock tests, or backend CI alone.
 
 ## Change control
 

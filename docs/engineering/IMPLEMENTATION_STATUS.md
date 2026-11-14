@@ -46,7 +46,7 @@
 - Node.js X25519/HKDF/AES-GCM decryption has backend test source but no executed result. CryptoKit-to-Node cross-language interoperability has not yet been tested.
 - Xcode packaging phase, universal Node runtime copy, nested signature, and final app signature have not been verified.
 - Packaged child-process startup, protocol v2 handshake, encrypted credential transfer, app-termination shutdown, process restart, and UI state synchronization have not been verified.
-- No real Capital.com Demo authentication, market search, historical-price response, live quote, or OHLC event has been verified against a real Demo account.
+- The owner reports that the local Xcode application authenticates to Capital.com Demo and receives broker-originated asset prices. This remains owner-reported runtime evidence; this review did not independently reproduce it. Current-main Xcode build, packaged runtime, real account snapshots, and OHLC delivery remain unverified.
 - The new Market Watch SwiftUI files and Xcode project membership have not yet been compiled on the target Mac.
 
 ## Not implemented or not operationally integrated
@@ -154,11 +154,32 @@ Limitations:
 
 ## ATP-ARCH-OOP-003 — Backend IPC composition boundary
 
-**Implemented in source on branch:** `refactor/atp-arch-oop-003-stdio-composition`.
+**Merged into main:** PR #47, merge commit `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
 
 - `stdio-ipc.ts` now accepts the explicit `StdioIpcBroker` contract. The transport layer no longer imports or instantiates `CapitalComRuntime`.
 - `server.ts` constructs `CapitalComRuntime` and injects it into the stdio transport as the composition root.
 - IPC tests use a deterministic broker test double for unit-level sessions. The production child-process test still starts `server.js`, exercising explicit production composition.
 - Protocol v2, capability allowlist, encrypted credential transfer, read-only broker methods, and disconnect cleanup are unchanged by intent.
 
-**Verification status:** GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript compilation passed and 51/51 Node tests passed. Packaged app behavior, Xcode build, target-Mac runtime, and actual Capital.com Demo runtime remain unverified. No dealing or LIVE capability was added. PR #47 remains open and unmerged.
+**Verification status:** GitHub Actions Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript compilation passed and 51/51 Node tests passed. Packaged app behavior, current-main Xcode build, target-Mac runtime, and independent Capital.com Demo runtime verification remain unverified. No dealing or LIVE capability was added. PR #47 is closed and merged.
+
+
+## Baseline reconciliation — 2026-11-14
+
+**Verified GitHub main:** `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
+
+- PR #45 (ADR-0006 / OOP standard), PR #46 (initial OOP source audit), and PR #47 (stdio broker dependency injection) are closed and merged.
+- PR #47 Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed; 51/51 tests passed.
+- PR #31 remains open; its UI changes are not in main and target-Mac Xcode acceptance is pending.
+- PR #35 remains open; its local-PostgreSQL migration-runner changes are not in main and its recorded Backend CI run failed one migration-runner test.
+- The owner reports working Capital.com Demo authentication and broker-originated price delivery in the local Xcode application. This remains owner-reported and is not converted into independent verification.
+- The full OOP source audit remains IN PROGRESS. ADR-0006 acceptance does not establish legacy-code conformance.
+- No broker dealing, operational OMS/Execution path, or LIVE capability is present in main.
+
+
+### ATP-BASELINE-001 documentation reconciliation
+
+- Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48
+- Eight documentation files updated on `docs/atp-baseline-reconciliation-001`.
+- No application/backend source, tests, SQL, Xcode project, broker permission, or runtime behavior changed.
+- PR #48 is open, draft, and not merged; owner review is pending.
