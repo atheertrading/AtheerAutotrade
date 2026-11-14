@@ -31,7 +31,7 @@ The annotated tag is the immutable recovery reference. Do not move, delete, or r
 Repository links:
 - [Baseline branch](https://github.com/atheertrading/AtheerAutotrade/tree/baseline/local-stable-v1)
 - [Baseline commit](https://github.com/atheertrading/AtheerAutotrade/commit/264b445fa5657ebd91b9eda197ff0654c2402c5a)
-- [Baseline tag](https://github.com/atheertrading/AtheerAutotrade/releases/tag/v1.0.0-baseline)
+- [Baseline tag](https://github.com/atheertrading/AtheerAutotrade/tree/v1.0.0-baseline)
 
 ## 3. What the baseline means
 
