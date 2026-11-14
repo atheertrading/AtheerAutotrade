@@ -2,7 +2,7 @@
 
 **Last reconciled:** 2026-11-14  
 **Latest observed main baseline:** `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` (PR #52 merge, 2026-11-14)  
-**Open implementation PR branches:** `feat/atp-ux-001-clipboard-and-broker-polish` (PR #31); `fix/atp-persist-003-local-postgres-runner` (PR #35).  
+**Open implementation PR branches:** `fix/atp-persist-003-current-main` (PR #51); `feat/atp-exec-002-current-main` (PR #53); `feat/atp-ux-002-professional-market-watch` (Draft PR #60).  
 **Local worktree:** not inspected in this GitHub review; preserve all local changes and stashes until its branch/commit/status are explicitly reconciled.
 
 ## Status definitions
@@ -332,7 +332,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 |---|---|---|---|
 | ATP-UX-002 | Native Market Watch table and trader workflow controls | Native SwiftUI Table, watchlist search, quote-quality filters, multi-field sorting, persistent optional-column visibility, row selection/keyboard navigation, context copy, and removal | IMPLEMENTED ON FEATURE BRANCH — XCODE BUILD AND TARGET-MAC ACCEPTANCE PENDING |
 
-- Branch: `feat/atp-ux-002-professional-market-watch`, created from current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` after PR #52 merged.
+- Branch: `feat/atp-ux-002-professional-market-watch`, created from current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` after PR #52 merged. Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60. Initial implementation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`.
 - Primary source: `apps/macos/Sources/Features/Markets/MarketWatchView.swift`; implementation record: `docs/engineering/ATP-UX-002-PROFESSIONAL-MARKET-WATCH.md`.
 - Dashboard and compact workspace presentation are preserved through `MarketWatchTableView(compact: true)`; broker discovery/add remains in Brokers.
 - No MarketDataStore, backend, IPC, broker, risk, OMS, execution, or LIVE behavior is changed.

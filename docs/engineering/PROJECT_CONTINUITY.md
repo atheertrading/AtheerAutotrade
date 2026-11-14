@@ -507,3 +507,12 @@ The owner confirms local development code matches GitHub project code. Do not as
 1. Complete target-Mac Xcode and UI acceptance for ATP-UX-001 and ATP-UX-002; resolve any compile/layout/accessibility issues found.
 2. Continue with ATP-MD-QUALITY-002 (quote timestamp monotonicity, duplicate/out-of-order handling, freshness-aware Dashboard, and gap/recovery state) without changing the presentation layer's broker authority.
 3. Proceed to the shared broker/session state and activity/audit presentation only after the relevant typed backend events/contracts exist.
+
+
+### ATP-UX-002 PR handoff update — 2026-11-14
+
+- Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60.
+- Branch: `feat/atp-ux-002-professional-market-watch`.
+- Initial source/documentation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`.
+- Base: main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`, which includes merged ATP-UX-001 PR #52.
+- PR is intentionally Draft pending Xcode 14/macOS 13-compatible build and target-Mac acceptance. No local build or runtime result is claimed.

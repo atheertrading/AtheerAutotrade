@@ -296,3 +296,11 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - The existing Brokers screen remains the instrument catalogue search/add workflow. This milestone does not duplicate broker discovery or modify subscription behavior.
 - No backend, IPC, MarketDataStore, broker API, RiskEngine, OMS, Execution Gateway, order submission, or LIVE permission is changed.
 - **Not verified:** target-Mac Xcode build, XCTest, table rendering, keyboard interaction, column preference persistence, and live Demo quote behavior. These remain acceptance gates.
+
+
+### ATP-UX-002 — PR #60 current branch record
+
+- Draft PR #60: https://github.com/atheertrading/AtheerAutotrade/pull/60.
+- Branch head implementation commit: `ce4d16ceb405b78a0b7f5b0020fae27c8e44f522`, based on main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`.
+- GitHub source diff contains the native Market Watch table and the associated task/status/continuity/audit documentation.
+- No Xcode build, XCTest, UI automation, or target-Mac runtime evidence is available yet; PR remains Draft.
