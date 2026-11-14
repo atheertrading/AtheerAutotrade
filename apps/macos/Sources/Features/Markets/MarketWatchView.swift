@@ -162,22 +162,22 @@ struct MarketWatchTableView: View {
                     TableColumn("Mid") { instrument in
                         priceText(marketDataStore.quotes[instrument.epic]?.mid)
                     }
-                    .width(visibleColumns.contains(.mid.rawValue) ? 95 : 0)
+                    .width(visibleColumns.contains(MarketWatchOptionalColumn.mid.rawValue) ? 95 : 0)
 
                     TableColumn("Spread") { instrument in
                         priceText(marketDataStore.quotes[instrument.epic]?.spread)
                     }
-                    .width(visibleColumns.contains(.spread.rawValue) ? 95 : 0)
+                    .width(visibleColumns.contains(MarketWatchOptionalColumn.spread.rawValue) ? 95 : 0)
 
                     TableColumn("Age") { instrument in
                         ageText(marketDataStore.quotes[instrument.epic])
                     }
-                    .width(visibleColumns.contains(.age.rawValue) ? 75 : 0)
+                    .width(visibleColumns.contains(MarketWatchOptionalColumn.age.rawValue) ? 75 : 0)
 
                     TableColumn("Quality") { instrument in
                         freshnessText(marketDataStore.quotes[instrument.epic])
                     }
-                    .width(visibleColumns.contains(.quality.rawValue) ? 110 : 0)
+                    .width(visibleColumns.contains(MarketWatchOptionalColumn.quality.rawValue) ? 110 : 0)
 
                     TableColumn("Market") { instrument in
                         Text(instrument.marketStatus)
@@ -185,7 +185,7 @@ struct MarketWatchTableView: View {
                             .foregroundColor(AtheerColors.textSecondary)
                             .lineLimit(1)
                     }
-                    .width(visibleColumns.contains(.market.rawValue) ? 110 : 0)
+                    .width(visibleColumns.contains(MarketWatchOptionalColumn.market.rawValue) ? 110 : 0)
 
                     TableColumn(" ") { instrument in
                         Button(role: .destructive) {
