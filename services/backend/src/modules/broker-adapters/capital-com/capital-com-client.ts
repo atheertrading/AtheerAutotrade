@@ -84,6 +84,34 @@ export interface CapitalComWorkingOrder {
   };
 }
 export interface CapitalComWorkingOrdersSnapshot { readonly observedAt: string; readonly workingOrders: readonly CapitalComWorkingOrder[]; }
+export interface CapitalComMarketOrderRequest {
+  readonly epic: string;
+  readonly direction: "BUY" | "SELL";
+  readonly size: number;
+  readonly stopLevel: number;
+  readonly profitLevel?: number;
+}
+
+export interface CapitalComPositionSubmission {
+  readonly dealReference: string;
+}
+
+export interface CapitalComAffectedDeal {
+  readonly dealId: string;
+  readonly status: string;
+}
+
+export interface CapitalComDealConfirmation {
+  readonly date?: string;
+  readonly status: string;
+  readonly dealStatus?: string;
+  readonly dealReference: string;
+  readonly dealId?: string;
+  readonly affectedDeals: readonly CapitalComAffectedDeal[];
+  readonly level?: number;
+  readonly size?: number;
+  readonly direction?: "BUY" | "SELL";
+}
 export interface CapitalComAccountPreferences {
   readonly observedAt: string; readonly hedgingMode: boolean;
   readonly leverages: Readonly<Record<string, { readonly current: number; readonly available: readonly number[] }>>;
@@ -103,6 +131,18 @@ export class CapitalComProtocolError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "CapitalComProtocolError";
+  }
+}
+
+/**
+ * A dealing request may have reached Capital.com even when the client did not
+ * receive a usable response. Callers must reconcile broker state and must not
+ * automatically resubmit this intent.
+ */
+export class CapitalComSubmissionUnknownError extends Error {
+  constructor() {
+    super("Capital.com market-order submission outcome is unknown; broker reconciliation is required.");
+    this.name = "CapitalComSubmissionUnknownError";
   }
 }
 
@@ -497,12 +537,122 @@ export class CapitalComClient {
     return Object.freeze({observedAt:new Date().toISOString(),workingOrders:Object.freeze(result.workingOrders.map(parseWorkingOrder))});
   }
 
+  /**
+   * Submit a market position. This adapter method is an infrastructure
+   * capability, not an application entry point: only the Execution Gateway
+   * may call it after durable OMS authorization and a RiskEngine approval
+   * bound to the same immutable intent.
+   *
+   * A transport/5xx/invalid-success-response failure is treated as UNKNOWN.
+   * The caller must reconcile using getDealConfirmation and broker snapshots;
+   * it must never blindly retry this submission.
+   */
+  async createPosition(input: CapitalComMarketOrderRequest): Promise<CapitalComPositionSubmission> {
+    const epic = validateEpic(input.epic);
+    if (input.direction !== "BUY" && input.direction !== "SELL") {
+      throw new TypeError("direction must be BUY or SELL.");
+    }
+    if (!Number.isFinite(input.size) || input.size <= 0) {
+      throw new TypeError("size must be a positive finite number.");
+    }
+    if (!Number.isFinite(input.stopLevel) || input.stopLevel <= 0) {
+      throw new TypeError("stopLevel must be a positive finite number.");
+    }
+    if (input.profitLevel !== undefined
+      && (!Number.isFinite(input.profitLevel) || input.profitLevel <= 0)) {
+      throw new TypeError("profitLevel must be a positive finite number when supplied.");
+    }
+
+    const payload = {
+      epic,
+      direction: input.direction,
+      size: input.size,
+      stopLevel: input.stopLevel,
+      ...(input.profitLevel === undefined ? {} : { profitLevel: input.profitLevel })
+    };
+
+    let result: unknown;
+    try {
+      result = await this.authenticatedJson<unknown>(
+        "/api/v1/positions",
+        "create-position",
+        "POST",
+        payload
+      );
+    } catch (error) {
+      if (error instanceof CapitalComApiError
+        && error.status >= 400 && error.status < 500) {
+        throw error;
+      }
+      throw new CapitalComSubmissionUnknownError();
+    }
+
+    if (!isRecord(result) || typeof result.dealReference !== "string"
+      || result.dealReference.trim().length === 0) {
+      throw new CapitalComSubmissionUnknownError();
+    }
+
+    return Object.freeze({ dealReference: result.dealReference });
+  }
+
+  async getDealConfirmation(dealReference: string): Promise<CapitalComDealConfirmation> {
+    const reference = dealReference.trim();
+    if (!reference || reference.length > 256 || /[\\s/]/.test(reference)) {
+      throw new TypeError("dealReference must be a valid Capital.com deal reference.");
+    }
+
+    const result = await this.authenticatedJson<unknown>(
+      `/api/v1/confirms/${encodeURIComponent(reference)}`,
+      "deal-confirmation"
+    );
+    if (!isRecord(result) || typeof result.status !== "string"
+      || typeof result.dealReference !== "string"
+      || !Array.isArray(result.affectedDeals)) {
+      throw new CapitalComProtocolError("Capital.com deal confirmation returned an unexpected payload.");
+    }
+
+    const affectedDeals = result.affectedDeals.map((item) => {
+      if (!isRecord(item) || typeof item.dealId !== "string"
+        || typeof item.status !== "string") {
+        throw new CapitalComProtocolError("Capital.com deal confirmation contains an invalid affected deal.");
+      }
+      return Object.freeze({ dealId: item.dealId, status: item.status });
+    });
+
+    const direction = result.direction;
+    if (direction !== undefined && direction !== "BUY" && direction !== "SELL") {
+      throw new CapitalComProtocolError("Capital.com deal confirmation contains an invalid direction.");
+    }
+    const level = optionalFiniteNumber(result.level, "confirmation.level");
+    const size = optionalFiniteNumber(result.size, "confirmation.size");
+    const date = optionalString(result.date, "confirmation.date");
+    const dealStatus = optionalString(result.dealStatus, "confirmation.dealStatus");
+    const dealId = optionalString(result.dealId, "confirmation.dealId");
+
+    return Object.freeze({
+      ...(date === undefined ? {} : { date }),
+      status: result.status,
+      ...(dealStatus === undefined ? {} : { dealStatus }),
+      dealReference: result.dealReference,
+      ...(dealId === undefined ? {} : { dealId }),
+      affectedDeals: Object.freeze(affectedDeals),
+      ...(level === undefined ? {} : { level }),
+      ...(size === undefined ? {} : { size }),
+      ...(direction === undefined ? {} : { direction })
+    });
+  }
+
   invalidateSession(): void {
     this.session = undefined;
   }
 
-  private async authenticatedJson<T>(path: string, operation: string): Promise<T> {
-    const response = await this.authenticatedRequest(path, "GET", operation);
+  private async authenticatedJson<T>(
+    path: string,
+    operation: string,
+    method: "GET" | "POST" = "GET",
+    body?: unknown
+  ): Promise<T> {
+    const response = await this.authenticatedRequest(path, method, operation, body);
     try {
       return await response.json() as T;
     } catch {
@@ -512,8 +662,9 @@ export class CapitalComClient {
 
   private async authenticatedRequest(
     path: string,
-    method: "GET",
-    operation: string
+    method: "GET" | "POST",
+    operation: string,
+    body?: unknown
   ): Promise<Response> {
     const session = this.session;
     if (!session) {
@@ -524,8 +675,10 @@ export class CapitalComClient {
       method,
       headers: {
         CST: session.cst,
-        "X-SECURITY-TOKEN": session.securityToken
+        "X-SECURITY-TOKEN": session.securityToken,
+        ...(body === undefined ? {} : { "content-type": "application/json" })
       },
+      ...(body === undefined ? {} : { body: JSON.stringify(body) }),
       cache: "no-store",
       signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS)
     });
