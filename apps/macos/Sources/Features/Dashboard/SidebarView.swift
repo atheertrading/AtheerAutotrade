@@ -65,7 +65,7 @@ struct SidebarView: View {
                     .tracking(1.5)
                     .foregroundColor(AtheerColors.textPrimary)
 
-                Text("AUTOTRADE")
+                Text("TRADING PRO")
                     .font(.system(size: 9, weight: .medium, design: .rounded))
                     .tracking(1.8)
                     .foregroundColor(AtheerColors.textSecondary)

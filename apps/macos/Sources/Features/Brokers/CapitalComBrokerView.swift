@@ -29,25 +29,41 @@ struct CapitalComBrokerView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 20) {
+            VStack(alignment: .leading, spacing: 22) {
                 pageHeader
 
-                HStack(alignment: .top, spacing: 18) {
-                    VStack(spacing: 18) {
-                        connectionOverview
-                        credentialsCard
-                        securityNotice
+                // Keep connection state prominent and full-width. The previous
+                // three-metric strip was compressed into a 350-point column.
+                connectionOverview
+
+                // Prefer a two-column workstation layout when it genuinely
+                // fits; fall back to a single column rather than compressing
+                // credentials, status text, or market results.
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 18) {
+                        VStack(spacing: 18) {
+                            credentialsCard
+                            securityNotice
+                        }
+                        .frame(width: 350)
+
+                        VStack(spacing: 18) {
+                            marketDiscoveryCard
+                            integrationStatus
+                        }
+                        .frame(minWidth: 400, maxWidth: .infinity)
                     }
-                    .frame(width: 350)
 
                     VStack(spacing: 18) {
+                        credentialsCard
+                        securityNotice
                         marketDiscoveryCard
                         integrationStatus
                     }
                     .frame(maxWidth: .infinity)
                 }
             }
-            .frame(maxWidth: 1040, alignment: .leading)
+            .frame(maxWidth: 1280, alignment: .leading)
             .padding(.horizontal, 28)
             .padding(.vertical, 26)
             .frame(maxWidth: .infinity, alignment: .topLeading)
@@ -363,43 +379,40 @@ struct CapitalComBrokerView: View {
                     }
             }
 
-            HStack(alignment: .center, spacing: 12) {
-                Button(action: saveCredentials) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "lock.shield")
-                        Text("Save Credentials Securely")
+            VStack(alignment: .leading, spacing: 10) {
+                HStack(spacing: 10) {
+                    Button(action: saveCredentials) {
+                        Label("Save Credentials", systemImage: "lock.shield")
+                            .font(.system(size: 12, weight: .semibold))
+                            .foregroundColor(AtheerColors.canvas)
+                            .padding(.horizontal, 13)
+                            .frame(height: 40)
+                            .frame(maxWidth: .infinity)
+                            .background(AtheerColors.accent)
+                            .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                     }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(AtheerColors.canvas)
-                    .padding(.horizontal, 17)
-                    .frame(height: 40)
-                    .background(AtheerColors.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
-                }
-                .buttonStyle(.plain)
-                 .disabled(!canSave || isConnected)
-                .opacity(canSave && !isConnected ? 1 : 0.48)
-                .help(isConnected ? "Disconnect before changing stored credentials." : "Save credentials in macOS Keychain.")
+                    .buttonStyle(.plain)
+                    .disabled(!canSave || isConnected)
+                    .opacity(canSave && !isConnected ? 1 : 0.48)
+                    .help(isConnected ? "Disconnect before changing stored credentials." : "Save credentials in macOS Keychain.")
 
-                Button(action: isConnected ? disconnectFromCapitalCom : connectToCapitalCom) {
-                    HStack(spacing: 7) {
-                        if isConnecting {
-                            ProgressView().controlSize(.small)
-                        } else {
-                            Image(systemName: isConnected ? "link.slash" : "link")
-                        }
-                        Text(isConnected ? "Disconnect" : (isConnecting ? "Connecting…" : "Connect to Capital.com"))
+                    Button(action: isConnected ? disconnectFromCapitalCom : connectToCapitalCom) {
+                        Label(
+                            isConnected ? "Disconnect" : (isConnecting ? "Connecting…" : "Connect"),
+                            systemImage: isConnecting ? "arrow.triangle.2.circlepath" : (isConnected ? "link.slash" : "link")
+                        )
+                        .font(.system(size: 12, weight: .semibold))
+                        .foregroundColor(isConnected ? AtheerColors.negative : AtheerColors.canvas)
+                        .padding(.horizontal, 13)
+                        .frame(height: 40)
+                        .frame(maxWidth: .infinity)
+                        .background(isConnected ? AtheerColors.negative.opacity(0.12) : AtheerColors.accent)
+                        .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
                     }
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundColor(isConnected ? AtheerColors.negative : AtheerColors.canvas)
-                    .padding(.horizontal, 15)
-                    .frame(height: 40)
-                    .background(isConnected ? AtheerColors.negative.opacity(0.12) : AtheerColors.accent)
-                    .clipShape(RoundedRectangle(cornerRadius: AtheerRadius.small))
+                    .buttonStyle(.plain)
+                    .disabled(isConnecting || (!isConnected && !hasSavedCredentials))
+                    .help(isConnected ? "Close the current Capital.com Demo session." : "Authenticate with Capital.com Demo using credentials stored in Keychain.")
                 }
-                .buttonStyle(.plain)
-                .disabled(isConnecting || (!isConnected && !hasSavedCredentials))
-                .help(isConnected ? "Close the current Capital.com Demo session." : "Authenticate with Capital.com Demo using credentials stored in Keychain.")
 
                 if hasSavedCredentials {
                     Button("Remove Saved Credentials", role: .destructive) {
@@ -409,8 +422,6 @@ struct CapitalComBrokerView: View {
                     .font(.system(size: 11, weight: .medium))
                     .foregroundColor(AtheerColors.negative)
                 }
-
-                Spacer()
             }
 
             if let feedback {
@@ -467,9 +478,9 @@ struct CapitalComBrokerView: View {
                 complete: true
             )
             readinessRow(
-                title: "Secure desktop-to-backend session handoff",
-                detail: "Ephemeral X25519 + AES-256-GCM channel and runtime packaging phase added; build verification pending",
-                complete: false
+                title: "Encrypted local credential handoff",
+                detail: "Implemented with ephemeral X25519 key agreement and AES-256-GCM credential transfer",
+                complete: true
             )
             readinessRow(
                 title: "Capital.com Demo API session",
@@ -477,8 +488,15 @@ struct CapitalComBrokerView: View {
                 complete: isConnected
             )
             readinessRow(
-                title: "Trading and order execution",
-                detail: "Disabled by system safety policy",
+                title: "Broker quote stream",
+                detail: marketDataStore.streamStatus == "connected"
+                    ? "\(marketDataStore.quotes.count) instruments have received broker quotes"
+                    : "Subscription and quote delivery are tracked separately from REST authentication",
+                complete: marketDataStore.streamStatus == "connected" && !marketDataStore.quotes.isEmpty
+            )
+            readinessRow(
+                title: "Order execution",
+                detail: "Not implemented. No broker dealing endpoint is exposed.",
                 complete: false
             )
         }
