@@ -249,3 +249,14 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Corrected the JavaScript template-literal escaping so psql receives the literal `\\gexec` meta-command. The unit test now asserts the generated string contains the actual backslash command.
 - GitHub Actions Backend CI run `43535924779` passed on Node.js 24.22.2: TypeScript build passed; 52 tests passed, 0 failed, 0 skipped.
 - PR #51 remains Draft. No PostgreSQL server was provisioned and no migration was applied. Schema ownership mismatch between ATP-ARCH-003 and migration 0001 remains an explicit blocker before the first application.
+
+
+## ATP-PERSIST-004 — PostgreSQL schema ownership mapping
+
+| ID | Milestone | Evidence | Status |
+|---|---|---|---|
+| ATP-PERSIST-004 | Resolve ATP-ARCH-003 schema ownership before first migration | `docs/engineering/ATP-PERSIST-004-SCHEMA-OWNERSHIP-PROPOSAL.md`; recommends `oms` for initial intent/idempotency/event/outbox tables and `atheer` only for platform migration metadata | PROPOSED — OWNER APPROVAL REQUIRED; migration 0001 must not be applied until decided |
+
+- Options assessed: domain-owned schema mapping (recommended), retain generic `trading` schema (not recommended), or split every initial object across all domains immediately (not recommended).
+- No SQL or database was changed by this proposal.
+- On approval, correct the still-unapplied migration 0001 with a forward-safe pre-installation update, update migration docs, and then complete owner-Mac PostgreSQL integration tests.
