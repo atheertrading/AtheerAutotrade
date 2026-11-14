@@ -182,7 +182,7 @@ Limitations:
 - Draft PR #48: https://github.com/atheertrading/AtheerAutotrade/pull/48
 - Eight documentation files updated on `docs/atp-baseline-reconciliation-001`.
 - No application/backend source, tests, SQL, Xcode project, broker permission, or runtime behavior changed.
-- PR #48 is open, draft, and not merged; owner review is pending.
+- PR #48 documentation reconciliation is merged and present in main.
 
 
 ## Current reconciled status — 2026-11-14 (owner instruction and trading scope)
@@ -194,9 +194,11 @@ ATHEER Trading Pro must support both manual and automated trading through broker
 - Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
 - PR #48 documentation reconciliation is present in main.
 - PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
-- Old PR #49 / ATP-EXEC-002 was closed unmerged as superseded. Current-main-based PR #53 ports its DEMO-only Capital.com market-position adapter method and deal-confirmation parser; current-main CI is pending. The previous PR #49 CI passed 62/62 tests, but that result is not a substitute for CI on PR #53. The adapter remains unexposed through IPC, UI, strategy, or AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
-- PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
-- PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
+- PR #55 merged the SemVer and immutable release tagging policy as `ac5c658595ab032032d71f5f53c035aa342ed581`.
+- PR #56 merged the latest verified workstream state and CI evidence as `c465eedd3b15067641bbb1b1206e5e29a659ffc1`.
+- Old PR #49 / ATP-EXEC-002 was closed unmerged as superseded. Current-main-based PR #53 ports its DEMO-only Capital.com market-position adapter method and deal-confirmation parser; current-head Backend CI run `43537817589` passed TypeScript build and 62/62 tests on Node.js 24.22.2. The adapter remains unexposed through IPC, UI, strategy, or AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
+- PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Latest current-head Backend CI run `43538085414` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
+- PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. PR #52 is a current-main-based port and remains Draft pending target-Mac Xcode/UI acceptance.
 
 ### Persistence status
 **PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
@@ -216,7 +218,7 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - Old PR #35 was closed unmerged as superseded; no commit history was rewritten or force-pushed.
 - Current-main-based PR #51: `fix/atp-persist-003-current-main`, 4 commits ahead / 0 behind main, Draft.
 - Corrected the template-literal escape so generated psql input contains a literal `\\gexec` command; added a unit assertion against the generated output.
-- GitHub Actions Backend CI run `43535924779` passed on Node.js 24.22.2: TypeScript build passed; 52 passed, 0 failed, 0 skipped.
+- GitHub Actions Backend CI run `43538085414` passed on Node.js 24.22.2: TypeScript build passed; 52 passed, 0 failed, 0 skipped.
 - **PostgreSQL remains NOT IMPLEMENTED operationally.** No local PostgreSQL server/database was provisioned and no migration applied. Resolve ATP-ARCH-003 schema ownership versus migration 0001 before the first migration; perform owner-Mac integration tests before merge.
 
 ### ATP-GOV-001 — owner-approved instructions
@@ -258,13 +260,13 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - PR #53: branch `feat/atp-exec-002-current-main`, 8 commits ahead / 0 behind current main at creation, Draft.
 - Ported `CapitalComClient.createPosition` for authenticated `POST /api/v1/positions`, `getDealConfirmation` for `GET /api/v1/confirms/{dealReference}`, DEMO-only enforcement, pre-network session validation, and unknown-submission outcome handling.
 - Ported deterministic mock tests for request validation, authenticated payload, 4xx rejection, ambiguous outcomes, missing session, LIVE rejection, and broker confirmation parsing.
-- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
+- GitHub Actions Backend CI run `43537817589` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
 - The adapter remains infrastructure-only and is not exposed to IPC/UI/strategies/AI. No actual Demo or LIVE order was submitted. End-to-end trading remains NOT IMPLEMENTED.
 
 
 ### ATP-GOV-002 — versioning and release policy
 
-- Added `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` on branch `docs/atp-versioning-policy-001`.
+- PR #55 merged `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` into main.
 - Defined SemVer for integrated product releases, pre-1.0 0.x.y development, prerelease identifiers, immutable annotated tags, component-version boundaries, append-only database migration versioning, and release qualification evidence.
 - Updated root `AGENTS.md` to load the versioning policy and linked it from README.
 - No product version or tag was created or claimed. First tag is deferred until an owner-approved milestone is qualified.
