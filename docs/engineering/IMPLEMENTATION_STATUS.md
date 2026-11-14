@@ -170,8 +170,8 @@ Limitations:
 
 - PR #45 (ADR-0006 / OOP standard), PR #46 (initial OOP source audit), and PR #47 (stdio broker dependency injection) are closed and merged.
 - PR #47 Backend CI run 43528019119 passed on Node.js 24.22.2: TypeScript build passed; 51/51 tests passed.
-- PR #31 remains open; its UI changes are not in main and target-Mac Xcode acceptance is pending.
-- PR #35 remains open; its local-PostgreSQL migration-runner changes are not in main and its recorded Backend CI run failed one migration-runner test.
+- PR #31 was closed unmerged as superseded by current-main-based PR #52. PR #52 is Draft and awaits target-Mac Xcode/UI acceptance.
+- PR #35 was closed unmerged as superseded by current-main-based PR #51. PR #51 fixes the `\\gexec` defect and CI passes; no local PostgreSQL database or migration has been executed.
 - The owner reports working Capital.com Demo authentication and broker-originated price delivery in the local Xcode application. This remains owner-reported and is not converted into independent verification.
 - The full OOP source audit remains IN PROGRESS. ADR-0006 acceptance does not establish legacy-code conformance.
 - No broker dealing, operational OMS/Execution path, or LIVE capability is present in main.
@@ -194,10 +194,9 @@ ATHEER Trading Pro must support both manual and automated trading through broker
 - Current main baseline: `d44e184d998b719289c42159db138073d3213584`.
 - PR #48 documentation reconciliation is present in main.
 - PR #50 merged the owner-approved custom instructions and mandatory `AGENTS.md` loading rule as `d44e184d998b719289c42159db138073d3213584`.
-- PR #49 / ATP-EXEC-002 adds a DEMO-only Capital.com market-position adapter method and deal-confirmation parser on a feature branch. GitHub Actions run `43534214647` passed TypeScript compilation and 62/62 tests on Node.js 24.22.2. It is not merged and not exposed through IPC, UI, strategy, or AI. It does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
+- Old PR #49 / ATP-EXEC-002 was closed unmerged as superseded. Current-main-based PR #53 ports its DEMO-only Capital.com market-position adapter method and deal-confirmation parser; current-main CI is pending. The previous PR #49 CI passed 62/62 tests, but that result is not a substitute for CI on PR #53. The adapter remains unexposed through IPC, UI, strategy, or AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation.
 - PR #35 old branch was closed unmerged as superseded. PR #51 / ATP-PERSIST-003 ports the migration-runner changes to current main and fixes the `\\gexec` template-literal escaping defect. Backend CI run `43535924779` passed TypeScript build and 52/52 tests. This remains source-level implementation only; no local PostgreSQL database has been provisioned and no migration executed.
-- PR #31 / ATP-UX-001 is open as Draft. Its branch is 20 commits ahead and 70 behind main; target-Mac Xcode/UI acceptance remains pending. Do not merge until reconciled and accepted.
-- PR #31 was converted to Draft to match its own acceptance statement. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
+- PR #31 was closed unmerged as superseded by PR #52. PR #52 ports the UI changes to current main and remains Draft pending target-Mac Xcode/UI acceptance. Its branch remains 20 commits ahead and 70 behind current main and is not mergeable.
 
 ### Persistence status
 **PostgreSQL: NOT IMPLEMENTED OPERATIONALLY.** Migration SQL and runner source are not equivalent to a provisioned local PostgreSQL server, applied migrations, working repositories, or verified restart recovery. The local-Mac-only policy remains the current-phase requirement. The generic `trading` schema versus ATP-ARCH-003 domain-owned schema mapping must be resolved before applying migration 0001. No applied migration may be rewritten in place.
@@ -232,3 +231,32 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - Proposal: `docs/engineering/ATP-PERSIST-004-SCHEMA-OWNERSHIP-PROPOSAL.md`.
 - Recommended mapping: initial OMS tables under `oms`; migration ledger under platform metadata schema `atheer`.
 - Status: PROPOSED — OWNER APPROVAL REQUIRED. No migration 0001 changes or database operations were performed. Do not apply the migration until the mapping is approved.
+
+
+### ATP-UX-001 — current-main UI port
+
+- PR #31 closed unmerged as superseded; its original branch/history remains preserved.
+- PR #52: `feat/atp-ux-001-current-main`, six commits ahead / zero behind current main at creation, Draft.
+- Ported adaptive Capital.com broker layout, Dashboard distinction between authentication/subscription/actual quote receipt, Market Watch native copy context menu, ATHEER Trading Pro branding, and accurate Workspace status copy.
+- UI/UX audit and acceptance criteria are included.
+- No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check has been performed. Do not merge until the owner-Mac acceptance gates pass.
+
+### ATP-PERSIST-003 / ATP-PERSIST-004
+
+- PR #51 is the current-main migration-runner port; Backend CI run 43535924779 passed TypeScript build and 52/52 tests. The psql `\\gexec` escaping defect is corrected.
+- PostgreSQL remains NOT IMPLEMENTED operationally. No local server/database has been provisioned and no migration applied.
+- ATP-PERSIST-004 schema ownership proposal is PROPOSED — OWNER APPROVAL REQUIRED; do not change or apply migration 0001 until approved.
+
+### ATP-GOV-001
+
+- PR #50 merged as `d44e184d998b719289c42159db138073d3213584`; owner instructions are normative and mandatory through root `AGENTS.md`.
+
+
+### ATP-EXEC-002 — current-main Capital.com dealing adapter port
+
+- PR #49 closed unmerged as superseded; its original branch/history was preserved.
+- PR #53: branch `feat/atp-exec-002-current-main`, 8 commits ahead / 0 behind current main at creation, Draft.
+- Ported `CapitalComClient.createPosition` for authenticated `POST /api/v1/positions`, `getDealConfirmation` for `GET /api/v1/confirms/{dealReference}`, DEMO-only enforcement, pre-network session validation, and unknown-submission outcome handling.
+- Ported deterministic mock tests for request validation, authenticated payload, 4xx rejection, ambiguous outcomes, missing session, LIVE rejection, and broker confirmation parsing.
+- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
+- The adapter remains infrastructure-only and is not exposed to IPC/UI/strategies/AI. No actual Demo or LIVE order was submitted. End-to-end trading remains NOT IMPLEMENTED.
