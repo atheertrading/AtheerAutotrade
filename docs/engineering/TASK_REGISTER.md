@@ -228,7 +228,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
 | ATP-GOV-001 | Persist owner-approved project instructions in GitHub | PR #50 merged as `d44e184d998b719289c42159db138073d3213584`; custom instructions are normative and loaded first by root `AGENTS.md` | DONE — MERGED TO MAIN |
-| ATP-EXEC-002 | Capital.com market dealing adapter | PR #53; branch `feat/atp-exec-002-current-main`; 8 commits ahead / 0 behind current main; adapter and tests ported from PR #49; CI pending on current-main port | IMPLEMENTED ON CURRENT-MAIN BRANCH — DRAFT; NOT AN OPERATIONAL ORDER PATH |
+| ATP-EXEC-002 | Capital.com market dealing adapter | PR #53; branch `feat/atp-exec-002-current-main`; Backend CI run 43537007717 passed TypeScript build and 62/62 tests on Node.js 24.22.2; dealing adapter remains isolated | SOURCE AND CI VERIFIED — DRAFT; NOT AN OPERATIONAL ORDER PATH |
 | ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52 current-main port; 6 commits ahead / 0 behind main at creation; 5 SwiftUI files and UX audit; PR #31 closed unmerged | IMPLEMENTED ON BRANCH — DRAFT; TARGET-MAC XCODE/UI ACCEPTANCE PENDING |
 | ATP-PERSIST-003 | Local PostgreSQL migration runner | PR #51 Draft; branch 4 ahead / 0 behind main; CI run 43535924779 passed TypeScript build and 52/52 tests; PR #35 closed unmerged as superseded; no database provisioned and no migration executed | SOURCE IMPLEMENTED AND CI VERIFIED; DATABASE NOT IMPLEMENTED OPERATIONALLY — local provisioning and integration gates pending |
 | ATP-BASELINE-001 | Documentation reconciliation | PR #48 changes are present in current main baseline `d5a82dc236ceed9987b4ab86d168e7a8da40f814` | DONE — MERGED |
@@ -276,4 +276,4 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Current-main-based branch `feat/atp-exec-002-current-main`, draft PR #53: https://github.com/atheertrading/AtheerAutotrade/pull/53. Branch comparison: 8 commits ahead / 0 behind main.
 - Ported CapitalComClient market-position submission and broker confirmation methods, explicit DEMO-only and session guards, unknown-outcome handling, and deterministic mock tests.
 - Added ADR-0007 and ATP-EXEC-002 implementation record. No order method is exposed through IPC/UI/strategy/AI; OMS/RiskEngine/Execution Gateway/durable reconciliation remain incomplete.
-- The previous PR #49 CI passed 62/62 tests, but PR #53 must pass CI on its own current-main head before merge. No real broker order was submitted.
+- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. No real broker order was submitted.
