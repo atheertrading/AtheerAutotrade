@@ -1,3 +1,16 @@
+## Owner-designated immutable baseline — 2026-11-14
+
+- **Baseline tag:** `v1.0.0-baseline` (annotated; pushed to GitHub and verified).
+- **Baseline branch:** `baseline/local-stable-v1`.
+- **Exact baseline commit:** `264b445fa5657ebd91b9eda197ff0654c2402c5a`.
+- **Commit message:** `docs: establish local stable baseline instructions`.
+- **Recovery rule:** branch from the exact tag/commit; do not move or rewrite the tag or develop directly on the baseline branch.
+- **Version policy:** `docs/engineering/BASELINE_AND_VERSIONING.md` defines sequential Semantic Versioning, branch/PR controls, release gates, and recovery.
+- **Important distinction:** this owner-designated local stable snapshot is a separate recovery reference; it does not replace or silently update `main`, and its existence does not imply that every open PR, local-only change, or production acceptance gate is included.
+- **Publication evidence:** local/remote branch SHA equality and remote annotated-tag dereference were verified during baseline publication. No build, test, broker session, or trading operation is claimed as part of that publication.
+
+---
+
 # Project Continuity Record
 
 **Purpose:** Preserve the authoritative engineering handoff between sessions and prevent repeated work, lost decisions, and unsupported claims.

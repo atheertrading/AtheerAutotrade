@@ -1,6 +1,15 @@
 # Engineering Task Register
 
-**Last reconciled:** 2026-11-13  
+**Last reconciled:** 2026-11-14  
+**Active documentation change:** ATP-REL-001 — Baseline and Sequential Versioning Policy (PR #63; review pending)
+
+## Release governance documentation — ATP-REL-001
+
+| ID | Deliverable | Evidence | Status |
+|---|---|---|---|
+| ATP-REL-001 | Record immutable owner-designated baseline and sequential Semantic Versioning policy | `docs/engineering/BASELINE_AND_VERSIONING.md`; baseline tag `v1.0.0-baseline`; commit `264b445fa5657ebd91b9eda197ff0654c2402c5a`; PR #63 | DOCUMENTED ON REVIEW BRANCH — PR OPEN; NOT MERGED |
+
+The baseline tag is immutable and remains the recovery anchor. The documentation branch is proposed for merge into `baseline/local-stable-v1`; no source code, default branch, or trading capability is changed. See [PR #63](https://github.com/atheertrading/AtheerAutotrade/pull/63).  
 **Latest observed main baseline:** `bf884b57f11619472ea5d6c1aaca23534d9d781e` (main head observed during ATP-UI-DASHBOARD-001)  
 **Active implementation branches:** `feat/atp-persist-001-postgres-foundation` (PostgreSQL persistence foundation); `feat/atp-dashboard-001-operational-dashboard` (Dashboard UI)
 
