@@ -135,11 +135,15 @@ struct MarketWatchTableView: View {
                     TableColumn("Instrument") { instrument in
                         instrumentIdentity(instrument)
                             .contextMenu {
-                                Button("Copy Instrument Details", systemImage: "doc.on.doc") {
+                                Button {
                                     copyInstrumentDetails(instrument)
+                                } label: {
+                                    Label("Copy Instrument Details", systemImage: "doc.on.doc")
                                 }
-                                Button("Copy Symbol", systemImage: "number") {
+                                Button {
                                     copyToPasteboard(instrument.epic)
+                                } label: {
+                                    Label("Copy Symbol", systemImage: "number")
                                 }
                             }
                     }
@@ -155,43 +159,33 @@ struct MarketWatchTableView: View {
                     }
                     .width(min: 90, ideal: 105)
 
-                    if visibleColumns.contains(.mid.rawValue) {
-                        TableColumn("Mid") { instrument in
-                            priceText(marketDataStore.quotes[instrument.epic]?.mid)
-                        }
-                        .width(min: 85, ideal: 95)
+                    TableColumn("Mid") { instrument in
+                        priceText(marketDataStore.quotes[instrument.epic]?.mid)
                     }
+                    .width(visibleColumns.contains(.mid.rawValue) ? 95 : 0)
 
-                    if visibleColumns.contains(.spread.rawValue) {
-                        TableColumn("Spread") { instrument in
-                            priceText(marketDataStore.quotes[instrument.epic]?.spread)
-                        }
-                        .width(min: 85, ideal: 95)
+                    TableColumn("Spread") { instrument in
+                        priceText(marketDataStore.quotes[instrument.epic]?.spread)
                     }
+                    .width(visibleColumns.contains(.spread.rawValue) ? 95 : 0)
 
-                    if visibleColumns.contains(.age.rawValue) {
-                        TableColumn("Age") { instrument in
-                            ageText(marketDataStore.quotes[instrument.epic])
-                        }
-                        .width(min: 65, ideal: 75)
+                    TableColumn("Age") { instrument in
+                        ageText(marketDataStore.quotes[instrument.epic])
                     }
+                    .width(visibleColumns.contains(.age.rawValue) ? 75 : 0)
 
-                    if visibleColumns.contains(.quality.rawValue) {
-                        TableColumn("Quality") { instrument in
-                            freshnessText(marketDataStore.quotes[instrument.epic])
-                        }
-                        .width(min: 95, ideal: 110)
+                    TableColumn("Quality") { instrument in
+                        freshnessText(marketDataStore.quotes[instrument.epic])
                     }
+                    .width(visibleColumns.contains(.quality.rawValue) ? 110 : 0)
 
-                    if visibleColumns.contains(.market.rawValue) {
-                        TableColumn("Market") { instrument in
-                            Text(instrument.marketStatus)
-                                .font(.system(size: 10, weight: .medium, design: .monospaced))
-                                .foregroundColor(AtheerColors.textSecondary)
-                                .lineLimit(1)
-                        }
-                        .width(min: 90, ideal: 110)
+                    TableColumn("Market") { instrument in
+                        Text(instrument.marketStatus)
+                            .font(.system(size: 10, weight: .medium, design: .monospaced))
+                            .foregroundColor(AtheerColors.textSecondary)
+                            .lineLimit(1)
                     }
+                    .width(visibleColumns.contains(.market.rawValue) ? 110 : 0)
 
                     TableColumn(" ") { instrument in
                         Button(role: .destructive) {
@@ -385,11 +379,15 @@ struct MarketWatchTableView: View {
         .frame(height: 49)
         .contentShape(Rectangle())
         .contextMenu {
-            Button("Copy Instrument Details", systemImage: "doc.on.doc") {
+            Button {
                 copyInstrumentDetails(instrument)
+            } label: {
+                Label("Copy Instrument Details", systemImage: "doc.on.doc")
             }
-            Button("Copy Symbol", systemImage: "number") {
+            Button {
                 copyToPasteboard(instrument.epic)
+            } label: {
+                Label("Copy Symbol", systemImage: "number")
             }
         }
     }
