@@ -10,7 +10,7 @@
 
 ## 1. Product identity and scope
 
-ATHEER Trading Pro is the product identity: a professional, production-oriented, automated multi-asset trading system. AtheerAutotrade is a temporary technical repository/project identifier, not a separate product identity. Retain repository, Xcode, bundle, package, and Keychain identifiers until a controlled migration plan is approved.
+ATHEER Trading Pro is the product identity: a professional, production-oriented multi-asset trading platform requiring both manual and automated trading through broker-linked DEMO and LIVE account environments. Read-only connectivity is an incremental implementation milestone, not the product scope. AtheerAutotrade is a temporary technical repository/project identifier, not a separate product identity. Retain repository, Xcode, bundle, package, and Keychain identifiers until a controlled migration plan is approved.
 
 Prior ATHEER Trading Pro architecture and engineering material is source material to reconcile. Preserve applicable requirements, but do not copy contradictory, obsolete, provisional, or unverified implementation assumptions.
 
@@ -18,6 +18,7 @@ Prior ATHEER Trading Pro architecture and engineering material is source materia
 
 | Concern | Source |
 |---|---|
+| Owner-approved role, product scope, governance, trading and safety instructions | [ATHEER Trading Pro Custom Instructions](ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md) |
 | Cross-session handoff and constraints | This document |
 | Task state and next action | [Task Register](TASK_REGISTER.md) |
 | Implemented, planned, and unvalidated functionality | [Implementation Status](IMPLEMENTATION_STATUS.md) |
@@ -26,16 +27,17 @@ Prior ATHEER Trading Pro architecture and engineering material is source materia
 | Target topology | [System Overview](../architecture/SYSTEM_OVERVIEW.md) |
 | Security baseline | [Security Baseline](../security/SECURITY_BASELINE.md) |
 | Agent working rules | Repository-root `AGENTS.md` |
+| Normative project instructions | [Custom GPT Instructions](ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md) |
 
 Repository records are authoritative over conversation summaries. When documents conflict, prefer newer directly verified evidence and record the reconciliation.
 
 ## 3. Repository baseline and active branches
 
-- Current verified GitHub `main` baseline: `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (PR #47 merge, 2026-11-14).
+- Current verified GitHub `main` baseline for this handoff: `d5a82dc236ceed9987b4ab86d168e7a8da40f814` (includes the documentation reconciliation from PR #48).
 - PR #45 merged ADR-0006 / project-wide OOP standard as `65b814a09b905011cb0da00f493e341c7ee94591`.
 - PR #46 merged the initial ATP-ARCH-OOP-002 source-conformance audit as `0bbd272d7a3ec33b53f6d84a1658f8c07e93e396`.
 - PR #47 merged ATP-ARCH-OOP-003 stdio broker dependency injection as `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed`.
-- Current open PRs: #31 (ATP-UX-001) and #35 (ATP-PERSIST-003). Their current branch divergence and verification status are recorded in the latest handoff below.
+- Current open PRs include #31 (ATP-UX-001), #35 (ATP-PERSIST-003), and #49 (ATP-EXEC-002); see the latest handoff below for current branch divergence and verification.
 - The owner-confirmed local project root is `/Users/enghossamalfahad/Developer/AtheerAutotrade`; the Xcode project is `apps/macos/AtheerAutotrade.xcodeproj`.
 - The local working tree, branch, commit, uncommitted files, and stashes were not inspected in this GitHub review. Do not assume local files match GitHub main. Do not reset, clean, force-push, pop/drop stashes, or overwrite local work without a reviewed reconciliation plan.
 
@@ -57,7 +59,7 @@ Repository records are authoritative over conversation summaries. When documents
 - Native SwiftUI macOS client remains the presentation/operator-control surface.
 - Backend remains a Node.js/TypeScript modular monolith with explicit module ownership and typed boundaries.
 - Backend owns broker lifecycle, market-data ingestion, domain orchestration, persistence, Risk, OMS, execution, and reconciliation.
-- Capital.com is the primary broker target; initial broker integration remains read-only.
+- Capital.com is the primary broker target. The current merged Capital.com connectivity milestone is read-only, but manual and automated dealing across DEMO and LIVE are mandatory product capabilities. The read-only milestone must not be treated as the final broker integration.
 - ADR-0005 selects parent-owned anonymous standard-I/O pipes for production desktop IPC. Loopback HTTP remains development/diagnostic-only. The native macOS app owns Keychain access; protocol v2 transfers credentials only as AES-256-GCM ciphertext over the per-session X25519/HKDF channel.
 - The Execution Gateway is the only dealing path. It accepts dispatch only from OMS with a Risk decision bound to the exact immutable intent.
 - Every exposure-increasing intent passes through centralized Risk Engine.
@@ -93,7 +95,7 @@ Reassess the toolchain only when the development environment changes or a task r
 
 ## 8. Working protocol
 
-1. Read `AGENTS.md`, this record, task register, implementation status, and relevant ADR/security/architecture documents.
+1. Read `AGENTS.md`, `ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md`, this record, task register, implementation status, and relevant ADR/security/architecture documents.
 2. Confirm the requested milestone is not already complete.
 3. Inspect exact source and project configuration before edits.
 4. Define scope, dependencies, acceptance criteria, and verification.
@@ -369,3 +371,36 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - Eight documentation files updated: README, System Overview, Module Boundaries, Implementation Status, Task Register, Project Continuity, ATP-ARCH-OOP-003 implementation record, and ATP-AUD-002 audit.
 - No source code, tests, Xcode project, SQL migration, broker permission, database, or runtime setting changed.
 - PR #48 is open, draft, not merged, and awaiting review. No build or runtime verification is claimed for this documentation-only change.
+
+
+---
+
+## Latest handoff — 2026-11-14 (owner instruction persistence and open-work reconciliation)
+
+### Normative instructions persisted
+
+- Added [ATHEER Trading Pro — Custom GPT Instructions](ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md) on branch `docs/atp-governance-instructions-001`.
+- Updated repository-root `AGENTS.md` so every coding agent must read the owner-approved instructions before reviewing or changing code.
+- Updated README to distinguish the product's mandatory manual/automated DEMO/LIVE trading scope from the currently implemented read-only Capital.com connectivity milestone.
+- This work is documentation/governance only. It has not yet been merged to `main`; do not claim it is already the default repository instruction until the PR is merged.
+
+### Current GitHub baseline and synchronization
+
+- Current `main` baseline used by new work: `d5a82dc236ceed9987b4ab86d168e7a8da40f814`.
+- PR #48 documentation reconciliation is present in `main`; its eight documentation changes are reflected in the current README, System Overview, Module Boundaries, Task Register, Implementation Status, Project Continuity, and audit records.
+- The owner confirms the local development code is synchronized with the GitHub project code. Do not reopen this as an unresolved Git issue or repeatedly ask for confirmation. A GitHub-only feature branch created after the owner's synchronization point is not automatically present on the Mac.
+
+### Open pull requests and actual state
+
+- **PR #31 — ATP-UX-001:** open and now correctly converted to Draft, matching its own stated acceptance policy. GitHub reports the branch is 20 commits ahead and 70 behind current `main`; it is not mergeable. Target-Mac Xcode/UI acceptance has not been performed in this review. Preserve its work; reconcile the branch incrementally before merge. No UI build or acceptance is claimed.
+- **PR #35 — ATP-PERSIST-003:** open Draft, 1 commit ahead and 55 behind current `main`. The migration-runner source exists only on this unmerged branch. It is **not a provisioned or operational PostgreSQL implementation**; no local database or real migration execution is claimed. Source inspection confirms a real defect: the JavaScript template literal contains a single source backslash before `gexec`, which is consumed as an identity escape and omits the backslash in generated psql input, while the test expects the backslash. Correct this on a current-main-based branch and rerun CI. Real local PostgreSQL qualification remains a separate required gate.
+- **PR #49 — ATP-EXEC-002:** open Draft, 14 commits ahead of current `main`, zero commits behind. It adds a Capital.com DEMO-only market-dealing adapter method and deal-confirmation parser, but does not expose them through IPC/UI/strategy/AI and does not implement OMS, RiskEngine integration, Execution Gateway, durable persistence, or reconciliation. Backend CI run `43534214647` passed on Node 24.22.2 with TypeScript build and 62/62 tests for source commit `5d71e36d2c6e594aa6f18c7e9ea52989a79eafb0`; subsequent commits on that branch update documentation only. No real Demo or LIVE order was submitted. PR #49 remains Draft and is not an end-to-end trading implementation.
+
+### Product and engineering constraints reaffirmed
+
+- Manual and automated trading, with DEMO and LIVE account support, are mandatory product capabilities.
+- The complete shared order path remains RiskEngine → durable OMS → Execution Gateway → broker dealing → broker confirmation → reconciliation.
+- Read-only source milestones must be labelled as incremental integration work, never as a product definition.
+- LIVE remains disabled until all safeguards are implemented, verified, and explicitly authorized by the owner.
+- PostgreSQL remains NOT IMPLEMENTED operationally. Migration-runner source on an unmerged branch is not database completion.
+- Do not start another trading feature until governance instructions are merged and the active persistence/execution dependencies are reconciled sufficiently to establish the next safe milestone.
