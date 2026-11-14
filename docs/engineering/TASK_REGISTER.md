@@ -289,3 +289,24 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Tag only owner-accepted, qualified commits already merged to main. Tags are annotated and immutable.
 - Keep app build numbers, backend/package versions, IPC/API contract versions, database schema versions, and migration IDs as distinct version domains.
 - No current application version or release tag is claimed. The first release tag requires an owner-approved milestone and complete qualification record.
+
+
+## Latest verified workstream state — 2026-11-14
+
+| Workstream | Current PR | Verified state | Remaining acceptance |
+|---|---|---|---|
+| Owner instructions | PR #50 — merged | Normative custom instructions are on `main`; root `AGENTS.md` loads them first | None for instruction persistence |
+| Versioning policy | PR #55 — merged | SemVer, immutable annotated tags, component version boundaries, and release qualification policy documented | First release tag only after owner-approved qualified milestone; no tag claimed |
+| Project status reconciliation | PR #54 — merged | Main Task Register, Implementation Status, and Project Continuity reconciled; ATP-PERSIST-004 proposal included | Owner decision on schema mapping remains pending |
+| Local PostgreSQL runner | PR #51 — Draft | Current-head Backend CI run `43537770742` passed Node.js 24.22.2 TypeScript build and 52/52 tests; psql `\\gexec` escaping corrected | Owner approval of ATP-PERSIST-004; local PostgreSQL provisioning and actual migration/integration tests |
+| macOS UI/UX | PR #52 — Draft | Current-main port of five SwiftUI files and UI/UX audit | Target-Mac Xcode build, UI, clipboard, responsive layout, and Demo runtime acceptance |
+| Capital.com dealing adapter | PR #53 — Draft | Current-head Backend CI run `43537807412` passed Node.js 24.22.2 TypeScript build and 62/62 tests; adapter is DEMO-only and not exposed to application clients | Review API contract; later integrate durable OMS, mandatory RiskEngine, Execution Gateway, and reconciliation |
+
+### Superseded branches
+
+- PR #31 closed unmerged; UX work ported to PR #52.
+- PR #35 closed unmerged; persistence runner work ported/fixed in PR #51.
+- PR #49 closed unmerged; dealing adapter work ported to PR #53.
+- Original branch histories were preserved; no force-push or history rewrite was used.
+
+**Operational truth:** PostgreSQL is NOT IMPLEMENTED operationally; end-to-end manual/automated order execution is NOT IMPLEMENTED. The product requirement remains a complete manual and automated trading platform across DEMO and LIVE. Read-only broker connectivity is an incremental milestone only.
