@@ -1,7 +1,7 @@
 # Engineering Task Register
 
 **Last reconciled:** 2026-11-14  
-**Latest observed main baseline:** `64025fd5fc088e9b7aea3ebe4ff455c6ef5829ed` (PR #47 merge, 2026-11-14)  
+**Latest observed main baseline:** `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` (PR #52 merge, 2026-11-14)  
 **Open implementation PR branches:** `feat/atp-ux-001-clipboard-and-broker-polish` (PR #31); `fix/atp-persist-003-local-postgres-runner` (PR #35).  
 **Local worktree:** not inspected in this GitHub review; preserve all local changes and stashes until its branch/commit/status are explicitly reconciled.
 
@@ -210,7 +210,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
 | ATP-BASELINE-001 | Source-of-truth and engineering-record reconciliation | PR #48 documentation changes are present on `main`; PR #50 governance instructions merged at `d44e184d998b719289c42159db138073d3213584` | DONE — merged to main |
-| ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52; branch `feat/atp-ux-001-current-main`; six SwiftUI/UI audit files ported to current main; PR #31 closed unmerged as superseded; no target-Mac Xcode acceptance evidence | IMPLEMENTED ON CURRENT-MAIN BRANCH — DRAFT; TARGET-MAC XCODE/UI ACCEPTANCE REQUIRED |
+| ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52 merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; five SwiftUI files and UX audit are on main; PR #31 closed unmerged as superseded | DONE — MERGED; TARGET-MAC XCODE/UI ACCEPTANCE STILL PENDING |
 | ATP-PERSIST-003 | Enforce local PostgreSQL and correct migration execution | PR #51; branch `fix/atp-persist-003-current-main`; 4 commits ahead / 0 behind main; Backend CI run 43535924779 passed TypeScript build and 52/52 tests; PR #35 closed unmerged as superseded; no local PostgreSQL database or migration execution | SOURCE IMPLEMENTED AND CI VERIFIED; PostgreSQL NOT IMPLEMENTED OPERATIONALLY — owner-Mac provisioning, schema reconciliation, and real integration tests remain pending |
 
 ### Current branch and architecture notes
@@ -229,7 +229,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 |---|---|---|---|
 | ATP-GOV-001 | Persist owner-approved project instructions in GitHub | PR #50 merged as `d44e184d998b719289c42159db138073d3213584`; custom instructions are normative and loaded first by root `AGENTS.md` | DONE — MERGED TO MAIN |
 | ATP-EXEC-002 | Capital.com market dealing adapter | PR #53; current-main port; latest Backend CI run 43537817589 passed TypeScript build and 62/62 tests on Node.js 24.22.2; adapter remains isolated | SOURCE AND CI VERIFIED — DRAFT; NOT AN OPERATIONAL ORDER PATH |
-| ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52 current-main port; 6 commits ahead / 0 behind main at creation; 5 SwiftUI files and UX audit; PR #31 closed unmerged | IMPLEMENTED ON BRANCH — DRAFT; TARGET-MAC XCODE/UI ACCEPTANCE PENDING |
+| ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52 merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`; 5 SwiftUI files and UX audit | DONE — MERGED; TARGET-MAC XCODE/UI ACCEPTANCE PENDING |
 | ATP-PERSIST-003 | Local PostgreSQL migration runner | PR #51 Draft; current-head CI run 43538085414 passed TypeScript build and 52/52 tests; PR #35 closed unmerged; no database provisioned and no migration executed | SOURCE IMPLEMENTED AND CI VERIFIED; DATABASE NOT IMPLEMENTED OPERATIONALLY — schema approval and owner-Mac integration pending |
 | ATP-BASELINE-001 | Documentation reconciliation | PR #48 changes are present in current main baseline `1843331767483cb04f3cc3d1626e2a10fd1c72a3` | DONE — MERGED |
 
@@ -265,9 +265,9 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 ## ATP-UX-001 current-main port — 2026-11-14
 
 - Old PR #31 closed unmerged as superseded; no history was rewritten or force-pushed.
-- Current-main branch `feat/atp-ux-001-current-main`, draft PR #52: https://github.com/atheertrading/AtheerAutotrade/pull/52.
+- Current-main branch `feat/atp-ux-001-current-main`, PR #52 merged as `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`.
 - Ported adaptive broker layout, Dashboard quote-state clarity, Market Watch native copy context menu, ATHEER Trading Pro sidebar branding, Workspace status wording, and the UI/UX audit.
-- No target-Mac Xcode build or UI acceptance has been performed. Keep PR #52 Draft until the acceptance checklist passes on the owner's Mac.
+- No target-Mac Xcode build or UI acceptance has been performed; merge status does not waive the owner's Mac acceptance checklist.
 
 
 ## ATP-EXEC-002 current-main port — 2026-11-14
@@ -299,7 +299,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 | Versioning policy | PR #55 — merged | SemVer, immutable annotated tags, component version boundaries, and release qualification policy documented | First release tag only after owner-approved qualified milestone; no tag claimed |
 | Project status reconciliation | PR #54, PR #56, and PR #57 — merged | Main Task Register, Implementation Status, and Project Continuity reconciled with current PR and CI evidence | Owner decision on schema mapping remains pending |
 | Local PostgreSQL runner | PR #51 — Draft | Current-head Backend CI run `43538085414` passed Node.js 24.22.2 TypeScript build and 52/52 tests; psql `\\gexec` escaping corrected | Owner approval of ATP-PERSIST-004; local PostgreSQL provisioning and actual migration/integration tests |
-| macOS UI/UX | PR #52 — Draft | Current-main port of five SwiftUI files and UI/UX audit | Target-Mac Xcode build, UI, clipboard, responsive layout, and Demo runtime acceptance |
+| macOS UI/UX | PR #52 — merged | Five SwiftUI files and UX audit merged as `089b1dfe` | Target-Mac Xcode build, UI, clipboard, responsive layout, and Demo runtime acceptance |
 | Capital.com dealing adapter | PR #53 — Draft | Current-head Backend CI run `43537817589` passed Node.js 24.22.2 TypeScript build and 62/62 tests; adapter is DEMO-only and not exposed to application clients | Review API contract; later integrate durable OMS, mandatory RiskEngine, Execution Gateway, and reconciliation |
 
 ### Superseded branches
@@ -324,3 +324,16 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Documentation-only milestone. No application source, broker integration, database, build, tests, release version, or trading permissions changed.
 - No LIVE trading authorization is implied or granted.
 - Current main baseline after this milestone: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
+
+
+## ATP-UX-002 — Professional Market Watch Data Grid — 2026-11-14
+
+| ID | Milestone | Scope | Status |
+|---|---|---|---|
+| ATP-UX-002 | Native Market Watch table and trader workflow controls | Native SwiftUI Table, watchlist search, quote-quality filters, multi-field sorting, persistent optional-column visibility, row selection/keyboard navigation, context copy, and removal | IMPLEMENTED ON FEATURE BRANCH — XCODE BUILD AND TARGET-MAC ACCEPTANCE PENDING |
+
+- Branch: `feat/atp-ux-002-professional-market-watch`, created from current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef` after PR #52 merged.
+- Primary source: `apps/macos/Sources/Features/Markets/MarketWatchView.swift`; implementation record: `docs/engineering/ATP-UX-002-PROFESSIONAL-MARKET-WATCH.md`.
+- Dashboard and compact workspace presentation are preserved through `MarketWatchTableView(compact: true)`; broker discovery/add remains in Brokers.
+- No MarketDataStore, backend, IPC, broker, risk, OMS, execution, or LIVE behavior is changed.
+- Target-Mac Xcode build and all acceptance checks in the milestone record remain pending. Do not claim runtime verification from source inspection.

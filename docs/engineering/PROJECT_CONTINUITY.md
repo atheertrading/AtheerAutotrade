@@ -479,3 +479,31 @@ The owner confirms local development code matches GitHub project code. Do not as
 - The charter explicitly requires resuming from verified state, avoiding repeated resolved work, checking branch freshness, preserving history/local changes, recording evidence, and reconciling conflicting documents rather than silently guessing.
 - Current repository main baseline after this milestone: `a79de03d97c543c7b28635cddc3255cb37b9fe34`.
 - Earlier historical paths and milestone/status statements in the supplied source are not current-state evidence; use the current task register, implementation status, continuity record, and inspected source for operational facts.
+
+
+## Latest implementation handoff — ATP-UX-002 — 2026-11-14
+
+### Verified baseline
+
+- PR #52 (ATP-UX-001) is now merged; GitHub reports merge commit/current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`. Its five SwiftUI UI changes and UX audit are on main.
+- New branch `feat/atp-ux-002-professional-market-watch` was created directly from that main commit.
+
+### ATP-UX-002 source change
+
+- Primary file: `apps/macos/Sources/Features/Markets/MarketWatchView.swift`.
+- Full Market Watch view now uses native SwiftUI `Table` with row selection, watchlist search, quality filtering, selectable sort field/direction, and persisted optional columns.
+- Compact presentation remains available to Dashboard/workspace consumers and retains its existing data source and dense row layout.
+- The search field filters only the current watchlist. Instrument catalogue search/add remains in Brokers.
+- No MarketDataStore, quote normalization, backend IPC, broker connection, dealing, risk, OMS, execution, or LIVE behavior was changed.
+
+### Verification boundary
+
+- Source and documentation were authored through GitHub. No local Terminal/Xcode access or target-Mac build is claimed.
+- No XCTest, UI automation, accessibility audit, or Demo runtime test has been run for ATP-UX-002.
+- Required next action: review the new PR and run the ATP-UX-002 acceptance checklist on the owner's Mac before merge.
+
+### Next sequence
+
+1. Complete target-Mac Xcode and UI acceptance for ATP-UX-001 and ATP-UX-002; resolve any compile/layout/accessibility issues found.
+2. Continue with ATP-MD-QUALITY-002 (quote timestamp monotonicity, duplicate/out-of-order handling, freshness-aware Dashboard, and gap/recovery state) without changing the presentation layer's broker authority.
+3. Proceed to the shared broker/session state and activity/audit presentation only after the relevant typed backend events/contracts exist.

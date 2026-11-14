@@ -283,3 +283,16 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - **Superseded PRs:** #31, #35, and #49 closed unmerged; their work was ported to #52, #51, and #53 respectively.
 
 **End-to-end trading remains NOT IMPLEMENTED.** RiskEngine is not yet an enforced OMS order-intake gate; durable OMS, outbox/idempotency, Execution Gateway, order IPC/UI, strategy order intake, broker confirmation/reconciliation, and operational qualification remain incomplete. LIVE remains disabled.
+
+
+## ATP-UX-002 — Professional Market Watch Data Grid — 2026-11-14
+
+**Status:** Source implemented on feature branch; not yet Xcode/UI verified.
+
+- Branch `feat/atp-ux-002-professional-market-watch` is based on current main `089b1dfe9b11c2911a645e49e0ba9ac1359496ef`.
+- `MarketWatchView.swift` now uses native SwiftUI `Table` for the full Market Watch view, with watchlist-local search, quote-quality filters, sorting by instrument/Bid/Ask/Spread/age/quality, persistent optional columns, and row selection.
+- Missing quote values remain unavailable and sort after observed values; no synthetic prices or broker state are introduced.
+- The compact table path used by Dashboard and compact workspace panels remains separate and retains its prior columns and copy behavior.
+- The existing Brokers screen remains the instrument catalogue search/add workflow. This milestone does not duplicate broker discovery or modify subscription behavior.
+- No backend, IPC, MarketDataStore, broker API, RiskEngine, OMS, Execution Gateway, order submission, or LIVE permission is changed.
+- **Not verified:** target-Mac Xcode build, XCTest, table rendering, keyboard interaction, column preference persistence, and live Demo quote behavior. These remain acceptance gates.
