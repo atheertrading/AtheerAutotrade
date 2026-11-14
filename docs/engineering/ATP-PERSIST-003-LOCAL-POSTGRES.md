@@ -1,6 +1,6 @@
 # ATP-PERSIST-003 — Local PostgreSQL enforcement and migration runner correctness
 
-**Status:** Ported to current main; migration-runner CI pending; PostgreSQL remains NOT IMPLEMENTED operationally.
+**Status:** IMPLEMENTED IN SOURCE ON PR #51; BACKEND CI PASSED (52/52); PostgreSQL remains NOT IMPLEMENTED operationally.
 
 ## Defects corrected
 
@@ -20,4 +20,6 @@ Unit tests cover comment-aware wrapper parsing, deterministic discovery, checksu
 ## Change log
 
 - 2026-11-13: Original feature-branch implementation corrected migration bootstrap parsing, repeat-application behavior, and local-only database enforcement.
-- 2026-11-14: Ported to a branch based on current main. Fixed JavaScript template-literal escaping so generated psql input contains the required literal `\\gexec` command; strengthened the unit assertion to verify the actual output. No PostgreSQL server was provisioned and no migration was applied.
+- 2026-11-14: Ported to a branch based on current main. Fixed JavaScript template-literal escaping so generated psql input contains the required literal `\\gexec` command; strengthened the unit assertion to verify the actual output.
+- GitHub Actions Backend CI run `43535924779` passed on Node.js 24.22.2: TypeScript build passed; 52 tests passed, 0 failed, 0 skipped.
+- This is source/CI verification only. No PostgreSQL server was provisioned and no migration was applied. Schema ownership reconciliation against ATP-ARCH-003 remains required before the first real migration.
