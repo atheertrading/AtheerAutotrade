@@ -147,6 +147,24 @@ test("HTTP 5xx and malformed success responses are treated as unknown outcomes",
   }
 });
 
+test("LIVE dealing is disabled even when a live REST client is constructed", async () => {
+  let submissions = 0;
+  const client = new CapitalComClient("live", credentialsProvider(), async (url, init) => {
+    if (url.endsWith("/api/v1/session")) {
+      return response({}, { CST: "cst-live", "X-SECURITY-TOKEN": "security-live" });
+    }
+    submissions += 1;
+    return response({ dealReference: "must-not-be-created" });
+  });
+  await client.createSession();
+
+  await assert.rejects(
+    client.createPosition({ epic: "OIL_CRUDE", direction: "BUY", size: 1, stopLevel: 70 }),
+    /LIVE dealing is disabled/
+  );
+  assert.equal(submissions, 0);
+});
+
 test("deal confirmation parses broker status and affected deals", async () => {
   const requests = [];
   const client = await connectedClient(async (url, init) => {
