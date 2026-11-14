@@ -313,3 +313,13 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - **Corrective source:** branch `fix/atp-ux-002-xcode14-compat`, commit `fb95a396d8d69db47af43d65b3302b90c39e49f8`. Optional columns are now unconditional with state-driven zero/nonzero widths; context-menu buttons use explicit `Label` content.
 - **Status:** correction implemented in GitHub source, target-Mac rebuild pending. Do not mark ATP-UX-002 verified. UI behavior of zero-width optional columns is specifically pending visual acceptance.
 - **Process note:** PR #60 was merged before its stated target-Mac acceptance gates passed. Its merge status is not evidence of build or UI acceptance.
+
+
+## ATP-UX-002 — follow-up compiler correction (2026-11-14)
+
+- Owner's second Xcode 14.3.1 build confirmed the earlier TableColumnBuilder and Button initializer diagnostics no longer appeared.
+- The build then failed at `MarketWatchView.swift:165`: `visibleColumns` is a `Set<String>`, so shorthand `.mid.rawValue` could not be inferred as a String member.
+- Corrected all five optional-column membership checks to use explicit `MarketWatchOptionalColumn.<case>.rawValue` values. This preserves the persisted String-based preference representation and changes no visibility policy or trading/data behavior.
+- Follow-up branch: `fix/atp-ux-002-visible-column-string-compat`, based on main after PR #61 merge `7704af6c6dfbf4b5c375212217567875c4d655b0`.
+- PR #61 was merged while its body still stated Draft/target-Mac acceptance pending. The merge does not establish build or UI acceptance; the follow-up remains subject to the same owner-Mac verification gates.
+- **Current status:** source correction committed to the follow-up branch; Xcode rebuild and visual/interaction acceptance are pending. No successful build, XCTest, UI runtime, or Capital.com Demo verification is claimed.
