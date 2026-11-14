@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 
 struct MarketWatchView: View {
@@ -137,6 +138,39 @@ struct MarketWatchTableView: View {
         }
         .padding(.horizontal, 14)
         .frame(height: 49)
+        .contentShape(Rectangle())
+        .contextMenu {
+            Button("Copy Instrument Details", systemImage: "doc.on.doc") {
+                copyInstrumentDetails(instrument, quote: quote)
+            }
+            Button("Copy Symbol", systemImage: "number") {
+                copyToPasteboard(instrument.epic)
+            }
+        }
+    }
+
+    private func copyInstrumentDetails(
+        _ instrument: MarketWatchInstrument,
+        quote: MarketQuoteSnapshot?
+    ) {
+        let details = [
+            "Instrument: \(instrument.name)",
+            "Epic: \(instrument.epic)",
+            "Type: \(instrument.instrumentType)",
+            "Market status: \(instrument.marketStatus)",
+            "Bid: \(quote.map { String($0.bid) } ?? "—")",
+            "Ask: \(quote.map { String($0.ask) } ?? "—")",
+            "Mid: \(quote.map { String($0.mid) } ?? "—")",
+            "Spread: \(quote.map { String($0.spread) } ?? "—")",
+            "Quote age: \(quote?.ageLabel ?? "—")",
+            "Quality: \(quote?.currentQuality ?? "WAITING")"
+        ].joined(separator: "\n")
+        copyToPasteboard(details)
+    }
+
+    private func copyToPasteboard(_ value: String) {
+        NSPasteboard.general.clearContents()
+        NSPasteboard.general.setString(value, forType: .string)
     }
 
     private var emptyState: some View {
