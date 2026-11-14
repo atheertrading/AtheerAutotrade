@@ -4,13 +4,16 @@ These instructions apply to every coding agent and automated assistant working i
 
 ## Mandatory context loading
 
-Before planning or changing anything, read these files in this order:
+Before planning, reviewing, or changing anything, read these files in this order:
 
-1. `docs/engineering/PROJECT_CONTINUITY.md`
-2. `docs/engineering/TASK_REGISTER.md`
-3. `docs/engineering/IMPLEMENTATION_STATUS.md`
-4. The relevant architecture decision records under `docs/decisions/`
-5. The relevant architecture and security documents for the task
+1. `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` — owner-approved project role, product scope, governance, trading requirements, safety, and continuity rules.
+2. `docs/engineering/PROJECT_CONTINUITY.md` — current handoff, owner-confirmed environment facts, active branches, and unresolved issues.
+3. `docs/engineering/TASK_REGISTER.md` — milestone state and next actions.
+4. `docs/engineering/IMPLEMENTATION_STATUS.md` — implemented, unimplemented, and unverified behavior.
+5. The relevant accepted architecture decision records under `docs/decisions/`.
+6. The relevant architecture, API contract, broker, and security documents for the task.
+
+The custom instructions are normative project guidance. This file operationalizes them for repository work; neither this file nor an assistant's memory may silently narrow the product requirements.
 
 The repository documents are the persistent engineering source of truth. Conversation history and model memory are supplementary and must never override verified repository records without new evidence.
 
@@ -28,6 +31,22 @@ The repository documents are the persistent engineering source of truth. Convers
 - Work on one defined milestone at a time. State scope, dependencies, acceptance criteria, and verification before implementation.
 - Prefer coherent, complete changes over speculative patches. Do not add dependencies or capabilities without a demonstrated requirement.
 - Update the continuity record and task register after each completed milestone or material decision.
+
+## Product purpose and mandatory trading capability
+
+ATHEER Trading Pro is a professional trading platform, not a read-only market-data viewer. Its required product scope includes both manual/operator-initiated and automated/strategy-initiated trading, broker-linked DEMO and LIVE environments, and the complete order lifecycle. A read-only broker adapter is permitted only as an explicitly scoped incremental milestone; it is never the permanent product architecture or an acceptable final product boundary.
+
+- Manual and automated intents must use the same governed backend order-intake path.
+- Every exposure-increasing intent must pass centralized RiskEngine validation before durable OMS authorization and Execution Gateway dispatch.
+- Only the Execution Gateway may invoke broker dealing APIs. UI, strategies, and AI must never call dealing endpoints directly.
+- Broker confirmation and reconciliation are required; a submission response alone does not prove a filled/open position.
+- Ambiguous submission outcomes require reconciliation and must never be blindly retried.
+- DEMO is the first broker-dealing qualification environment. LIVE is a required product capability but remains disabled until safeguards are implemented and verified and the owner explicitly authorizes activation.
+- Do not report trading as implemented merely because an adapter method, button, mock test, or draft PR exists. The complete order path must be integrated and verified.
+
+## Documentation and version control
+
+Every material code or architecture change must be recorded in `docs/engineering/TASK_REGISTER.md`, `docs/engineering/IMPLEMENTATION_STATUS.md`, and, when the handoff changes, `docs/engineering/PROJECT_CONTINUITY.md`. Consequential decisions require an ADR. Use reviewed branches and pull requests; preserve history and use version tags/releases at approved milestones. Never rebuild from scratch, reset, clean, force-push, or overwrite completed work to compensate for missing context.
 
 ## Codex usage boundary
 
