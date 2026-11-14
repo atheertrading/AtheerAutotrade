@@ -258,5 +258,5 @@ No local Terminal command, Xcode build, local PostgreSQL provisioning/migration,
 - PR #53: branch `feat/atp-exec-002-current-main`, 8 commits ahead / 0 behind current main at creation, Draft.
 - Ported `CapitalComClient.createPosition` for authenticated `POST /api/v1/positions`, `getDealConfirmation` for `GET /api/v1/confirms/{dealReference}`, DEMO-only enforcement, pre-network session validation, and unknown-submission outcome handling.
 - Ported deterministic mock tests for request validation, authenticated payload, 4xx rejection, ambiguous outcomes, missing session, LIVE rejection, and broker confirmation parsing.
-- Previous PR #49 Backend CI passed TypeScript build and 62/62 tests. PR #53 must independently pass current-head CI before merge.
+- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. This verifies the current-main port's backend source and mock tests only.
 - The adapter remains infrastructure-only and is not exposed to IPC/UI/strategies/AI. No actual Demo or LIVE order was submitted. End-to-end trading remains NOT IMPLEMENTED.
