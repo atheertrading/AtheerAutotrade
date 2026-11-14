@@ -548,6 +548,9 @@ export class CapitalComClient {
    * it must never blindly retry this submission.
    */
   async createPosition(input: CapitalComMarketOrderRequest): Promise<CapitalComPositionSubmission> {
+    if (this.environment !== "demo") {
+      throw new Error("Capital.com LIVE dealing is disabled.");
+    }
     const epic = validateEpic(input.epic);
     if (input.direction !== "BUY" && input.direction !== "SELL") {
       throw new TypeError("direction must be BUY or SELL.");
