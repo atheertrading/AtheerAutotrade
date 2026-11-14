@@ -93,3 +93,19 @@ Branch: `feat/atp-ux-001-clipboard-and-broker-polish`.
 ## 7. Verification boundary
 
 This review and the initial code changes were performed through GitHub. No local filesystem, Xcode build, target-Mac UI inspection, XCTest run, or real broker session was executed during this review. Source changes remain subject to target-Mac verification before merge.
+
+
+## 8. Current-main port — 2026-11-14
+
+The original PR #31 branch became 70 commits behind current main and was closed unmerged as superseded. Its UI source changes were ported onto a clean branch based on current main: `feat/atp-ux-001-current-main`, draft PR #52.
+
+Ported source files:
+- `apps/macos/Sources/Features/Brokers/CapitalComBrokerView.swift` — full-width connection overview and adaptive two-column/stacked layout.
+- `apps/macos/Sources/Features/Dashboard/DashboardView.swift` — explicit distinction between Demo authentication, subscription acknowledgement, and actual quote receipt; market prices/status presentation without fabricated account values.
+- `apps/macos/Sources/Features/Dashboard/SidebarView.swift` — ATHEER Trading Pro branding.
+- `apps/macos/Sources/Features/Markets/MarketWatchView.swift` — native context-menu copy for instrument details and epic.
+- `apps/macos/Sources/Features/Workspace/WorkspacePanelView.swift` — accurate status copy for chart, order entry, positions, and orders.
+
+The current root `ApplicationShellView` already enables application-wide text selection, so no redundant edit was ported there.
+
+**Verification:** source port only. No target-Mac Xcode build, XCTest, UI automation, accessibility audit, or real broker runtime check was performed for PR #52. Keep it Draft until the acceptance criteria in the PR body pass on the owner's Mac. No dealing method or order submission is added by this UI milestone.
