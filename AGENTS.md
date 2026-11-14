@@ -8,7 +8,7 @@ Before planning, reviewing, or changing the project, read the following sources 
 
 1. `docs/engineering/ATHEER_TRADING_PRO_CUSTOM_GPT_INSTRUCTIONS.md` — owner-approved role, product scope, engineering expectations, governance, trading requirements, safety, and continuity.
 2. `docs/engineering/PROJECT_GOVERNANCE_CHARTER.md` — governance principles, engineering standards, team decision protocol, and repeat-error prevention.
-3. `docs/engineering/VERSIONING_AND_RELEASE_POLICY.md` — versioning, tags, migrations, and release qualification.
+3. `docs/engineering/BASELINE_AND_VERSIONING.md` — versioning, tags, migrations, and release qualification.
 4. `docs/engineering/PROJECT_KNOWLEDGE_SOURCES.md` — integrated project resources, provenance, source authority, and reconciliation rules.
 5. `docs/engineering/KNOWLEDGE_GOVERNANCE.md` — documentation quality, evidence classification, and maintenance requirements.
 6. `docs/engineering/PROJECT_CONTINUITY.md` — current handoff, confirmed environment facts, active branches, and unresolved issues.
