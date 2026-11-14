@@ -49,6 +49,11 @@ npm start
 
 The backend currently listens on `127.0.0.1:3000` by default. `GET /health` reports process health only; it does not assert broker connectivity, market-data readiness, or trading readiness. Do not expose broker operations through an unauthenticated local API.
 
+## Baseline and versioning
+
+- [Authoritative Baseline and Versioning Policy](docs/engineering/BASELINE_AND_VERSIONING.md)
+- Baseline tag: `v1.0.0-baseline` — immutable recovery reference; not a production release.
+
 ## Engineering continuity
 
 - [Project Continuity Record](docs/engineering/PROJECT_CONTINUITY.md)
