@@ -430,3 +430,39 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 - Branch `docs/atp-versioning-policy-001` defines SemVer, immutable annotated Git tags, pre-1.0 release numbering, component/API/schema version separation, immutable migration rules, and release qualification evidence.
 - Root `AGENTS.md` now requires the policy as part of mandatory context loading; README links it.
 - Status: implemented on documentation branch, PR pending. No product release version or Git tag is claimed; first tag must follow an owner-approved qualified milestone.
+
+
+## Latest verified handoff — 2026-11-14
+
+### Merged to main
+
+- PR #50: owner-approved custom instructions; merge commit `d44e184d998b719289c42159db138073d3213584`.
+- PR #54: current workstream/status reconciliation; merge commit `110dcf9e4fb4b7f564d1687c165ca3cd56d9b3d6`.
+- PR #55: SemVer and release versioning policy; merge commit `ac5c658595ab032032d71f5f53c035aa342ed581`.
+- Root `AGENTS.md` requires reading custom instructions and versioning policy before any project work.
+
+### Active Draft PRs
+
+- **#51 — ATP-PERSIST-003:** migration runner current-main port. Latest CI run `43537770742`: TypeScript build + 52/52 tests passed. No local PostgreSQL provisioned and no migration applied. ATP-PERSIST-004 schema mapping still requires owner approval.
+- **#52 — ATP-UX-001:** current-main SwiftUI/UI port. Target-Mac Xcode build and UI acceptance not performed; keep Draft.
+- **#53 — ATP-EXEC-002:** Capital.com DEMO dealing adapter current-main port. CI run `43537807412`: TypeScript build + 62/62 tests passed. Adapter remains infrastructure-only; no OMS/RiskEngine/Gateway/reconciliation integration and no real order.
+
+### Superseded PRs
+
+- #31 closed unmerged; ported to #52.
+- #35 closed unmerged; ported and fixed in #51.
+- #49 closed unmerged; ported to #53.
+- Original branches remain in GitHub; no force-push or history rewrite.
+
+### Product and safety state
+
+- ATHEER Trading Pro is a professional trading platform requiring manual and automated trading across DEMO and LIVE.
+- Read-only broker connectivity is an incremental milestone, not the product definition.
+- PostgreSQL is NOT IMPLEMENTED operationally; end-to-end trading is NOT IMPLEMENTED.
+- LIVE remains disabled until all safety gates pass and the owner separately authorizes activation.
+- The ATP-PERSIST-004 schema mapping is a proposal, not an accepted ADR/team consensus; owner approval is required before changing/applying migration 0001.
+- No product release tag has been created or claimed. SemVer/tag policy is merged; first tag follows owner-approved milestone qualification.
+
+### Owner-confirmed environment context
+
+The owner confirms local development code matches GitHub project code. Do not ask repeatedly for confirmation. GitHub feature branches created after that synchronization point are not automatically present locally. No local Terminal/Xcode/PostgreSQL/broker execution is claimed by this handoff.
