@@ -1,6 +1,6 @@
 # ATP-EXEC-002 — Capital.com Market Dealing Adapter
 
-**Status:** IMPLEMENTED IN SOURCE — BACKEND CI PENDING  
+**Status:** IMPLEMENTED IN SOURCE — BACKEND CI PASSED (62/62)  
 **Branch:** `feat/atp-exec-002-capital-com-dealing-adapter`  
 **Product requirement:** ADR-0007 and ATP-ORDER-001  
 **Broker:** Capital.com; DEMO target for first operational qualification
@@ -40,5 +40,5 @@ These methods are broker-adapter infrastructure capabilities only. They are not 
 
 ## Verification record
 
-- Source changes authored on the feature branch.
-- No local Terminal command, Xcode build, backend build, CI result, database operation, or live/demo broker order is claimed at this stage.
+- GitHub Actions Backend CI run `43534214647` passed on Node.js `24.22.2`: TypeScript build passed; 62 tests passed, 0 failed, 0 skipped.
+- CI covers mocked API behavior only. No local Terminal command, Xcode build, PostgreSQL operation, or real Demo/LIVE broker order is claimed.
