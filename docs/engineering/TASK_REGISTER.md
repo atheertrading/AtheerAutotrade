@@ -228,7 +228,7 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 | ID | Milestone | Evidence | Status |
 |---|---|---|---|
 | ATP-GOV-001 | Persist owner-approved project instructions in GitHub | PR #50 merged as `d44e184d998b719289c42159db138073d3213584`; custom instructions are normative and loaded first by root `AGENTS.md` | DONE — MERGED TO MAIN |
-| ATP-EXEC-002 | Capital.com market dealing adapter | PR #49; branch `feat/atp-exec-002-capital-com-dealing-adapter`; 14 commits ahead / 0 behind main; Backend CI run 43534214647 passed (TypeScript build; 62/62 tests); dealing method is DEMO-only and is not exposed to application clients | IMPLEMENTED ON BRANCH — DRAFT PR; NOT AN OPERATIONAL ORDER PATH |
+| ATP-EXEC-002 | Capital.com market dealing adapter | PR #53; branch `feat/atp-exec-002-current-main`; Backend CI run 43537007717 passed TypeScript build and 62/62 tests on Node.js 24.22.2; dealing adapter remains isolated | SOURCE AND CI VERIFIED — DRAFT; NOT AN OPERATIONAL ORDER PATH |
 | ATP-UX-001 | Broker workspace, clipboard, and trading UI clarity | PR #52 current-main port; 6 commits ahead / 0 behind main at creation; 5 SwiftUI files and UX audit; PR #31 closed unmerged | IMPLEMENTED ON BRANCH — DRAFT; TARGET-MAC XCODE/UI ACCEPTANCE PENDING |
 | ATP-PERSIST-003 | Local PostgreSQL migration runner | PR #51 Draft; branch 4 ahead / 0 behind main; CI run 43535924779 passed TypeScript build and 52/52 tests; PR #35 closed unmerged as superseded; no database provisioned and no migration executed | SOURCE IMPLEMENTED AND CI VERIFIED; DATABASE NOT IMPLEMENTED OPERATIONALLY — local provisioning and integration gates pending |
 | ATP-BASELINE-001 | Documentation reconciliation | PR #48 changes are present in current main baseline `d5a82dc236ceed9987b4ab86d168e7a8da40f814` | DONE — MERGED |
@@ -268,3 +268,12 @@ ATP-CAP-ACCOUNT-001 is merged as PR #29; Node.js 24.22.2 CI passed TypeScript co
 - Current-main branch `feat/atp-ux-001-current-main`, draft PR #52: https://github.com/atheertrading/AtheerAutotrade/pull/52.
 - Ported adaptive broker layout, Dashboard quote-state clarity, Market Watch native copy context menu, ATHEER Trading Pro sidebar branding, Workspace status wording, and the UI/UX audit.
 - No target-Mac Xcode build or UI acceptance has been performed. Keep PR #52 Draft until the acceptance checklist passes on the owner's Mac.
+
+
+## ATP-EXEC-002 current-main port — 2026-11-14
+
+- Old PR #49 closed unmerged as superseded; no history was rewritten or force-pushed.
+- Current-main-based branch `feat/atp-exec-002-current-main`, draft PR #53: https://github.com/atheertrading/AtheerAutotrade/pull/53. Branch comparison: 8 commits ahead / 0 behind main.
+- Ported CapitalComClient market-position submission and broker confirmation methods, explicit DEMO-only and session guards, unknown-outcome handling, and deterministic mock tests.
+- Added ADR-0007 and ATP-EXEC-002 implementation record. No order method is exposed through IPC/UI/strategy/AI; OMS/RiskEngine/Execution Gateway/durable reconciliation remain incomplete.
+- GitHub Actions Backend CI run `43537007717` passed on Node.js 24.22.2: TypeScript build passed; 62 passed, 0 failed, 0 skipped. No real broker order was submitted.
