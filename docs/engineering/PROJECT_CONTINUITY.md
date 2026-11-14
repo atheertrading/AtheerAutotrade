@@ -418,7 +418,7 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 ### Evidence classification
 
-- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and current-head CI run `43537007717`.
+- **Verified through GitHub:** PR #50 merge; current-main comparisons; PR #51 source changes and CI; PR #52 source port and branch divergence; PR #53 source port and current-head CI run `43537817589`.
 - **Owner-confirmed:** local code synchronized with GitHub; Capital.com Demo authentication and broker-originated prices work in the local app.
 - **Not independently performed here:** local Terminal commands, Xcode build, local PostgreSQL provisioning/migrations, target-Mac UI acceptance, or actual broker dealing.
 
@@ -435,9 +435,10 @@ Inspect the branch diff, run Backend CI, and address any reported failures befor
 
 ### Merged to main
 
-- PR #50: owner-approved custom instructions; merge commit `d44e184d998b719289c42159db138073d3213584`.
+- PR #50: owner-approved custom instructions; merge commit `1843331767483cb04f3cc3d1626e2a10fd1c72a3`.
 - PR #54: initial workstream/status reconciliation; merge commit `110dcf9e4fb4b7f564d1687c165ca3cd56d9b3d6`.
 - PR #56: latest verified workstream and CI reconciliation; merge commit `c465eedd3b15067641bbb1b1206e5e29a659ffc1`.
+- PR #57: corrected merged-governance and current CI references; merge commit `1843331767483cb04f3cc3d1626e2a10fd1c72a3`.
 - PR #55: SemVer and release versioning policy; merge commit `ac5c658595ab032032d71f5f53c035aa342ed581`.
 - Root `AGENTS.md` requires reading custom instructions and versioning policy before any project work.
 
